@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.roles.RoleUtilisateur;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -33,8 +34,28 @@ public class Voyageur implements Serializable {
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Utilisateur idUser;
+    @Enumerated(EnumType.STRING)
+    private RoleUtilisateur roleUtilisateur;
 
     public Voyageur() {
+    }
+
+    public Voyageur(Long id, List<Avis> avisList, String preferences, List<Favori> favoriList, List<Reservation> reservationList, Utilisateur idUser, RoleUtilisateur roleUtilisateur) {
+        this.id = id;
+        this.avisList = avisList;
+        this.preferences = preferences;
+        this.favoriList = favoriList;
+        this.reservationList = reservationList;
+        this.idUser = idUser;
+        this.roleUtilisateur = roleUtilisateur;
+    }
+
+    public RoleUtilisateur getRoleUtilisateur() {
+        return roleUtilisateur;
+    }
+
+    public void setRoleUtilisateur(RoleUtilisateur roleUtilisateur) {
+        this.roleUtilisateur = roleUtilisateur;
     }
 
     public Voyageur(Long id) {
@@ -89,6 +110,16 @@ public class Voyageur implements Serializable {
         this.idUser = idUser;
     }
 
+
+    public Voyageur(Long id, String preferences, List<Avis> avisList, List<Favori> favoriList, List<Reservation> reservationList, Utilisateur idUser) {
+        this.id = id;
+        this.preferences = preferences;
+        this.avisList = avisList;
+        this.favoriList = favoriList;
+        this.reservationList = reservationList;
+        this.idUser = idUser;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -113,5 +144,5 @@ public class Voyageur implements Serializable {
     public String toString() {
         return "entities.Voyageur[ id=" + id + " ]";
     }
-    
+
 }

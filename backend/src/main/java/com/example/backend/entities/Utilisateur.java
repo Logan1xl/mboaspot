@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.roles.RoleUtilisateur;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -47,7 +48,8 @@ public class Utilisateur implements Serializable {
     private Boolean estActif;
     @Basic(optional = false)
     @Column(name = "role")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private RoleUtilisateur role;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
     private List<Admin> adminList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
@@ -64,7 +66,7 @@ public class Utilisateur implements Serializable {
         this.id = id;
     }
 
-    public Utilisateur(Long id, String email, String motDePasse, String role) {
+    public Utilisateur(Long id, String email, String motDePasse, RoleUtilisateur role) {
         this.id = id;
         this.email = email;
         this.motDePasse = motDePasse;
@@ -135,11 +137,11 @@ public class Utilisateur implements Serializable {
         this.estActif = estActif;
     }
 
-    public String getRole() {
+    public RoleUtilisateur getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(RoleUtilisateur role) {
         this.role = role;
     }
 
