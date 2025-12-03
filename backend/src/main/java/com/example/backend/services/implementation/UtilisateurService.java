@@ -7,6 +7,7 @@ import com.example.backend.entities.Utilisateur;
 import com.example.backend.mappers.UtilisateurMapper;
 import com.example.backend.repositories.UtilisateurRepos;
 import com.example.backend.services.interfaces.UtilisateurInterface;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class UtilisateurService implements UtilisateurInterface {
     private UtilisateurRepos repository;
     private PasswordEncoder passwordEncoder;
     private UtilisateurMapper utilisateurMapper;
+
 
     public UtilisateurService(UtilisateurRepos repository, PasswordEncoder passwordEncoder, UtilisateurMapper utilisateurMapper) {
         this.repository = repository;
@@ -48,6 +50,7 @@ public class UtilisateurService implements UtilisateurInterface {
             throw new RuntimeException("Email déjà utilisé");
         }else{
             try{
+                utilisateurDTO.setMotDePasse(passwordEncoder.encode(utilisateurDTO.getMotDePasse()));
                 return utilisateurMapper.toDTO(repository.save(utilisateurMapper.toEntity(utilisateurDTO)));
             }catch(Exception e){
                 throw new RuntimeException("Erreur lors de la création de l'utilisateur: " + e.getMessage());
