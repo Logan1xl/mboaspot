@@ -19,12 +19,16 @@ public class AuthController {
      * Endpoint d'inscription
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(
-            @Valid @RequestBody RegisterDTO dto) {
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterDTO dto) {
+
+        // Bloque la création d'ADMIN via cet endpoint public
+        if ("ADMIN".equalsIgnoreCase(dto.getRole())) {
+            throw new RuntimeException("Impossible de s'inscrire en tant qu'administrateur");
+        }
+
         AuthResponseDTO response = authService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
     /**
      * Endpoint de connexion
      */
