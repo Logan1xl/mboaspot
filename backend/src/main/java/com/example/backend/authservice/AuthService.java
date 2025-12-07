@@ -76,7 +76,7 @@ public class AuthService {
             case "ADMIN":
                 Admin admin = new Admin();
                 admin.setIdUser(user);
-                admin.setDepartement(dto.getDepartement());
+
                 adminRepository.save(admin);
                 break;
 
