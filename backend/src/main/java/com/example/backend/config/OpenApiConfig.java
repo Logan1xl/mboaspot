@@ -12,7 +12,7 @@ public class OpenApiConfig {
     public OpenAPI apiInfo() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API de gestion")
+                        .title("API pour Application de Recherche de Logements au Cameroun")
                         .description("Documentation de l'API")
                         .version("1.0.0")
                 );
