@@ -1,4 +1,4 @@
-package com.example.backend.authservice;
+package com.example.backend.auth.authController.authservice;
 
 
 
