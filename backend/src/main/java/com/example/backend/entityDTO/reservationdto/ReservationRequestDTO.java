@@ -3,48 +3,31 @@ package com.example.backend.entityDTO.reservationdto;
 import java.time.LocalDate;
 
 public class ReservationRequestDTO {
-    private Long annoncesid;
-    private String annonceTitre;
-    private Long voyageurID;
+
+    private Long annonceId;
+    private Long voyageurId;
     private LocalDate dateDebut;
     private LocalDate dateFin;
     private Integer nombreInvites;
 
-    public ReservationRequestDTO(String annonceTitre) {
-        this.annonceTitre = annonceTitre;
+    // Constructeur vide OBLIGATOIRE
+    public ReservationRequestDTO() {}
+
+    // Getters et Setters OBLIGATOIRES
+    public Long getAnnonceId() {
+        return annonceId;
     }
 
-    public ReservationRequestDTO(Long id, String annonceTitre, Long voyageurID, LocalDate dateDebut, LocalDate dateFin, Integer nombreInvites) {
-        this.annoncesid = id;
-        this.annonceTitre = annonceTitre;
-        this.voyageurID = voyageurID;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.nombreInvites = nombreInvites;
+    public void setAnnonceId(Long annonceId) {
+        this.annonceId = annonceId;
     }
 
-    public Long getId() {
-        return annoncesid;
+    public Long getVoyageurId() {
+        return voyageurId;
     }
 
-    public void setId(Long id) {
-        this.annoncesid = id;
-    }
-
-    public Long getAnnoncesid() {
-        return annoncesid;
-    }
-
-    public void setAnnoncesid(Long annoncesid) {
-        this.annoncesid = annoncesid;
-    }
-
-    public Long getVoyageurID() {
-        return voyageurID;
-    }
-
-    public void setVoyageurID(Long voyageurID) {
-        this.voyageurID = voyageurID;
+    public void setVoyageurId(Long voyageurId) {
+        this.voyageurId = voyageurId;
     }
 
     public LocalDate getDateDebut() {
@@ -69,13 +52,5 @@ public class ReservationRequestDTO {
 
     public void setNombreInvites(Integer nombreInvites) {
         this.nombreInvites = nombreInvites;
-    }
-
-    public String getAnnonceTitre() {
-        return annonceTitre;
-    }
-
-    public void setAnnonceTitre(String annonceTitre) {
-        this.annonceTitre = annonceTitre;
     }
 }

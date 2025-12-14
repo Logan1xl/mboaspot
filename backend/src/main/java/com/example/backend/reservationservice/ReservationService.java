@@ -92,7 +92,7 @@ public class ReservationService implements ReservationServiceInterface {
     public ReservationResponseDTO creerReservation(ReservationRequestDTO request) {
 
         DisponibiliteRequestDTO dispoCheck=new DisponibiliteRequestDTO(
-                request.getAnnoncesid(),
+                request.getAnnonceId(),
                 request.getDateDebut(),
                 request.getDateFin(),
                 request.getNombreInvites()
@@ -104,10 +104,10 @@ public class ReservationService implements ReservationServiceInterface {
         }
 
         //recuperer l'annonce et le voyageur
-        Annonces annonce=annoncesRepository.findById(request.getId())
+        Annonces annonce=annoncesRepository.findById(request.getVoyageurId())
                 .orElseThrow(()->new RuntimeException("Annonce non trouvée"));
 
-        Voyageur voyageur=voyageurRepository.findById(request.getId())
+        Voyageur voyageur=voyageurRepository.findById(request.getVoyageurId())
                 .orElseThrow(()->new RuntimeException("Voyageur non disponible"));
 
         //caluculer le prix total

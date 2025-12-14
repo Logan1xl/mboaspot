@@ -1,4 +1,4 @@
-package com.example.backend.auth.authController;
+package com.example.backend.auth.authController.reservationcontroller;
 
 import com.example.backend.entityDTO.reservationdto.DisponibiliteRequestDTO;
 import com.example.backend.entityDTO.reservationdto.ReservationRequestDTO;

@@ -1,7 +1,9 @@
 package com.example.backend.auth.authController;
 
-import com.example.backend.entityDTO.*;
 import com.example.backend.auth.authController.authservice.AuthService;
+import com.example.backend.entityDTO.authdto.AuthResponseDTO;
+import com.example.backend.entityDTO.authdto.LoginDTO;
+import com.example.backend.entityDTO.authdto.RegisterDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
