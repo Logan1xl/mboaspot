@@ -29,8 +29,6 @@ public class Admin implements Serializable {
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Utilisateur idUser;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idAdmin")
-    private List<Signalement> signalementList;
 
     public Admin() {
     }
@@ -63,13 +61,7 @@ public class Admin implements Serializable {
         this.idUser = idUser;
     }
 
-    public List<Signalement> getSignalementList() {
-        return signalementList;
-    }
 
-    public void setSignalementList(List<Signalement> signalementList) {
-        this.signalementList = signalementList;
-    }
 
     @Override
     public int hashCode() {

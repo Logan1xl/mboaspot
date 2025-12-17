@@ -37,9 +37,9 @@ public class Signalement implements Serializable {
     @JoinColumn(name = "id_annonce", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Annonces idAnnonce;
-    @JoinColumn(name = "id_admin", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Admin idAdmin;
+    @JoinColumn(name = "id_admin", referencedColumnName = "id")
+    private Utilisateur idAdmin;
 
     public Signalement() {
     }
@@ -95,14 +95,14 @@ public class Signalement implements Serializable {
     public void setIdAnnonce(Annonces idAnnonce) {
         this.idAnnonce = idAnnonce;
     }
-
-    public Admin getIdAdmin() {
+    public Utilisateur getIdAdmin() {
         return idAdmin;
     }
 
-    public void setIdAdmin(Admin idAdmin) {
+    public void setIdAdmin(Utilisateur idAdmin) {
         this.idAdmin = idAdmin;
     }
+
 
     @Override
     public int hashCode() {
