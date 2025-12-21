@@ -18,6 +18,11 @@ public class UtilisateurDTO {
     private String prenom;
     private String nom;
 
+    private String numeroTelephone;
+    private String photoProfil;
+    private Boolean estActif;
+    private String role;
+
     public Long getId() {
         return id;
     }
@@ -89,11 +94,6 @@ public class UtilisateurDTO {
     public void setRole(String role) {
         this.role = role;
     }
-
-    private String numeroTelephone;
-    private String photoProfil;
-    private Boolean estActif;
-    private String role;
 
 
 }

@@ -14,7 +14,7 @@ public class UtilisateurController {
 
 
     private final UtilisateurService utilisateurService;
-    private UtilisateurService Utilisateurservice;
+
 
     public UtilisateurController(UtilisateurService utilisateurService) {
         this.utilisateurService = utilisateurService;
@@ -22,7 +22,7 @@ public class UtilisateurController {
 
     @GetMapping
     public ResponseEntity<?> getAllUtilisateurs() {
-        return ResponseEntity.ok(Utilisateurservice.getAllUtilisateurs());
+        return ResponseEntity.ok(utilisateurService.getAllUtilisateurs());
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ package com.example.backend.dto;
 import com.example.backend.entities.Proprietaire;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
