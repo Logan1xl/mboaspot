@@ -51,27 +51,6 @@ class UtilisateurControllerTest {
         utilisateurDTO.setRole("VOYAGEUR");
     }
 
-    @Test
-    void getAllUtilisateurs_ShouldReturnListOfUtilisateurs() throws Exception {
-        UtilisateurDTO utilisateur2 = new UtilisateurDTO();
-        utilisateur2.setId(2L);
-        utilisateur2.setEmail("marie@example.com");
-        utilisateur2.setPrenom("Marie");
-        utilisateur2.setNom("Martin");
-
-        List<UtilisateurDTO> utilisateurs = Arrays.asList(utilisateurDTO, utilisateur2);
-        when(utilisateurService.getAllUtilisateurs()).thenReturn(utilisateurs);
-
-        mockMvc.perform(get("/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].email").value("test@example.com"))
-                .andExpect(jsonPath("$[0].prenom").value("Jean"))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].email").value("marie@example.com"));
-
-        verify(utilisateurService, times(1)).getAllUtilisateurs();
-    }
 
     @Test
     void getAllUtilisateurs_ShouldReturnEmptyList_WhenNoUtilisateurs() throws Exception {
@@ -160,6 +139,29 @@ class UtilisateurControllerTest {
                 .andExpect(jsonPath("$.numeroTelephone").value("+237698765432"));
 
         verify(utilisateurService, times(1)).updateUtilisateur(eq(1L), any(UtilisateurDTO.class));
+    }
+
+
+    @Test
+    void getAllUtilisateurs_ShouldReturnListOfUtilisateurs() throws Exception {
+        UtilisateurDTO utilisateur2 = new UtilisateurDTO();
+        utilisateur2.setId(2L);
+        utilisateur2.setEmail("marie@example.com");
+        utilisateur2.setPrenom("Marie");
+        utilisateur2.setNom("Martin");
+
+        List<UtilisateurDTO> utilisateurs = Arrays.asList(utilisateurDTO, utilisateur2);
+        when(utilisateurService.getAllUtilisateurs()).thenReturn(utilisateurs);
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].email").value("test@example.com"))
+                .andExpect(jsonPath("$[0].prenom").value("Jean"))
+                .andExpect(jsonPath("$[1].id").value(2L))
+                .andExpect(jsonPath("$[1].email").value("marie@example.com"));
+
+        verify(utilisateurService, times(1)).getAllUtilisateurs();
     }
 
     @Test

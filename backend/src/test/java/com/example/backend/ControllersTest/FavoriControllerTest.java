@@ -52,18 +52,6 @@ class FavoriControllerTest {
         favoriDTO.setIdAnnonce(annonce);
     }
 
-    @Test
-    void getFavorisByUserId_ShouldReturnFavori_WhenIdExists() throws Exception {
-        when(favoriService.obtenirFavoriParId(1L)).thenReturn(favoriDTO);
-
-        mockMvc.perform(get("/api/favori/{id}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.idVoyageur.id").value(1L))
-                .andExpect(jsonPath("$.idAnnonce.id").value(1L));
-
-        verify(favoriService, times(1)).obtenirFavoriParId(1L);
-    }
 
     @Test
     void getFavorisByUserId_ShouldReturnBadRequest_WhenIdDoesNotExist() throws Exception {
@@ -77,6 +65,18 @@ class FavoriControllerTest {
         verify(favoriService, times(1)).obtenirFavoriParId(99L);
     }
 
+    @Test
+    void getFavorisByUserId_ShouldReturnFavori_WhenIdExists() throws Exception {
+        when(favoriService.obtenirFavoriParId(1L)).thenReturn(favoriDTO);
+
+        mockMvc.perform(get("/api/favori/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.idVoyageur.id").value(1L))
+                .andExpect(jsonPath("$.idAnnonce.id").value(1L));
+
+        verify(favoriService, times(1)).obtenirFavoriParId(1L);
+    }
     @Test
     void createFavori_ShouldReturnCreated_WhenFavoriIsValid() throws Exception {
         when(favoriService.ajouterFavori(any(FavoriDTO.class))).thenReturn(favoriDTO);
@@ -189,5 +189,8 @@ class FavoriControllerTest {
         mockMvc.perform(delete("/api/favori/{id}", 1L))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Erreur lors de la suppression"));
+
     }
+
+
 }

@@ -53,20 +53,7 @@ class AvisControllerTest {
         avisDTO.setIdVoyageur(voyageur);
     }
 
-    @Test
-    void createAvis_ShouldReturnCreated_WhenAvisIsValid() throws Exception {
-        when(avisService.ajouterAvis(any(AvisDTO.class))).thenReturn(avisDTO);
 
-        mockMvc.perform(post("/api/avis")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(avisDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.note").value(5))
-                .andExpect(jsonPath("$.estSignale").value(false));
-
-        verify(avisService, times(1)).ajouterAvis(any(AvisDTO.class));
-    }
 
     @Test
     void createAvis_ShouldReturnBadRequest_WhenExceptionOccurs() throws Exception {
@@ -107,6 +94,20 @@ class AvisControllerTest {
         mockMvc.perform(get("/api/avis"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Erreur lors de la récupération"));
+    }
+    @Test
+    void createAvis_ShouldReturnCreated_WhenAvisIsValid() throws Exception {
+        when(avisService.ajouterAvis(any(AvisDTO.class))).thenReturn(avisDTO);
+
+        mockMvc.perform(post("/api/avis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(avisDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.note").value(5))
+                .andExpect(jsonPath("$.estSignale").value(false));
+
+        verify(avisService, times(1)).ajouterAvis(any(AvisDTO.class));
     }
 
    /* @Test
