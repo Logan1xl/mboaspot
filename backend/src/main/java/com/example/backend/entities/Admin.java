@@ -11,7 +11,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "admin", catalog = "logement_cameroun", schema = "")
 @NamedQueries({
     @NamedQuery(name = "Admin.findAll", query = "SELECT a FROM Admin a"),
     @NamedQuery(name = "Admin.findById", query = "SELECT a FROM Admin a WHERE a.id = :id"),
@@ -26,8 +25,8 @@ public class Admin implements Serializable {
     private Long id;
     @Column(name = "departement")
     private String departement;
-    @JoinColumn(name = "id_user", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "id_user", unique = true)
     private Utilisateur idUser;
 
     public Admin() {

@@ -10,7 +10,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "signalement", catalog = "logement_cameroun", schema = "")
 @NamedQueries({
     @NamedQuery(name = "Signalement.findAll", query = "SELECT s FROM Signalement s"),
     @NamedQuery(name = "Signalement.findById", query = "SELECT s FROM Signalement s WHERE s.id = :id"),
@@ -39,7 +38,8 @@ public class Signalement implements Serializable {
     private Annonces idAnnonce;
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_admin", referencedColumnName = "id")
-    private Utilisateur idAdmin;
+    private Admin idAdmin;
+
 
     public Signalement() {
     }
@@ -95,11 +95,11 @@ public class Signalement implements Serializable {
     public void setIdAnnonce(Annonces idAnnonce) {
         this.idAnnonce = idAnnonce;
     }
-    public Utilisateur getIdAdmin() {
+    public Admin getIdAdmin() {
         return idAdmin;
     }
 
-    public void setIdAdmin(Utilisateur idAdmin) {
+    public void setIdAdmin(Admin idAdmin) {
         this.idAdmin = idAdmin;
     }
 

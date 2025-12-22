@@ -19,9 +19,13 @@ public class SignalementMapper {
         dto.setRaison(s.getRaison());
         dto.setDescription(s.getDescription());
         dto.setStatut(s.getStatut());
+        dto.setResolution(s.getResolution()); // ✅ FIX MANQUANT
         dto.setAnnonceId(s.getIdAnnonce().getId());
-        dto.setAdminId(s.getIdAdmin().getId());
+        if (s.getIdAdmin() != null) {
+            dto.setAdminId(s.getIdAdmin().getId());
+        }
         return dto;
     }
+
 
 }

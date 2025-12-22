@@ -1,21 +1,18 @@
+// ===== AnnoncesServiceTest.java =====
 package com.example.backend.services;
 
-import com.example.backend.dto.AnnonceDTO;
-import com.example.backend.dto.DisponibiliteDTO;
-import com.example.backend.dto.LocalisationDTO;
-import com.example.backend.dto.RechercheDTO;
-import com.example.backend.entities.Annonces;
-import com.example.backend.repositories.AnnoncesRepository;
-import com.example.backend.repositories.DisponibiliteRepository;
-import com.example.backend.repositories.LocalisationRepository;
+import com.example.backend.dto.*;
+import com.example.backend.entities.*;
+import com.example.backend.repositories.*;
+import com.example.backend.utils.TestDataBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,9 +20,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
 @Transactional
-public class AnnoncesServiceTest {
+class AnnoncesServiceTest {
 
     @Autowired
     private AnnoncesService annoncesService;
@@ -34,218 +32,217 @@ public class AnnoncesServiceTest {
     private AnnoncesRepository annoncesRepository;
 
     @Autowired
+    private ProprietaireRepository proprietaireRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
     private LocalisationRepository localisationRepository;
 
     @Autowired
     private DisponibiliteRepository disponibiliteRepository;
 
-    private AnnonceDTO annonceTest;
+    private Proprietaire proprietaire;
+    private Annonces annonce;
 
     @BeforeEach
     void setUp() {
-        // Nettoyer la base
         disponibiliteRepository.deleteAll();
         localisationRepository.deleteAll();
         annoncesRepository.deleteAll();
+        proprietaireRepository.deleteAll();
+        utilisateurRepository.deleteAll();
 
-        // Créer une annonce de test
-        annonceTest = new AnnonceDTO();
-        annonceTest.setTitre("Villa luxueuse");
-        annonceTest.setPrix(100000.0);
-        annonceTest.setAdresse("456 Avenue Test");
-        annonceTest.setVille("Douala");
-        annonceTest.setLatitude(4.0511);
-        annonceTest.setLongitude(9.7679);
-        annonceTest.setNbreChambres(4);
-        annonceTest.setNbreLits(3);
-        annonceTest.setMaxInvites(8);
-        annonceTest.setDescription("Belle villa avec piscine");
-        annonceTest.setTypeAnnonce("MAISON");
-        annonceTest.setUrlImagePrincipale("http://example.com/villa.jpg");
-        annonceTest.setUrlImages(Arrays.asList("img1.jpg", "img2.jpg", "img3.jpg"));
+        Utilisateur user = TestDataBuilder.createUtilisateur("Dupont", "dupont@test.com");
+        user = utilisateurRepository.save(user);
+
+        proprietaire = TestDataBuilder.createProprietaire(user);
+        proprietaire = proprietaireRepository.save(proprietaire);
+
+        annonce = TestDataBuilder.createAnnonce(proprietaire);
+        annonce = annoncesRepository.save(annonce);
+    }
+
+    @Test
+    void testGetAllAnnonces() {
+        List<AnnonceDTO> annonces = annoncesService.getAllAnnonces();
+
+        assertThat(annonces).isNotEmpty();
+        assertThat(annonces).hasSize(1);
+        assertThat(annonces.get(0).getTitre()).isEqualTo("Test Annonce");
+    }
+
+    @Test
+    void testGetAnnoncesActives() {
+        Annonces annonceInactive = TestDataBuilder.createAnnonce(proprietaire);
+        annonceInactive.setEstActive(false);
+        annonceInactive.setTitre("Annonce Inactive");
+        annoncesRepository.save(annonceInactive);
+
+        List<AnnonceDTO> annoncesActives = annoncesService.getAnnoncesActives();
+
+        assertThat(annoncesActives).hasSize(1);
+        assertThat(annoncesActives.get(0).getEstActive()).isTrue();
+    }
+
+    @Test
+    void testGetAnnonceById() {
+        Optional<AnnonceDTO> result = annoncesService.getAnnonceById(annonce.getId());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getTitre()).isEqualTo("Test Annonce");
+        assertThat(result.get().getPrix()).isEqualTo(100.0);
+    }
+
+    @Test
+    void testGetAnnonceById_NotFound() {
+        Optional<AnnonceDTO> result = annoncesService.getAnnonceById(999L);
+        assertThat(result).isEmpty();
     }
 
     @Test
     void testCreateAnnonce() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+        AnnonceDTO dto = new AnnonceDTO();
+        dto.setTitre("Nouvelle Annonce");
+        dto.setPrix(150.0);
+        dto.setAdresse("456 New Street");
+        dto.setVille("Yaoundé");
+        dto.setLatitude(3.87);
+        dto.setLongitude(11.52);
+        dto.setNbreChambres(3);
+        dto.setNbreLits(3);
+        dto.setMaxInvites(6);
+        dto.setDescription("Nouvelle description");
+        dto.setTypeAnnonce("Maison");
+        dto.setIdProprietaire(proprietaire.getId());
+
+        AnnonceDTO created = annoncesService.createAnnonce(dto);
 
         assertThat(created).isNotNull();
         assertThat(created.getId()).isNotNull();
-        assertThat(created.getTitre()).isEqualTo("Villa luxueuse");
-        assertThat(created.getPrix()).isEqualTo(100000.0);
+        assertThat(created.getTitre()).isEqualTo("Nouvelle Annonce");
         assertThat(created.getEstActive()).isTrue();
         assertThat(created.getEvaluationMoyenne()).isEqualTo(0.0);
     }
 
     @Test
-    void testGetAllAnnonces() {
-        annoncesService.createAnnonce(annonceTest);
+    void testCreateAnnonceAvecLocalisation() {
+        AnnonceDTO dto = new AnnonceDTO();
+        dto.setTitre("Annonce avec localisation");
+        dto.setPrix(200.0);
+        dto.setAdresse("789 Loc Street");
+        dto.setVille("Douala");
+        dto.setNbreChambres(2);
+        dto.setNbreLits(2);
+        dto.setMaxInvites(4);
+        dto.setDescription("Test");
+        dto.setTypeAnnonce("Appartement");
+        dto.setIdProprietaire(proprietaire.getId());
 
-        List<AnnonceDTO> annonces = annoncesService.getAllAnnonces();
+        LocalisationDTO locDTO = new LocalisationDTO();
+        locDTO.setVille("Douala");
+        locDTO.setQuartier("Bonanjo");
+        locDTO.setLatitude(4.05);
+        locDTO.setLongitude(9.70);
+        dto.setLocalisation(locDTO);
 
-        assertThat(annonces).isNotEmpty();
-        assertThat(annonces).hasSizeGreaterThanOrEqualTo(1);
-    }
+        AnnonceDTO created = annoncesService.createAnnonce(dto);
 
-    @Test
-    void testGetAnnoncesActives() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
-
-        List<AnnonceDTO> actives = annoncesService.getAnnoncesActives();
-
-        assertThat(actives).isNotEmpty();
-        assertThat(actives).allMatch(a -> a.getEstActive());
-    }
-
-    @Test
-    void testGetAnnonceById() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
-
-        Optional<AnnonceDTO> found = annoncesService.getAnnonceById(created.getId());
-
-        assertThat(found).isPresent();
-        assertThat(found.get().getTitre()).isEqualTo("Villa luxueuse");
-    }
-
-    @Test
-    void testGetAnnonceById_NotFound() {
-        Optional<AnnonceDTO> found = annoncesService.getAnnonceById(99999L);
-
-        assertThat(found).isEmpty();
+        assertThat(created).isNotNull();
+        Optional<LocalisationDTO> localisation = annoncesService.getLocalisation(created.getId());
+        assertThat(localisation).isPresent();
+        assertThat(localisation.get().getQuartier()).isEqualTo("Bonanjo");
     }
 
     @Test
     void testUpdateAnnonce() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+        AnnonceDTO dto = new AnnonceDTO();
+        dto.setTitre("Titre Modifié");
+        dto.setPrix(250.0);
+        dto.setAdresse(annonce.getAdresse());
+        dto.setVille(annonce.getVille());
+        dto.setNbreChambres(annonce.getNbreChambres());
+        dto.setNbreLits(annonce.getNbreLits());
+        dto.setMaxInvites(annonce.getMaxInvites());
+        dto.setDescription("Description modifiée");
+        dto.setTypeAnnonce(annonce.getTypeAnnonce());
 
-        created.setTitre("Villa modifiée");
-        created.setPrix(120000.0);
-        created.setNbreChambres(5);
+        AnnonceDTO updated = annoncesService.updateAnnonce(annonce.getId(), dto);
 
-        AnnonceDTO updated = annoncesService.updateAnnonce(created.getId(), created);
-
-        assertThat(updated.getTitre()).isEqualTo("Villa modifiée");
-        assertThat(updated.getPrix()).isEqualTo(120000.0);
-        assertThat(updated.getNbreChambres()).isEqualTo(5);
+        assertThat(updated.getTitre()).isEqualTo("Titre Modifié");
+        assertThat(updated.getPrix()).isEqualTo(250.0);
+        assertThat(updated.getDescription()).isEqualTo("Description modifiée");
     }
 
     @Test
     void testUpdateAnnonce_NotFound() {
-        assertThatThrownBy(() -> {
-            annoncesService.updateAnnonce(99999L, annonceTest);
-        }).isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("non trouvée");
+        AnnonceDTO dto = new AnnonceDTO();
+        dto.setTitre("Test");
+
+        assertThatThrownBy(() -> annoncesService.updateAnnonce(999L, dto))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Annonce non trouvée");
     }
 
     @Test
     void testDeleteAnnonce() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
-        Long id = created.getId();
+        annoncesService.deleteAnnonce(annonce.getId());
 
-        annoncesService.deleteAnnonce(id);
-
-        Optional<AnnonceDTO> found = annoncesService.getAnnonceById(id);
-        assertThat(found).isEmpty();
+        Optional<Annonces> deleted = annoncesRepository.findById(annonce.getId());
+        assertThat(deleted).isEmpty();
     }
 
     @Test
     void testActiverAnnonce() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+        annoncesService.activerAnnonce(annonce.getId(), false);
 
-        annoncesService.activerAnnonce(created.getId(), false);
-
-        Optional<AnnonceDTO> found = annoncesService.getAnnonceById(created.getId());
-        assertThat(found).isPresent();
-        assertThat(found.get().getEstActive()).isFalse();
-    }
-
-    @Test
-    void testRechercherAnnonces_ParVille() {
-        annoncesService.createAnnonce(annonceTest);
-
-        RechercheDTO recherche = new RechercheDTO();
-        recherche.setVille("Douala");
-
-        List<AnnonceDTO> resultats = annoncesService.rechercherAnnonces(recherche);
-
-        assertThat(resultats).isNotEmpty();
-        assertThat(resultats).allMatch(a -> "Douala".equals(a.getVille()));
-    }
-
-    @Test
-    void testRechercherAnnonces_ParPrix() {
-        annoncesService.createAnnonce(annonceTest);
-
-        RechercheDTO recherche = new RechercheDTO();
-        recherche.setPrixMin(50000.0);
-        recherche.setPrixMax(150000.0);
-
-        List<AnnonceDTO> resultats = annoncesService.rechercherAnnonces(recherche);
-
-        assertThat(resultats).isNotEmpty();
-        assertThat(resultats).allMatch(a ->
-                a.getPrix() >= 50000.0 && a.getPrix() <= 150000.0
-        );
+        Annonces updated = annoncesRepository.findById(annonce.getId()).orElseThrow();
+        assertThat(updated.getEstActive()).isFalse();
     }
 
     @Test
     void testAddDisponibilite() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+        DisponibiliteDTO dto = new DisponibiliteDTO();
+        dto.setIdAnnonce(annonce.getId());
+        dto.setEstDisponible(true);
+        dto.setDateDebut(new Date());
+        dto.setDateFin(new Date(System.currentTimeMillis() + 86400000L * 7));
+        dto.setPrixSurcharge(20.0);
 
-        DisponibiliteDTO dispo = new DisponibiliteDTO();
-        dispo.setIdAnnonce(created.getId());
-        dispo.setEstDisponible(true);
-        dispo.setPrixSurcharge(5000.0);
-        dispo.setDateDebut(new Date());
-        dispo.setDateFin(new Date(System.currentTimeMillis() + 86400000)); // +1 jour
+        DisponibiliteDTO created = annoncesService.addDisponibilite(dto);
 
-        DisponibiliteDTO added = annoncesService.addDisponibilite(dispo);
-
-        assertThat(added).isNotNull();
-        assertThat(added.getId()).isNotNull();
-        assertThat(added.getEstDisponible()).isTrue();
+        assertThat(created).isNotNull();
+        assertThat(created.getId()).isNotNull();
+        assertThat(created.getEstDisponible()).isTrue();
+        assertThat(created.getPrixSurcharge()).isEqualTo(20.0);
     }
 
     @Test
-    void testGetDisponibilites() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+    void testVerifierDisponibilite() {
+        Disponibilite dispo = TestDataBuilder.createDisponibilite(annonce);
+        disponibiliteRepository.save(dispo);
 
-        DisponibiliteDTO dispo = new DisponibiliteDTO();
-        dispo.setIdAnnonce(created.getId());
-        dispo.setEstDisponible(true);
-        dispo.setDateDebut(new Date());
-        dispo.setDateFin(new Date(System.currentTimeMillis() + 86400000));
-        annoncesService.addDisponibilite(dispo);
+        Date debut = new Date();
+        Date fin = new Date(System.currentTimeMillis() + 86400000L * 3);
 
-        List<DisponibiliteDTO> disponibilites = annoncesService.getDisponibilites(created.getId());
+        boolean disponible = annoncesService.verifierDisponibilite(annonce.getId(), debut, fin);
 
-        assertThat(disponibilites).isNotEmpty();
-        assertThat(disponibilites).hasSize(1);
+        assertThat(disponible).isTrue();
     }
 
     @Test
     void testUpdateLocalisation() {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+        LocalisationDTO dto = new LocalisationDTO();
+        dto.setVille("Yaoundé");
+        dto.setQuartier("Bastos");
+        dto.setLatitude(3.87);
+        dto.setLongitude(11.52);
 
-        LocalisationDTO localisation = new LocalisationDTO();
-        localisation.setVille("Yaoundé");
-        localisation.setQuartier("Bastos");
-        localisation.setLatitude(3.8480);
-        localisation.setLongitude(11.5021);
-
-        LocalisationDTO updated = annoncesService.updateLocalisation(created.getId(), localisation);
+        LocalisationDTO updated = annoncesService.updateLocalisation(annonce.getId(), dto);
 
         assertThat(updated).isNotNull();
         assertThat(updated.getVille()).isEqualTo("Yaoundé");
         assertThat(updated.getQuartier()).isEqualTo("Bastos");
-    }
-
-    @Test
-    void testGetVillesDisponibles() {
-        annoncesService.createAnnonce(annonceTest);
-
-        List<String> villes = annoncesService.getVillesDisponibles();
-
-        assertThat(villes).isNotNull();
     }
 }

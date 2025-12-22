@@ -1,8 +1,10 @@
+// ===== AnnoncesControllerTest.java =====
 package com.example.backend.controllers;
 
-import com.example.backend.dto.AnnonceDTO;
-import com.example.backend.dto.RechercheDTO;
-import com.example.backend.services.AnnoncesService;
+import com.example.backend.dto.*;
+import com.example.backend.entities.*;
+import com.example.backend.repositories.*;
+import com.example.backend.utils.TestDataBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +13,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -22,9 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
 @Transactional
-public class AnnoncesControllerTest {
+class AnnoncesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,152 +38,194 @@ public class AnnoncesControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private AnnoncesService annoncesService;
+    private AnnoncesRepository annoncesRepository;
 
-    private AnnonceDTO annonceTest;
+    @Autowired
+    private ProprietaireRepository proprietaireRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private LocalisationRepository localisationRepository;
+
+    @Autowired
+    private DisponibiliteRepository disponibiliteRepository;
+
+    private Proprietaire proprietaire;
+    private Annonces annonce;
 
     @BeforeEach
     void setUp() {
-        // Créer une annonce de test
-        annonceTest = new AnnonceDTO();
-        annonceTest.setTitre("Appartement moderne");
-        annonceTest.setPrix(50000.0);
-        annonceTest.setAdresse("123 Rue Test, Douala");
-        annonceTest.setVille("Douala");
-        annonceTest.setLatitude(4.0511);
-        annonceTest.setLongitude(9.7679);
-        annonceTest.setNbreChambres(3);
-        annonceTest.setNbreLits(2);
-        annonceTest.setMaxInvites(6);
-        annonceTest.setDescription("Bel appartement au centre-ville");
-        annonceTest.setTypeAnnonce("APPARTEMENT");
-        annonceTest.setUrlImagePrincipale("http://example.com/image.jpg");
-        annonceTest.setUrlImages(Arrays.asList("img1.jpg", "img2.jpg"));
+        disponibiliteRepository.deleteAll();
+        localisationRepository.deleteAll();
+        annoncesRepository.deleteAll();
+        proprietaireRepository.deleteAll();
+        utilisateurRepository.deleteAll();
+
+        Utilisateur user = TestDataBuilder.createUtilisateur("Dupont", "dupont@test.com");
+        user = utilisateurRepository.save(user);
+
+        proprietaire = TestDataBuilder.createProprietaire(user);
+        proprietaire = proprietaireRepository.save(proprietaire);
+
+        annonce = TestDataBuilder.createAnnonce(proprietaire);
+        annonce = annoncesRepository.save(annonce);
     }
 
     @Test
     void testGetAllAnnonces() throws Exception {
         mockMvc.perform(get("/api/annonces"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", isA(java.util.List.class)));
+                .andExpect(jsonPath("$", hasSize(greaterThan(0))))
+                .andExpect(jsonPath("$[0].titre").value("Test Annonce"));
     }
 
     @Test
     void testGetAnnoncesActives() throws Exception {
+        Annonces annonceInactive = TestDataBuilder.createAnnonce(proprietaire);
+        annonceInactive.setEstActive(false);
+        annoncesRepository.save(annonceInactive);
+
         mockMvc.perform(get("/api/annonces/actives"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", isA(java.util.List.class)));
-    }
-
-    @Test
-    void testCreateAnnonce() throws Exception {
-        String annonceJson = objectMapper.writeValueAsString(annonceTest);
-
-        mockMvc.perform(post("/api/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(annonceJson))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.titre", is("Appartement moderne")))
-                .andExpect(jsonPath("$.prix", is(50000.0)))
-                .andExpect(jsonPath("$.ville", is("Douala")));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].estActive").value(true));
     }
 
     @Test
     void testGetAnnonceById() throws Exception {
-        // Créer d'abord une annonce
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
-
-        mockMvc.perform(get("/api/annonces/" + created.getId()))
+        mockMvc.perform(get("/api/annonces/" + annonce.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(created.getId().intValue())))
-                .andExpect(jsonPath("$.titre", is("Appartement moderne")));
+                .andExpect(jsonPath("$.id").value(annonce.getId()))
+                .andExpect(jsonPath("$.titre").value("Test Annonce"))
+                .andExpect(jsonPath("$.prix").value(100.0));
     }
 
     @Test
     void testGetAnnonceById_NotFound() throws Exception {
-        mockMvc.perform(get("/api/annonces/99999"))
+        mockMvc.perform(get("/api/annonces/999"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void testUpdateAnnonce() throws Exception {
-        // Créer une annonce
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
+    void testCreateAnnonce() throws Exception {
+        AnnonceDTO dto = new AnnonceDTO();
+        dto.setTitre("Nouvelle Annonce");
+        dto.setPrix(200.0);
+        dto.setAdresse("456 New Street");
+        dto.setVille("Yaoundé");
+        dto.setLatitude(3.87);
+        dto.setLongitude(11.52);
+        dto.setNbreChambres(3);
+        dto.setNbreLits(3);
+        dto.setMaxInvites(6);
+        dto.setDescription("Description test");
+        dto.setTypeAnnonce("Maison");
+        dto.setUrlImagePrincipale("https://test.com/image.jpg");
+        dto.setUrlImages(Arrays.asList("img1.jpg", "img2.jpg"));
+        dto.setIdProprietaire(proprietaire.getId());
 
-        // Modifier l'annonce
-        created.setTitre("Appartement modifié");
-        created.setPrix(60000.0);
-        String updatedJson = objectMapper.writeValueAsString(created);
-
-        mockMvc.perform(put("/api/annonces/" + created.getId())
+        mockMvc.perform(post("/api/annonces")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedJson))
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.titre").value("Nouvelle Annonce"))
+                .andExpect(jsonPath("$.prix").value(200.0));
+    }
+
+    @Test
+    void testUpdateAnnonce() throws Exception {
+        AnnonceDTO dto = new AnnonceDTO();
+        dto.setTitre("Titre Modifié");
+        dto.setPrix(250.0);
+        dto.setAdresse(annonce.getAdresse());
+        dto.setVille(annonce.getVille());
+        dto.setNbreChambres(annonce.getNbreChambres());
+        dto.setNbreLits(annonce.getNbreLits());
+        dto.setMaxInvites(annonce.getMaxInvites());
+        dto.setDescription("Description modifiée");
+        dto.setTypeAnnonce(annonce.getTypeAnnonce());
+
+        mockMvc.perform(put("/api/annonces/" + annonce.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.titre", is("Appartement modifié")))
-                .andExpect(jsonPath("$.prix", is(60000.0)));
+                .andExpect(jsonPath("$.titre").value("Titre Modifié"))
+                .andExpect(jsonPath("$.prix").value(250.0));
     }
 
     @Test
     void testDeleteAnnonce() throws Exception {
-        // Créer une annonce
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
-
-        mockMvc.perform(delete("/api/annonces/" + created.getId()))
+        mockMvc.perform(delete("/api/annonces/" + annonce.getId()))
                 .andExpect(status().isNoContent());
 
-        // Vérifier que l'annonce n'existe plus
-        mockMvc.perform(get("/api/annonces/" + created.getId()))
+        mockMvc.perform(get("/api/annonces/" + annonce.getId()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void testActiverAnnonce() throws Exception {
-        AnnonceDTO created = annoncesService.createAnnonce(annonceTest);
-
-        mockMvc.perform(patch("/api/annonces/" + created.getId() + "/activer")
+        mockMvc.perform(patch("/api/annonces/" + annonce.getId() + "/activer")
                         .param("activer", "false"))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/annonces/" + annonce.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estActive").value(false));
     }
 
     @Test
-    void testRechercherAnnonces() throws Exception {
-        // Créer quelques annonces
-        annoncesService.createAnnonce(annonceTest);
+    void testAddDisponibilite() throws Exception {
+        DisponibiliteDTO dto = new DisponibiliteDTO();
+        dto.setIdAnnonce(annonce.getId());
+        dto.setEstDisponible(true);
+        dto.setDateDebut(new Date());
+        dto.setDateFin(new Date(System.currentTimeMillis() + 86400000L * 7));
+        dto.setPrixSurcharge(25.0);
 
-        RechercheDTO recherche = new RechercheDTO();
-        recherche.setVille("Douala");
-        recherche.setPrixMin(0.0);
-        recherche.setPrixMax(100000.0);
-
-        String rechercheJson = objectMapper.writeValueAsString(recherche);
-
-        mockMvc.perform(post("/api/annonces/recherche")
+        mockMvc.perform(post("/api/annonces/disponibilites")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(rechercheJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", isA(java.util.List.class)));
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.estDisponible").value(true))
+                .andExpect(jsonPath("$.prixSurcharge").value(25.0));
     }
 
     @Test
-    void testGetTopAnnonces() throws Exception {
-        mockMvc.perform(get("/api/annonces/top"))
+    void testGetDisponibilites() throws Exception {
+        Disponibilite dispo = TestDataBuilder.createDisponibilite(annonce);
+        disponibiliteRepository.save(dispo);
+
+        mockMvc.perform(get("/api/annonces/" + annonce.getId() + "/disponibilites"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", isA(java.util.List.class)));
+                .andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test
-    void testGetVillesDisponibles() throws Exception {
-        mockMvc.perform(get("/api/annonces/villes"))
+    void testUpdateLocalisation() throws Exception {
+        LocalisationDTO dto = new LocalisationDTO();
+        dto.setVille("Yaoundé");
+        dto.setQuartier("Bastos");
+        dto.setLatitude(3.87);
+        dto.setLongitude(11.52);
+
+        mockMvc.perform(put("/api/annonces/" + annonce.getId() + "/localisation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", isA(java.util.List.class)));
+                .andExpect(jsonPath("$.ville").value("Yaoundé"))
+                .andExpect(jsonPath("$.quartier").value("Bastos"));
     }
 
     @Test
-    void testGetQuartiers() throws Exception {
-        mockMvc.perform(get("/api/annonces/quartiers")
-                        .param("ville", "Douala"))
+    void testGetLocalisation() throws Exception {
+        Localisation loc = TestDataBuilder.createLocalisation(annonce);
+        localisationRepository.save(loc);
+
+        mockMvc.perform(get("/api/annonces/" + annonce.getId() + "/localisation"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", isA(java.util.List.class)));
+                .andExpect(jsonPath("$.ville").value("Douala"))
+                .andExpect(jsonPath("$.quartier").value("Akwa"));
     }
 }

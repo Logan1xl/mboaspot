@@ -5,6 +5,7 @@ import com.example.backend.dto.DisponibiliteDTO;
 import com.example.backend.dto.LocalisationDTO;
 import com.example.backend.dto.RechercheDTO;
 import com.example.backend.entities.*;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,7 +107,7 @@ public class AnnoncesService {
 
     public void activerAnnonce(Long id, Boolean activer) {
         Annonces annonce = annoncesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
+                .orElseThrow(() -> new ResourceNotFoundException("Annonce non trouvée"));
         annonce.setEstActive(activer);
         annoncesRepository.save(annonce);
     }

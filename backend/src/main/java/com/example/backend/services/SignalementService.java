@@ -1,9 +1,12 @@
 package com.example.backend.services;
 
 import com.example.backend.dto.SignalementRequestDTO;
+import com.example.backend.entities.Admin;
 import com.example.backend.entities.Annonces;
 import com.example.backend.entities.Signalement;
 import com.example.backend.entities.Utilisateur;
+import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.repositories.AdminRepository;
 import com.example.backend.repositories.AnnoncesRepository;
 import com.example.backend.repositories.UtilisateurRepository;
 import com.example.backend.repositories.SignalementRepository;
@@ -16,22 +19,25 @@ public class SignalementService {
 
     private final SignalementRepository signalementRepository;
     private final AnnoncesRepository annoncesRepository;
-    private final UtilisateurRepository utilisateurRepository;
+    private final AdminRepository adminRepository;
+
 
     public SignalementService(
             SignalementRepository signalementRepository,
-            AnnoncesRepository annoncesRepository,UtilisateurRepository utilisateurRepository) {
+            AnnoncesRepository annoncesRepository,AdminRepository adminRepository) {
         this.signalementRepository = signalementRepository;
         this.annoncesRepository = annoncesRepository;
-        this.utilisateurRepository=utilisateurRepository;
+        this.adminRepository=adminRepository;
+
     }
     public Signalement creer(SignalementRequestDTO dto) {
 
         Annonces annonce = annoncesRepository.findById(dto.getAnnonceId())
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
-        Utilisateur admin = utilisateurRepository.findById(dto.getAdminId())
+        Admin admin = adminRepository.findById(dto.getAdminId())
                 .orElseThrow(() -> new RuntimeException("Admin introuvable"));
+
 
         Signalement s = new Signalement();
         s.setRaison(dto.getRaison());
@@ -51,7 +57,7 @@ public class SignalementService {
     // READ ONE
     public Signalement getById(Long id) {
         return signalementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Signalement non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Signalement non trouvé"));
     }
 
     // UPDATE

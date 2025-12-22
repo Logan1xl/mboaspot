@@ -5,9 +5,10 @@ public class SignalementResponseDTO {
     private Long id;
     private String raison;
     private String description;
+    private String resolution;
     private String statut;
-    private Long annonceId;
 
+    private Long annonceId;
     private Long adminId;
 
     public Long getId() {
@@ -56,5 +57,13 @@ public class SignalementResponseDTO {
 
     public void setAdminId(Long adminId) {
         this.adminId = adminId;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
     }
 }
