@@ -36,7 +36,7 @@ public class AvisService implements AvisInterface {
                 || !voyageurRepos.existsById(avisDTO.getIdVoyageur().getId())) {
 
             logger.warn("Ajout avis refusé : photos/note/voyageur manquant");
-            throw new IllegalArgumentException("Les photos, le voyageur et la note sont requises.");
+            throw new IllegalArgumentException("Les photos,le voyageur et la note sont requises.");
         }
 
         try {
