@@ -5,10 +5,13 @@ import com.example.backend.entityDTO.reservationdto.ReservationRequestDTO;
 import com.example.backend.entityDTO.reservationdto.ReservationResponseDTO;
 import com.example.backend.reservationservice.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -67,4 +70,12 @@ import java.util.List;
             ReservationResponseDTO reservation = reservationService.obtenirParCodeConfirmation(code);
             return ResponseEntity.ok(reservation);
         }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 }
+

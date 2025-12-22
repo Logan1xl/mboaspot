@@ -5,10 +5,13 @@ import com.example.backend.entityDTO.reservationdto.AnnonceRequestDTO;
 import com.example.backend.entityDTO.reservationdto.AnnonceResponseDTO;
 import com.example.backend.reservationservice.AnnonceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/annonces")
@@ -72,6 +75,13 @@ public class AnnonceController {
     public ResponseEntity<Void> supprimerAnnonce(@PathVariable Long id) {
         annonceService.supprimerAnnonce(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
 }

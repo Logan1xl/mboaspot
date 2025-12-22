@@ -114,7 +114,7 @@ public class AuthService {
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
 
-        if (!user.getEstActif()) {
+        if (user.getEstActif() == null || !user.getEstActif()) {
             throw new RuntimeException("Votre compte est désactivé");
         }
 
