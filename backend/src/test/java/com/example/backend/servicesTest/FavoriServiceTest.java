@@ -107,7 +107,7 @@ class FavoriServiceTest {
                 () -> favoriService.ajouterFavori(favoriDTO)
         );
 
-        assertEquals("L'ID de l'annonce et l'ID ddu voyageur sont requis et doivent exister.", exception.getMessage());
+        assertEquals("L'ID de l'annonce et l'ID du voyageur sont requis et doivent exister.", exception.getMessage());
         verify(favoriRepos, never()).save(any());
     }
 
@@ -124,6 +124,18 @@ class FavoriServiceTest {
         );
 
         assertTrue(exception.getMessage().contains("Erreur lors de l'ajout du favori"));
+    }
+
+
+    @Test
+    void listerFavoris_ShouldReturnEmptyList_WhenNoFavoris() {
+        when(favoriRepos.findAll()).thenReturn(Arrays.asList());
+
+        List<FavoriDTO> result = favoriService.listerFavoris();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(favoriRepos, times(1)).findAll();
     }
 
     @Test
@@ -146,17 +158,6 @@ class FavoriServiceTest {
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());
-        verify(favoriRepos, times(1)).findAll();
-    }
-
-    @Test
-    void listerFavoris_ShouldReturnEmptyList_WhenNoFavoris() {
-        when(favoriRepos.findAll()).thenReturn(Arrays.asList());
-
-        List<FavoriDTO> result = favoriService.listerFavoris();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
         verify(favoriRepos, times(1)).findAll();
     }
 
@@ -223,7 +224,7 @@ class FavoriServiceTest {
                 () -> favoriService.mettreAJourFavori(1L, favoriDTO)
         );
 
-        assertTrue(exception.getMessage().contains("erreur lors de la mise a jour"));
+        assertTrue(exception.getMessage().contains("Erreur lors de la mise à jour: " ));
     }
 
     @Test

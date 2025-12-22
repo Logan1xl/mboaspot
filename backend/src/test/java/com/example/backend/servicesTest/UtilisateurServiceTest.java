@@ -65,30 +65,6 @@ class UtilisateurServiceTest {
         utilisateur.setRole("VOYAGEUR");
     }
 
-    @Test
-    void getAllUtilisateurs_ShouldReturnListOfUtilisateurDTO() {
-        Utilisateur utilisateur2 = new Utilisateur();
-        utilisateur2.setId(2L);
-        utilisateur2.setEmail("marie@example.com");
-
-        UtilisateurDTO utilisateurDTO2 = new UtilisateurDTO();
-        utilisateurDTO2.setId(2L);
-        utilisateurDTO2.setEmail("marie@example.com");
-
-        List<Utilisateur> utilisateurs = Arrays.asList(utilisateur, utilisateur2);
-
-        when(repository.findAll()).thenReturn(utilisateurs);
-        when(utilisateurMapper.toDTO(utilisateur)).thenReturn(utilisateurDTO);
-        when(utilisateurMapper.toDTO(utilisateur2)).thenReturn(utilisateurDTO2);
-
-        List<UtilisateurDTO> result = utilisateurService.getAllUtilisateurs();
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("test@example.com", result.get(0).getEmail());
-        assertEquals("marie@example.com", result.get(1).getEmail());
-        verify(repository, times(1)).findAll();
-    }
 
     @Test
     void getAllUtilisateurs_ShouldReturnEmptyList_WhenNoUtilisateurs() {
@@ -113,6 +89,31 @@ class UtilisateurServiceTest {
         assertEquals("test@example.com", result.getEmail());
         assertEquals("Jean", result.getPrenom());
         verify(repository, times(1)).findById(1L);
+    }
+
+    @Test
+    void getAllUtilisateurs_ShouldReturnListOfUtilisateurDTO() {
+        Utilisateur utilisateur2 = new Utilisateur();
+        utilisateur2.setId(2L);
+        utilisateur2.setEmail("marie@example.com");
+
+        UtilisateurDTO utilisateurDTO2 = new UtilisateurDTO();
+        utilisateurDTO2.setId(2L);
+        utilisateurDTO2.setEmail("marie@example.com");
+
+        List<Utilisateur> utilisateurs = Arrays.asList(utilisateur, utilisateur2);
+
+        when(repository.findAll()).thenReturn(utilisateurs);
+        when(utilisateurMapper.toDTO(utilisateur)).thenReturn(utilisateurDTO);
+        when(utilisateurMapper.toDTO(utilisateur2)).thenReturn(utilisateurDTO2);
+
+        List<UtilisateurDTO> result = utilisateurService.getAllUtilisateurs();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("test@example.com", result.get(0).getEmail());
+        assertEquals("marie@example.com", result.get(1).getEmail());
+        verify(repository, times(1)).findAll();
     }
 
     @Test

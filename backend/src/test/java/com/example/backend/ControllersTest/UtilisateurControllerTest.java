@@ -141,7 +141,17 @@ class UtilisateurControllerTest {
         verify(utilisateurService, times(1)).updateUtilisateur(eq(1L), any(UtilisateurDTO.class));
     }
 
+    @Test
+    void updateUtilisateur_ShouldReturnBadRequest_WhenIdDoesNotExist() throws Exception {
+        when(utilisateurService.updateUtilisateur(eq(99L), any(UtilisateurDTO.class)))
+                .thenThrow(new RuntimeException("Utilisateur non trouvé"));
 
+        mockMvc.perform(put("/users/{id}", 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(utilisateurDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Utilisateur non trouvé"));
+    }
     @Test
     void getAllUtilisateurs_ShouldReturnListOfUtilisateurs() throws Exception {
         UtilisateurDTO utilisateur2 = new UtilisateurDTO();
@@ -164,17 +174,7 @@ class UtilisateurControllerTest {
         verify(utilisateurService, times(1)).getAllUtilisateurs();
     }
 
-    @Test
-    void updateUtilisateur_ShouldReturnBadRequest_WhenIdDoesNotExist() throws Exception {
-        when(utilisateurService.updateUtilisateur(eq(99L), any(UtilisateurDTO.class)))
-                .thenThrow(new RuntimeException("Utilisateur non trouvé"));
 
-        mockMvc.perform(put("/users/{id}", 99L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(utilisateurDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Utilisateur non trouvé"));
-    }
 
     @Test
     void updateUtilisateur_ShouldReturnBadRequest_WhenExceptionOccurs() throws Exception {

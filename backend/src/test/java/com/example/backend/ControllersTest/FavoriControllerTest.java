@@ -52,7 +52,20 @@ class FavoriControllerTest {
         favoriDTO.setIdAnnonce(annonce);
     }
 
+    @Test
+    void createFavori_ShouldReturnCreated_WhenFavoriIsValid() throws Exception {
+        when(favoriService.ajouterFavori(any(FavoriDTO.class))).thenReturn(favoriDTO);
 
+        mockMvc.perform(post("/api/favori")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(favoriDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.idVoyageur.id").value(1L))
+                .andExpect(jsonPath("$.idAnnonce.id").value(1L));
+
+        verify(favoriService, times(1)).ajouterFavori(any(FavoriDTO.class));
+    }
     @Test
     void getFavorisByUserId_ShouldReturnBadRequest_WhenIdDoesNotExist() throws Exception {
         when(favoriService.obtenirFavoriParId(99L))
@@ -77,20 +90,7 @@ class FavoriControllerTest {
 
         verify(favoriService, times(1)).obtenirFavoriParId(1L);
     }
-    @Test
-    void createFavori_ShouldReturnCreated_WhenFavoriIsValid() throws Exception {
-        when(favoriService.ajouterFavori(any(FavoriDTO.class))).thenReturn(favoriDTO);
 
-        mockMvc.perform(post("/api/favori")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(favoriDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.idVoyageur.id").value(1L))
-                .andExpect(jsonPath("$.idAnnonce.id").value(1L));
-
-        verify(favoriService, times(1)).ajouterFavori(any(FavoriDTO.class));
-    }
 
     @Test
     void createFavori_ShouldReturnBadRequest_WhenExceptionOccurs() throws Exception {

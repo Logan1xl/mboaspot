@@ -75,11 +75,11 @@ class AvisServiceTest {
         verify(voyageurRepos, times(1)).existsById(1L);
     }
 
+
+
     @Test
-    void ajouterAvis_ShouldThrowException_WhenPhotosIsNull() {
-        avisDTO.setPhotos(null);
-
-
+    void ajouterAvis_ShouldThrowException_WhenNoteIsNull() {
+        avisDTO.setNote(null);
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> avisService.ajouterAvis(avisDTO)
@@ -90,8 +90,10 @@ class AvisServiceTest {
     }
 
     @Test
-    void ajouterAvis_ShouldThrowException_WhenNoteIsNull() {
-        avisDTO.setNote(null);
+    void ajouterAvis_ShouldThrowException_WhenPhotosIsNull() {
+        avisDTO.setPhotos(null);
+
+
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> avisService.ajouterAvis(avisDTO)

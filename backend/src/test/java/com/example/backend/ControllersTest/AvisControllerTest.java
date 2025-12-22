@@ -52,21 +52,6 @@ class AvisControllerTest {
         avisDTO.setRaisonSignalement(null);
         avisDTO.setIdVoyageur(voyageur);
     }
-
-
-
-    @Test
-    void createAvis_ShouldReturnBadRequest_WhenExceptionOccurs() throws Exception {
-        when(avisService.ajouterAvis(any(AvisDTO.class)))
-                .thenThrow(new RuntimeException("Erreur lors de la création"));
-
-        mockMvc.perform(post("/api/avis")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(avisDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Erreur lors de la création"));
-    }
-
     @Test
     void getAllAvis_ShouldReturnListOfAvis() throws Exception {
         AvisDTO avisDTO2 = new AvisDTO();
@@ -85,6 +70,21 @@ class AvisControllerTest {
 
         verify(avisService, times(1)).listerAvis();
     }
+
+
+    @Test
+    void createAvis_ShouldReturnBadRequest_WhenExceptionOccurs() throws Exception {
+        when(avisService.ajouterAvis(any(AvisDTO.class)))
+                .thenThrow(new RuntimeException("Erreur lors de la création"));
+
+        mockMvc.perform(post("/api/avis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(avisDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Erreur lors de la création"));
+    }
+
+
 
     @Test
     void getAllAvis_ShouldReturnBadRequest_WhenExceptionOccurs() throws Exception {
