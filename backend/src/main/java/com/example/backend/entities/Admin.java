@@ -11,7 +11,6 @@ import jakarta.persistence.*;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "admin", catalog = "logement_cameroun")
 @NamedQueries({
     @NamedQuery(name = "Admin.findAll", query = "SELECT a FROM Admin a"),
     @NamedQuery(name = "Admin.findById", query = "SELECT a FROM Admin a WHERE a.id = :id"),
@@ -26,11 +25,9 @@ public class Admin implements Serializable {
     private Long id;
     @Column(name = "departement")
     private String departement;
-    @JoinColumn(name = "id_user", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "id_user", unique = true)
     private Utilisateur idUser;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idAdmin")
-    private List<Signalement> signalementList;
 
     public Admin() {
     }
@@ -63,13 +60,7 @@ public class Admin implements Serializable {
         this.idUser = idUser;
     }
 
-    public List<Signalement> getSignalementList() {
-        return signalementList;
-    }
 
-    public void setSignalementList(List<Signalement> signalementList) {
-        this.signalementList = signalementList;
-    }
 
     @Override
     public int hashCode() {

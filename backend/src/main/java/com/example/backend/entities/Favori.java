@@ -9,7 +9,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "favori", catalog = "logement_cameroun")
 @NamedQueries({
     @NamedQuery(name = "Favori.findAll", query = "SELECT f FROM Favori f"),
     @NamedQuery(name = "Favori.findById", query = "SELECT f FROM Favori f WHERE f.id = :id")})

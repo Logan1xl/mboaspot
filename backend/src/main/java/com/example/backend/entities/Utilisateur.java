@@ -10,7 +10,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "utilisateur", catalog = "logement_cameroun")
 @NamedQueries({
     @NamedQuery(name = "Utilisateur.findAll", query = "SELECT u FROM Utilisateur u"),
     @NamedQuery(name = "Utilisateur.findById", query = "SELECT u FROM Utilisateur u WHERE u.id = :id"),
@@ -48,10 +47,9 @@ public class Utilisateur implements Serializable {
     private Boolean estActif;
     @Basic(optional = false)
     @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private RoleUtilisateur role;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
-    private List<Admin> adminList;
+    private String role;
+    @OneToOne( mappedBy = "idUser")
+    private Admin admin;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
     private List<Notification> notificationList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
@@ -145,13 +143,14 @@ public class Utilisateur implements Serializable {
         this.role = role;
     }
 
-    public List<Admin> getAdminList() {
-        return adminList;
+    public Admin getAdmin() {
+        return admin;
     }
 
-    public void setAdminList(List<Admin> adminList) {
-        this.adminList = adminList;
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
+
 
     public List<Notification> getNotificationList() {
         return notificationList;

@@ -10,7 +10,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "voyageur", catalog = "logement_cameroun")
 @NamedQueries({
     @NamedQuery(name = "Voyageur.findAll", query = "SELECT v FROM Voyageur v"),
     @NamedQuery(name = "Voyageur.findById", query = "SELECT v FROM Voyageur v WHERE v.id = :id")})
