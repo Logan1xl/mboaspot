@@ -115,5 +115,12 @@ public class Notification implements Serializable {
     public String toString() {
         return "entities.Notification[ id=" + id + " ]";
     }
-    
+
+    public void setLue(boolean b) {
+        this.estLue = true;
+    }
+
+    public boolean isLue() {
+    return this.estLue;
+    }
 }

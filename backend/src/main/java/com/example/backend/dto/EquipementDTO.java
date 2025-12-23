@@ -29,3 +29,27 @@ public class EquipementDTO {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 }
+import com.example.backend.entities.Equipement;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class EquipementDTO {
+
+    private Long id;
+  
+    private String nom;
+  
+    private String icone;
+   
+    private String description;
+  
+
+
+}
