@@ -1,0 +1,174 @@
+package com.example.backend.services.implementations;
+
+import com.example.backend.dto.NotificationDTO;
+import com.example.backend.entities.Notification;
+import com.example.backend.entities.Utilisateur;
+import com.example.backend.repositories.NotificationRepository;
+import com.example.backend.services.interfaces.NotificationInterface;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * Service de gestion des notifications avec opérations CRUD
+ * @author Wulfrid MBONGO
+ */
+@Service
+@Transactional
+public class NotificationService implements NotificationInterface {
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private com.example.backend.repositories.UtilisateurRepository utilisateurRepository;
+
+    /**
+     * Créer une nouvelle notification
+     */
+    public NotificationDTO creerNotification(NotificationDTO notificationDTO) {
+        Notification notification = new Notification();
+        notification.setTitre(notificationDTO.getTitre());
+        notification.setMessage(notificationDTO.getMessage());
+        notification.setEstLue(false); // Par défaut non lue
+        notification.setTypeNotification(notificationDTO.getTypeNotification());
+
+        // Récupérer l'utilisateur
+        Utilisateur utilisateur = utilisateurRepository.findById(notificationDTO.getIdUser())
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + notificationDTO.getIdUser()));
+        notification.setIdUser(utilisateur);
+
+        Notification saved = notificationRepository.save(notification);
+        return convertToDTO(saved);
+    }
+
+    /**
+     * Récupérer toutes les notifications
+     */
+    public List<NotificationDTO> obtenirToutesLesNotifications() {
+        return notificationRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupérer une notification par ID
+     */
+    public Optional<NotificationDTO> obtenirNotificationParId(Long id) {
+        return notificationRepository.findById(id)
+                .map(this::convertToDTO);
+    }
+
+    /**
+     * Récupérer les notifications d'un utilisateur
+     */
+    public List<NotificationDTO> obtenirNotificationsParUtilisateur(Utilisateur  idUser) {
+        Utilisateur utilisateur = utilisateurRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUser));
+        return notificationRepository.findByIdUser(utilisateur).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupérer les notifications non lues d'un utilisateur
+     */
+    public List<NotificationDTO> obtenirNotificationsNonLues(Long idUser) {
+        Utilisateur utilisateur = utilisateurRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUser));
+        return notificationRepository.findByIdUserAndEstLue(utilisateur, false).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Compter les notifications non lues d'un utilisateur
+     */
+    public Long compterNotificationsNonLues(Long idUser) {
+        Utilisateur utilisateur = utilisateurRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUser));
+        return notificationRepository.countByIdUserAndEstLue(utilisateur, false);
+    }
+
+    /**
+     * Marquer une notification comme lue
+     */
+    public NotificationDTO marquerCommeLue(Long id) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notification non trouvée avec l'ID: " + id));
+        notification.setEstLue(true);
+        Notification updated = notificationRepository.save(notification);
+        return convertToDTO(updated);
+    }
+
+    /**
+     * Marquer toutes les notifications d'un utilisateur comme lues
+     */
+    public void marquerToutesCommeLues(Long idUser) {
+        Utilisateur utilisateur = utilisateurRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUser));
+        List<Notification> notifications = notificationRepository.findByIdUserAndEstLue(utilisateur, false);
+        notifications.forEach(n -> n.setEstLue(true));
+        notificationRepository.saveAll(notifications);
+    }
+
+    /**
+     * Mettre à jour une notification
+     */
+    public NotificationDTO mettreAJourNotification(Long id, NotificationDTO notificationDTO) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notification non trouvée avec l'ID: " + id));
+
+        notification.setTitre(notificationDTO.getTitre());
+        notification.setMessage(notificationDTO.getMessage());
+        notification.setEstLue(notificationDTO.getEstLue());
+        notification.setTypeNotification(notificationDTO.getTypeNotification());
+
+        Notification updated = notificationRepository.save(notification);
+        return convertToDTO(updated);
+    }
+
+    /**
+     * Supprimer une notification
+     */
+    public void supprimerNotification(Long id) {
+        if (!notificationRepository.existsById(id)) {
+            throw new RuntimeException("Notification non trouvée avec l'ID: " + id);
+        }
+        notificationRepository.deleteById(id);
+    }
+
+    List<NotificationDTO> obtenirNotificationsParUtilisateur(Long idUser){
+        return null;
+    }
+
+    /**
+     * Supprimer toutes les notifications d'un utilisateur
+     */
+    public void supprimerToutesLesNotificationsUtilisateur(Long idUser) {
+        Utilisateur utilisateur = utilisateurRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUser));
+        List<Notification> notifications = notificationRepository.findByIdUser(utilisateur);
+        notificationRepository.deleteAll(notifications);
+    }
+
+    /**
+     * Convertir une entité Notification en DTO
+     */
+    private NotificationDTO convertToDTO(Notification notification) {
+        return new NotificationDTO(
+                notification.getId(),
+                notification.getTitre(),
+                notification.getMessage(),
+                notification.getEstLue(),
+                notification.getTypeNotification(),
+                notification.getIdUser().getId(),
+                notification.getIdUser().getNom() // Supposant que Utilisateur a un champ nom
+        );
+    }
+
+}
