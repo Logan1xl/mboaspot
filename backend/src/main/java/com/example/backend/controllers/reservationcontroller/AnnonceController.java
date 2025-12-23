@@ -1,9 +1,9 @@
-package com.example.backend.auth.authController.reservationcontroller;
+package com.example.backend.controllers.reservationcontroller;
 
 
-import com.example.backend.entityDTO.reservationdto.AnnonceRequestDTO;
-import com.example.backend.entityDTO.reservationdto.AnnonceResponseDTO;
-import com.example.backend.reservationservice.AnnonceService;
+import com.example.backend.dto.reservationdto.AnnonceRequestDTO;
+import com.example.backend.dto.reservationdto.AnnonceResponseDTO;
+import com.example.backend.services.reservationservice.AnnonceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

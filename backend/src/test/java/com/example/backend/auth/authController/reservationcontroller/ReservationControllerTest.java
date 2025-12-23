@@ -1,10 +1,10 @@
 package com.example.backend.auth.authController.reservationcontroller;
 
 
-import com.example.backend.entityDTO.reservationdto.DisponibiliteRequestDTO;
-import com.example.backend.entityDTO.reservationdto.ReservationRequestDTO;
-import com.example.backend.entityDTO.reservationdto.ReservationResponseDTO;
-import com.example.backend.reservationservice.ReservationService;
+import com.example.backend.dto.reservationdto.DisponibiliteRequestDTO;
+import com.example.backend.dto.reservationdto.ReservationRequestDTO;
+import com.example.backend.dto.reservationdto.ReservationResponseDTO;
+import com.example.backend.services.reservationservice.ReservationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

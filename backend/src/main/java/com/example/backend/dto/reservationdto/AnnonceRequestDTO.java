@@ -1,7 +1,6 @@
-package com.example.backend.entityDTO.reservationdto;
-public class AnnonceResponseDTO {
+package com.example.backend.dto.reservationdto;
 
-    private Long id;
+public class AnnonceRequestDTO {
     private String titre;
     private Double prix;
     private String adresse;
@@ -11,27 +10,27 @@ public class AnnonceResponseDTO {
     private Integer maxInvites;
     private String description;
     private String typeAnnonce;
-    private Boolean estActive;
-    private Double evaluationMoyenne;
-    private Integer totalAvis;
-    private String urlImagePrincipale;
-
-    // Infos du propriétaire
     private Long proprietaireId;
-    private String proprietaireNom;
 
-    // Constructeur
-    public AnnonceResponseDTO() {}
+    // Constructeurs
+    public AnnonceRequestDTO() {}
+
+    public AnnonceRequestDTO(String titre, Double prix, String adresse, String ville,
+                             Integer nbreChambres, Integer nbreLits, Integer maxInvites,
+                             String description, String typeAnnonce, Long proprietaireId) {
+        this.titre = titre;
+        this.prix = prix;
+        this.adresse = adresse;
+        this.ville = ville;
+        this.nbreChambres = nbreChambres;
+        this.nbreLits = nbreLits;
+        this.maxInvites = maxInvites;
+        this.description = description;
+        this.typeAnnonce = typeAnnonce;
+        this.proprietaireId = proprietaireId;
+    }
 
     // Getters et Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getTitre() {
         return titre;
     }
@@ -104,51 +103,11 @@ public class AnnonceResponseDTO {
         this.typeAnnonce = typeAnnonce;
     }
 
-    public Boolean getEstActive() {
-        return estActive;
-    }
-
-    public void setEstActive(Boolean estActive) {
-        this.estActive = estActive;
-    }
-
-    public Double getEvaluationMoyenne() {
-        return evaluationMoyenne;
-    }
-
-    public void setEvaluationMoyenne(Double evaluationMoyenne) {
-        this.evaluationMoyenne = evaluationMoyenne;
-    }
-
-    public Integer getTotalAvis() {
-        return totalAvis;
-    }
-
-    public void setTotalAvis(Integer totalAvis) {
-        this.totalAvis = totalAvis;
-    }
-
-    public String getUrlImagePrincipale() {
-        return urlImagePrincipale;
-    }
-
-    public void setUrlImagePrincipale(String urlImagePrincipale) {
-        this.urlImagePrincipale = urlImagePrincipale;
-    }
-
     public Long getProprietaireId() {
         return proprietaireId;
     }
 
     public void setProprietaireId(Long proprietaireId) {
         this.proprietaireId = proprietaireId;
-    }
-
-    public String getProprietaireNom() {
-        return proprietaireNom;
-    }
-
-    public void setProprietaireNom(String proprietaireNom) {
-        this.proprietaireNom = proprietaireNom;
     }
 }

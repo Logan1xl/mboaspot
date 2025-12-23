@@ -1,8 +1,8 @@
-package com.example.backend.interfaceservice;
+package com.example.backend.services.interfaceservice;
 
-import com.example.backend.entityDTO.reservationdto.DisponibiliteRequestDTO;
-import com.example.backend.entityDTO.reservationdto.ReservationRequestDTO;
-import com.example.backend.entityDTO.reservationdto.ReservationResponseDTO;
+import com.example.backend.dto.reservationdto.DisponibiliteRequestDTO;
+import com.example.backend.dto.reservationdto.ReservationRequestDTO;
+import com.example.backend.dto.reservationdto.ReservationResponseDTO;
 
 import java.util.List;
 

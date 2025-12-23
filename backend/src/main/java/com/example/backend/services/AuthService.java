@@ -1,11 +1,11 @@
-package com.example.backend.auth.authController.authservice;
+package com.example.backend.services;
 
 
 
 import com.example.backend.entities.*;
-import com.example.backend.entityDTO.authdto.AuthResponseDTO;
-import com.example.backend.entityDTO.authdto.LoginDTO;
-import com.example.backend.entityDTO.authdto.RegisterDTO;
+import com.example.backend.dto.authdto.AuthResponseDTO;
+import com.example.backend.dto.authdto.LoginDTO;
+import com.example.backend.dto.authdto.RegisterDTO;
 import com.example.backend.repository.*;
 import com.example.backend.roles.RoleUtilisateur;
 import com.example.backend.security.jwt.JwtUtils;

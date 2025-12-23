@@ -1,4 +1,4 @@
-package com.example.backend.entityDTO.authdto;
+package com.example.backend.dto.authdto;
 
 import jakarta.validation.constraints.*;
 

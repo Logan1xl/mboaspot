@@ -1,13 +1,13 @@
-package com.example.backend.reservationservice;
+package com.example.backend.services.reservationservice;
 
 import com.example.backend.entities.Annonces;
 import com.example.backend.entities.Disponibilite;
 import com.example.backend.entities.Reservation;
 import com.example.backend.entities.Voyageur;
-import com.example.backend.entityDTO.reservationdto.DisponibiliteRequestDTO;
-import com.example.backend.entityDTO.reservationdto.ReservationRequestDTO;
-import com.example.backend.entityDTO.reservationdto.ReservationResponseDTO;
-import com.example.backend.interfaceservice.ReservationServiceInterface;
+import com.example.backend.dto.reservationdto.DisponibiliteRequestDTO;
+import com.example.backend.dto.reservationdto.ReservationRequestDTO;
+import com.example.backend.dto.reservationdto.ReservationResponseDTO;
+import com.example.backend.services.interfaceservice.ReservationServiceInterface;
 import com.example.backend.repository.AnnoncesRepository;
 import com.example.backend.repository.DisponibiliteRepository;
 import com.example.backend.repository.ReservationRepository;

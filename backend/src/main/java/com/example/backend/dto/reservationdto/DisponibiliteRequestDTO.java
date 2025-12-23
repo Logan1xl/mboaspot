@@ -1,4 +1,4 @@
-package com.example.backend.entityDTO.reservationdto;
+package com.example.backend.dto.reservationdto;
 
 import java.time.LocalDate;
 

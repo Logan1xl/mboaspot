@@ -1,9 +1,9 @@
 package com.example.backend.auth.authController;
 
-import com.example.backend.auth.authController.authservice.AuthService;
-import com.example.backend.entityDTO.authdto.AuthResponseDTO;
-import com.example.backend.entityDTO.authdto.LoginDTO;
-import com.example.backend.entityDTO.authdto.RegisterDTO;
+import com.example.backend.services.AuthService;
+import com.example.backend.dto.authdto.AuthResponseDTO;
+import com.example.backend.dto.authdto.LoginDTO;
+import com.example.backend.dto.authdto.RegisterDTO;
 import com.example.backend.roles.RoleUtilisateur;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
