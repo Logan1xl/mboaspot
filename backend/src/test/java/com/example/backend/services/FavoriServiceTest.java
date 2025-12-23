@@ -1,4 +1,4 @@
-package com.example.backend.servicesTest;
+package com.example.backend.services;
 
 import com.example.backend.dto.FavoriDTO;
 import com.example.backend.entities.Annonces;

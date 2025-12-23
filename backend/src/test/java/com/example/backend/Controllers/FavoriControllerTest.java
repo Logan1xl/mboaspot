@@ -1,4 +1,4 @@
-package com.example.backend.ControllersTest;
+package com.example.backend.Controllers;
 
 import com.example.backend.controllers.FavoriController;
 import com.example.backend.dto.FavoriDTO;

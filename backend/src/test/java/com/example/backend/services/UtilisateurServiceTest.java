@@ -1,4 +1,4 @@
-package com.example.backend.servicesTest;
+package com.example.backend.services;
 
 import com.example.backend.dto.UtilisateurDTO;
 import com.example.backend.entities.Utilisateur;

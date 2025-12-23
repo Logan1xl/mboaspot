@@ -1,4 +1,4 @@
-package com.example.backend.ControllersTest;
+package com.example.backend.Controllers;
 
 import com.example.backend.controllers.AvisController;
 import com.example.backend.dto.AvisDTO;
