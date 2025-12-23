@@ -53,4 +53,7 @@ public class Localisation implements Serializable {
     @JoinColumn(name = "id_annonce", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Annonces idAnnonce;
+
+    public void setNom(String zoneA) {
+    }
 }

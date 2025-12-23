@@ -120,4 +120,8 @@ public class Notification implements Serializable {
     public void setLue(boolean b) {
         this.estLue = true;
     }
+
+    public boolean isLue() {
+    return this.estLue;
+    }
 }

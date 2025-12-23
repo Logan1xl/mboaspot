@@ -27,6 +27,11 @@ public class NotificationDTO  {
     private Boolean estLue;
     private String typeNotification;
     private Utilisateur idUser;
-    
+
+
+    public void setLue(boolean b) {
+    }
+
+
 
 }

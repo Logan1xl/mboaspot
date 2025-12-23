@@ -84,8 +84,6 @@ public class EquipementService implements EquipementInterface {
 
     /**
      * Recherche les équipements par type.
-     *
-     * @param type type de l'équipement
      * @return liste des équipements correspondants
      */
     @Override
@@ -140,6 +138,15 @@ public class EquipementService implements EquipementInterface {
     public void deleteEquipement(Long id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteEquipement'");
+    }
+
+    @Override
+    public void delete(Long id) {
+        // Vérifie si l'équipement existe avant de supprimer (optionnel mais recommandé)
+        if (!equipementRepository.existsById(id)) {
+            throw new RuntimeException("Équipement non trouvé avec l'id : " + id);
+        }
+        equipementRepository.deleteById(id);
     }
 
 }

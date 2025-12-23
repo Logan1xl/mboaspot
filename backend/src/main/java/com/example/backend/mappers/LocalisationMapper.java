@@ -4,10 +4,13 @@ import com.example.backend.dto.LocalisationDTO;
 import com.example.backend.entities.Localisation;
 import org.mapstruct.Mapper;
 
+
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface LocalisationMapper {
+
+    LocalisationDTO toDTO(Localisation localisation);
 
     Localisation toEntity(LocalisationDTO localisationDTO);
 

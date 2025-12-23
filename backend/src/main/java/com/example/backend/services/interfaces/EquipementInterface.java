@@ -30,6 +30,9 @@ public interface EquipementInterface {
 
     void deleteEquipement(Long id);
 
+    // Dans l'interface EquipementService
+    void delete(Long id);
+
 
 
 

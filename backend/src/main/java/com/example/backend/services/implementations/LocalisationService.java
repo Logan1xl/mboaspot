@@ -3,9 +3,9 @@ package com.example.backend.services.implementations;
 import com.example.backend.dto.LocalisationDTO;
 import com.example.backend.entities.Localisation;
 import com.example.backend.mappers.LocalisationMapper;
+import com.example.backend.repositories.LocalisationRepository;
 import com.example.backend.services.interfaces.LocalisationInterface;
 import org.springframework.stereotype.Service;
-import com.example.backend.repositories.LocalisationRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,6 +100,7 @@ public class LocalisationService implements LocalisationInterface {
         // Retourner le résultat au format DTO
         return localisationMapper.toDto(updated);
     }
+
 
 
     }

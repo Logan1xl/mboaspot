@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,11 +25,17 @@ public class LocalisationDTO {
     private String quartier;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Length(max = 50)
-    private Double latitude;
+    private String latitude;
    @Length(max = 50)
-    private Double longitude;
+    private String longitude;
    
     private Annonces idAnnonce;
 
 
+    public void setNom(String zoneB) {
+    }
+
+    public String getNom() {
+        return null;
+    }
 }
