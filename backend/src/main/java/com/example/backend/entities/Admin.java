@@ -1,9 +1,9 @@
 
 package com.example.backend.entities;
 
-import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import jakarta.persistence.*;
 
 
 /**
