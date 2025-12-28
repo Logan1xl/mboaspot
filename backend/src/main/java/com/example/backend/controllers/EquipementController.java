@@ -60,7 +60,7 @@ public class EquipementController {
         }
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseEntity<List<EquipementDTO>> getAll() {
         try {
             return new ResponseEntity<>(equipementService.getAll(), HttpStatus.OK);

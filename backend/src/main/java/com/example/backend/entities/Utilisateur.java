@@ -46,8 +46,9 @@ public class Utilisateur implements Serializable {
     @Column(name = "est_actif")
     private Boolean estActif;
     @Basic(optional = false)
-    @Column(name = "role")
-    private String role;
+    @Enumerated(EnumType.STRING)  // Utilise STRING au lieu d'ORDINAL
+    @Column(name = "role", nullable = false)
+    private RoleUtilisateur role;
     @OneToOne( mappedBy = "idUser")
     private Admin admin;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")

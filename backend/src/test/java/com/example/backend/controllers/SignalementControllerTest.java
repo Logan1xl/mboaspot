@@ -4,6 +4,7 @@ package com.example.backend.controllers;
 import com.example.backend.dto.SignalementRequestDTO;
 import com.example.backend.entities.*;
 import com.example.backend.repositories.*;
+import com.example.backend.roles.RoleUtilisateur;
 import com.example.backend.utils.TestDataBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +75,7 @@ class SignalementControllerTest {
 
         // Créer admin
         Utilisateur userAdmin = TestDataBuilder.createUtilisateur("Admin", "admin@test.com");
-        userAdmin.setRole("ADMIN");
+        userAdmin.setRole(RoleUtilisateur.valueOf("ADMIN"));
         userAdmin = utilisateurRepository.save(userAdmin);
 
         admin = TestDataBuilder.createAdmin(userAdmin);

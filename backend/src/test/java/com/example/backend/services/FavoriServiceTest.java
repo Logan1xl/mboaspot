@@ -8,7 +8,7 @@ import com.example.backend.mappers.FavoriMapper;
 import com.example.backend.repositories.AnnoncesRepos;
 import com.example.backend.repositories.FavoriRepos;
 import com.example.backend.repositories.VoyageurRepos;
-import com.example.backend.services.implementation.FavoriService;
+import com.example.backend.services.implementations.FavoriService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

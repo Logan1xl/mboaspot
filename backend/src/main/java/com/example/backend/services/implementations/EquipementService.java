@@ -25,10 +25,7 @@ public class EquipementService implements EquipementInterface {
     private final EquipementRepository equipementRepository;
     private final EquipementMapper equipementMapper;
 
-    // public EquipementService(EquipementRepository equipementRepository, EquipementMapper equipementMapper) {
-    //     this.equipementRepository = equipementRepository;
-    //     this.equipementMapper = equipementMapper;
-    // }
+
 
     /**
      * Enregistre un nouvel équipement en base.

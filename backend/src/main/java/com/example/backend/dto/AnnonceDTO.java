@@ -10,23 +10,82 @@ public class AnnonceDTO {
     private Double latitude;
     private Double longitude;
     private String ville;
+    private String quartier; // Ajouté depuis les besoins de localisation
     private Integer nbreChambres;
     private Integer nbreLits;
     private Integer maxInvites;
     private String description;
+    private String typeAnnonce;
     private Boolean estActive;
     private Double evaluationMoyenne;
     private Integer totalAvis;
     private String urlImagePrincipale;
     private List<String> urlImages;
-    private String typeAnnonce;
+
+    // Informations du propriétaire
     private Long idProprietaire;
-    private String nomProprietaire;
+    private String proprietaireNom; // Anciennement nomProprietaire, plus cohérent
+    private String proprietaireEntreprise;
+
+    // Relations et objets complexes
     private List<EquipementDTO> equipements;
     private LocalisationDTO localisation;
+    private List<DisponibiliteDTO> disponibilites;
+
+    // Pour les recherches et statistiques
+    private Double prixSurcharge; // Pour les périodes spéciales
+    private Double distance; // Pour les recherches par géolocalisation
 
     // Constructeurs
     public AnnonceDTO() {}
+
+    // Constructeur simplifié pour création rapide
+    public AnnonceDTO(String titre, Double prix, String adresse, String ville,
+                      Integer nbreChambres, Integer nbreLits, Integer maxInvites,
+                      String description, String typeAnnonce, Long idProprietaire) {
+        this.titre = titre;
+        this.prix = prix;
+        this.adresse = adresse;
+        this.ville = ville;
+        this.nbreChambres = nbreChambres;
+        this.nbreLits = nbreLits;
+        this.maxInvites = maxInvites;
+        this.description = description;
+        this.typeAnnonce = typeAnnonce;
+        this.idProprietaire = idProprietaire;
+        this.estActive = true; // Par défaut active
+        this.evaluationMoyenne = 0.0;
+        this.totalAvis = 0;
+    }
+
+    // Constructeur complet
+    public AnnonceDTO(Long id, String titre, Double prix, String adresse,
+                      Double latitude, Double longitude, String ville, String quartier,
+                      Integer nbreChambres, Integer nbreLits, Integer maxInvites,
+                      String description, String typeAnnonce, Boolean estActive,
+                      Double evaluationMoyenne, Integer totalAvis, String urlImagePrincipale,
+                      Long idProprietaire, String proprietaireNom, String proprietaireEntreprise) {
+        this.id = id;
+        this.titre = titre;
+        this.prix = prix;
+        this.adresse = adresse;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.ville = ville;
+        this.quartier = quartier;
+        this.nbreChambres = nbreChambres;
+        this.nbreLits = nbreLits;
+        this.maxInvites = maxInvites;
+        this.description = description;
+        this.typeAnnonce = typeAnnonce;
+        this.estActive = estActive;
+        this.evaluationMoyenne = evaluationMoyenne;
+        this.totalAvis = totalAvis;
+        this.urlImagePrincipale = urlImagePrincipale;
+        this.idProprietaire = idProprietaire;
+        this.proprietaireNom = proprietaireNom;
+        this.proprietaireEntreprise = proprietaireEntreprise;
+    }
 
     // Getters et Setters
     public Long getId() {
@@ -85,6 +144,14 @@ public class AnnonceDTO {
         this.ville = ville;
     }
 
+    public String getQuartier() {
+        return quartier;
+    }
+
+    public void setQuartier(String quartier) {
+        this.quartier = quartier;
+    }
+
     public Integer getNbreChambres() {
         return nbreChambres;
     }
@@ -115,6 +182,14 @@ public class AnnonceDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getTypeAnnonce() {
+        return typeAnnonce;
+    }
+
+    public void setTypeAnnonce(String typeAnnonce) {
+        this.typeAnnonce = typeAnnonce;
     }
 
     public Boolean getEstActive() {
@@ -157,14 +232,6 @@ public class AnnonceDTO {
         this.urlImages = urlImages;
     }
 
-    public String getTypeAnnonce() {
-        return typeAnnonce;
-    }
-
-    public void setTypeAnnonce(String typeAnnonce) {
-        this.typeAnnonce = typeAnnonce;
-    }
-
     public Long getIdProprietaire() {
         return idProprietaire;
     }
@@ -173,12 +240,20 @@ public class AnnonceDTO {
         this.idProprietaire = idProprietaire;
     }
 
-    public String getNomProprietaire() {
-        return nomProprietaire;
+    public String getProprietaireNom() {
+        return proprietaireNom;
     }
 
-    public void setNomProprietaire(String nomProprietaire) {
-        this.nomProprietaire = nomProprietaire;
+    public void setProprietaireNom(String proprietaireNom) {
+        this.proprietaireNom = proprietaireNom;
+    }
+
+    public String getProprietaireEntreprise() {
+        return proprietaireEntreprise;
+    }
+
+    public void setProprietaireEntreprise(String proprietaireEntreprise) {
+        this.proprietaireEntreprise = proprietaireEntreprise;
     }
 
     public List<EquipementDTO> getEquipements() {
@@ -195,5 +270,81 @@ public class AnnonceDTO {
 
     public void setLocalisation(LocalisationDTO localisation) {
         this.localisation = localisation;
+    }
+
+    public List<DisponibiliteDTO> getDisponibilites() {
+        return disponibilites;
+    }
+
+    public void setDisponibilites(List<DisponibiliteDTO> disponibilites) {
+        this.disponibilites = disponibilites;
+    }
+
+    public Double getPrixSurcharge() {
+        return prixSurcharge;
+    }
+
+    public void setPrixSurcharge(Double prixSurcharge) {
+        this.prixSurcharge = prixSurcharge;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+
+    // Méthodes utilitaires
+
+
+    /**
+     * Vérifie si l'annonce a toutes les informations nécessaires
+     */
+    public boolean isValide() {
+        return titre != null && !titre.trim().isEmpty() &&
+                prix != null && prix > 0 &&
+                adresse != null && !adresse.trim().isEmpty() &&
+                ville != null && !ville.trim().isEmpty() &&
+                nbreChambres != null && nbreChambres >= 0 &&
+                maxInvites != null && maxInvites > 0 &&
+                typeAnnonce != null && !typeAnnonce.trim().isEmpty() &&
+                idProprietaire != null;
+    }
+
+    /**
+     * Calcule le prix total avec surcharge
+     */
+    public Double getPrixTotal() {
+        if (prix == null) return 0.0;
+        if (prixSurcharge != null && prixSurcharge > 0) {
+            return prix + prixSurcharge;
+        }
+        return prix;
+    }
+
+    /**
+     * Met à jour l'évaluation moyenne
+     */
+    public void updateEvaluation(Double nouvelleNote) {
+        if (nouvelleNote != null && nouvelleNote >= 0 && nouvelleNote <= 5) {
+            Double totalNotes = (evaluationMoyenne != null ? evaluationMoyenne * totalAvis : 0);
+            totalAvis = (totalAvis != null ? totalAvis : 0) + 1;
+            evaluationMoyenne = (totalNotes + nouvelleNote) / totalAvis;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "AnnonceDTO{" +
+                "id=" + id +
+                ", titre='" + titre + '\'' +
+                ", prix=" + prix +
+                ", ville='" + ville + '\'' +
+                ", typeAnnonce='" + typeAnnonce + '\'' +
+                ", estActive=" + estActive +
+                ", evaluationMoyenne=" + evaluationMoyenne +
+                '}';
     }
 }

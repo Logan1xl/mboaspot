@@ -1,6 +1,6 @@
 package com.example.backend.security.service;
 
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repositories.UtilisateurRepository;
 import com.example.backend.security.userDetail.CustomUserDetails;
 import com.example.backend.entities.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UtilisateurRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

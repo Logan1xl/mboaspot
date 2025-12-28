@@ -1,5 +1,7 @@
 package com.example.backend.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
@@ -17,18 +19,15 @@ import java.util.List;
 
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI apiInfo() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("API pour Application de Recherche de Logements au Cameroun")
-                        .description("Documentation de l'API")
-                        .version("1.0.0")
-                );
-    }
-}
     public OpenAPI productApiOpenAPI() {
         Server server = new Server();
         server.setUrl("http://localhost:8003");
@@ -56,3 +55,5 @@ public class OpenApiConfig {
                 .servers(List.of(server));
     }
 }
+
+

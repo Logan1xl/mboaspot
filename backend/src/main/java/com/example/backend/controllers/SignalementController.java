@@ -4,8 +4,7 @@ import com.example.backend.dto.SignalementRequestDTO;
 import com.example.backend.dto.SignalementResponseDTO;
 import com.example.backend.entities.Signalement;
 import com.example.backend.mappers.SignalementMapper;
-import com.example.backend.services.SignalementService;
-import jakarta.validation.Valid;
+import com.example.backend.services.implementations.SignalementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

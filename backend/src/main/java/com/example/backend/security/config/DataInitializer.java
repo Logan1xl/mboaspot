@@ -1,9 +1,9 @@
 package com.example.backend.security.config;
 
-import com.example.backend.repository.UserRepository;
-import com.example.backend.repository.AdminRepository;
+import com.example.backend.repositories.AdminRepository;
 import com.example.backend.entities.Utilisateur;
 import com.example.backend.entities.Admin;
+import com.example.backend.repositories.UtilisateurRepository;
 import com.example.backend.roles.RoleUtilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
-    private UserRepository userRepository;
+    private UtilisateurRepository userRepository;
 
     @Autowired
     private AdminRepository adminRepository;

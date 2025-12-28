@@ -1,7 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dto.PaiementDTO;
-import com.example.backend.services.PaiementService;
+import com.example.backend.services.implementations.PaiementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

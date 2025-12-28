@@ -1,6 +1,8 @@
 package com.example.backend.utils;
 
 import com.example.backend.entities.*;
+import com.example.backend.roles.RoleUtilisateur;
+
 import java.util.Date;
 
 public class TestDataBuilder {
@@ -12,7 +14,7 @@ public class TestDataBuilder {
         user.setEmail(email);
         user.setMotDePasse("password123");
         user.setNumeroTelephone("123456789");
-        user.setRole("USER");
+        user.setRole(RoleUtilisateur.valueOf("VOYAGEUR"));
         user.setEstActif(true);
         return user;
     }
@@ -63,10 +65,13 @@ public class TestDataBuilder {
     public static Reservation createReservation(Annonces annonce, Voyageur voyageur) {
         Reservation reservation = new Reservation();
         reservation.setIdVoyageur(voyageur);
+        reservation.setAnnonce(annonce);
         reservation.setNombreInvites(2);
         reservation.setPrixTotal(300.0);
         reservation.setStatut("CONFIRMEE");
         reservation.setCodeConfirmation("TEST-" + System.currentTimeMillis());
+        reservation.setDateDebut(new Date());
+        reservation.setDateFin(new Date(System.currentTimeMillis() + 86400000L));
         return reservation;
     }
 

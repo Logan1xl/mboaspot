@@ -3,8 +3,9 @@ package com.example.backend.services;
 import com.example.backend.dto.UtilisateurDTO;
 import com.example.backend.entities.Utilisateur;
 import com.example.backend.mappers.UtilisateurMapper;
-import com.example.backend.repositories.UtilisateurRepos;
-import com.example.backend.services.implementation.UtilisateurService;
+import com.example.backend.repositories.UtilisateurRepository;
+import com.example.backend.roles.RoleUtilisateur;
+import com.example.backend.services.implementations.UtilisateurService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 class UtilisateurServiceTest {
 
     @Mock
-    private UtilisateurRepos repository;
+    private UtilisateurRepository repository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -51,7 +52,7 @@ class UtilisateurServiceTest {
         utilisateurDTO.setNumeroTelephone("+237612345678");
         utilisateurDTO.setPhotoProfil("photo.jpg");
         utilisateurDTO.setEstActif(true);
-        utilisateurDTO.setRole("VOYAGEUR");
+        utilisateurDTO.setRole(RoleUtilisateur.valueOf("VOYAGEUR"));
 
         utilisateur = new Utilisateur();
         utilisateur.setId(1L);
@@ -62,7 +63,7 @@ class UtilisateurServiceTest {
         utilisateur.setNumeroTelephone("+237612345678");
         utilisateur.setPhotoProfil("photo.jpg");
         utilisateur.setEstActif(true);
-        utilisateur.setRole("VOYAGEUR");
+        utilisateur.setRole(RoleUtilisateur.valueOf("VOYAGEUR"));
     }
 
 

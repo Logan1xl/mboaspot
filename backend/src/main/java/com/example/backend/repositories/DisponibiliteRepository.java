@@ -30,4 +30,26 @@ public interface DisponibiliteRepository extends JpaRepository<Disponibilite, Lo
 
     // Trouver les disponibilités avec surcharge
     List<Disponibilite> findByIdAnnonceIdAndPrixSurchargeIsNotNull(Long annonceId);
+
+    // Trouve les disponibilités qui couvrent une période
+    @Query("SELECT d FROM Disponibilite d WHERE d.idAnnonce.id = :annonceId " +
+            "AND d.estDisponible = true " +
+            "AND d.dateDebut <= :dateDebut " +
+            "AND d.dateFin >= :dateFin")
+    List<Disponibilite> findDisponibiliteCouvrante(
+            @Param("annonceId") Long annonceId,
+            @Param("dateDebut") Date dateDebut,
+            @Param("dateFin") Date dateFin
+    );
+
+    // Trouve les périodes bloquées qui chevauchent
+    @Query("SELECT d FROM Disponibilite d WHERE d.idAnnonce.id = :annonceId " +
+            "AND d.estDisponible = false " +
+            "AND d.dateDebut <= :dateFin " +
+            "AND d.dateFin >= :dateDebut")
+    List<Disponibilite> findPeriodesBloquees(
+            @Param("annonceId") Long annonceId,
+            @Param("dateDebut") Date dateDebut,
+            @Param("dateFin") Date dateFin
+    );
 }

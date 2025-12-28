@@ -4,7 +4,7 @@ import com.example.backend.dto.SignalementRequestDTO;
 import com.example.backend.dto.SignalementResponseDTO;
 import com.example.backend.entities.Signalement;
 
-public class SignalementMapper {
+public interface SignalementMapper {
 
     public static Signalement toEntity(SignalementRequestDTO dto) {
         Signalement s = new Signalement();
@@ -19,7 +19,7 @@ public class SignalementMapper {
         dto.setRaison(s.getRaison());
         dto.setDescription(s.getDescription());
         dto.setStatut(s.getStatut());
-        dto.setResolution(s.getResolution()); // ✅ FIX MANQUANT
+        dto.setResolution(s.getResolution());
         dto.setAnnonceId(s.getIdAnnonce().getId());
         if (s.getIdAdmin() != null) {
             dto.setAdminId(s.getIdAdmin().getId());

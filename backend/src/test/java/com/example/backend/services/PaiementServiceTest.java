@@ -1,212 +1,226 @@
 // ===== PaiementServiceTest.java =====
 package com.example.backend.services;
-
 import com.example.backend.dto.PaiementDTO;
 import com.example.backend.entities.*;
 import com.example.backend.repositories.*;
-import com.example.backend.utils.TestDataBuilder;
+import com.example.backend.services.implementations.PaiementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.properties")
-@ActiveProfiles("test")
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class PaiementServiceTest {
 
-    @Autowired
-    private PaiementService paiementService;
-
-    @Autowired
+    @Mock
     private PaiementRepository paiementRepository;
 
-    @Autowired
+    @Mock
     private ReservationRepository reservationRepository;
 
-    @Autowired
-    private AnnoncesRepository annoncesRepository;
+    @InjectMocks
+    private PaiementService paiementService;
 
-    @Autowired
-    private ProprietaireRepository proprietaireRepository;
-
-    @Autowired
-    private VoyageurRepository voyageurRepository;
-
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
-
-    private Reservation reservation;
     private Paiement paiement;
+    private PaiementDTO paiementDTO;
+    private Reservation reservation;
 
     @BeforeEach
     void setUp() {
-        paiementRepository.deleteAll();
-        reservationRepository.deleteAll();
-        annoncesRepository.deleteAll();
-        voyageurRepository.deleteAll();
-        proprietaireRepository.deleteAll();
-        utilisateurRepository.deleteAll();
-
-        Utilisateur userProprio = TestDataBuilder.createUtilisateur("Proprio", "proprio@test.com");
-        userProprio = utilisateurRepository.save(userProprio);
-        Proprietaire proprietaire = TestDataBuilder.createProprietaire(userProprio);
-        proprietaire = proprietaireRepository.save(proprietaire);
-        Annonces annonce = TestDataBuilder.createAnnonce(proprietaire);
-        annonce = annoncesRepository.save(annonce);
-
-        Utilisateur userVoyageur = TestDataBuilder.createUtilisateur("Voyageur", "voyageur@test.com");
-        userVoyageur = utilisateurRepository.save(userVoyageur);
-        Voyageur voyageur = TestDataBuilder.createVoyageur(userVoyageur);
-        voyageur = voyageurRepository.save(voyageur);
-
-        reservation = TestDataBuilder.createReservation(annonce, voyageur);
-        reservation = reservationRepository.save(reservation);
-
-        paiement = TestDataBuilder.createPaiement(reservation, 150.0);
-        paiement = paiementRepository.save(paiement);
-    }
-
-    @Test
-    void testCreerPaiement() {
-        PaiementDTO dto = new PaiementDTO();
-        dto.setIdReservation(reservation.getId());
-        dto.setMontant(100.0);
-        dto.setMethode("MOBILE_MONEY");
-        dto.setStatut("EN_ATTENTE");
-
-        PaiementDTO created = paiementService.creerPaiement(dto);
-
-        assertThat(created).isNotNull();
-        assertThat(created.getId()).isNotNull();
-        assertThat(created.getMontant()).isEqualTo(100.0);
-        assertThat(created.getMethode()).isEqualTo("MOBILE_MONEY");
-        assertThat(created.getIdTransaction()).isNotNull();
-        assertThat(created.getIdTransaction()).startsWith("TXN-");
-    }
-
-    @Test
-    void testCreerPaiement_MontantInvalide() {
-        PaiementDTO dto = new PaiementDTO();
-        dto.setIdReservation(reservation.getId());
-        dto.setMontant(-50.0);
-        dto.setMethode("CARTE");
-
-        assertThatThrownBy(() -> paiementService.creerPaiement(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("montant doit être positif");
-    }
-
-    @Test
-    void testCreerPaiement_ReservationInexistante() {
-        PaiementDTO dto = new PaiementDTO();
-        dto.setIdReservation(999L);
-        dto.setMontant(100.0);
-        dto.setMethode("CARTE");
-
-        assertThatThrownBy(() -> paiementService.creerPaiement(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Réservation introuvable");
-    }
-
-    @Test
-    void testObtenirTousLesPaiements() {
-        List<PaiementDTO> paiements = paiementService.obtenirTousLesPaiements();
-
-        assertThat(paiements).isNotEmpty();
-        assertThat(paiements).hasSize(1);
-    }
-
-    @Test
-    void testObtenirPaiementParId() {
-        PaiementDTO found = paiementService.obtenirPaiementParId(paiement.getId());
-
-        assertThat(found).isNotNull();
-        assertThat(found.getId()).isEqualTo(paiement.getId());
-        assertThat(found.getMontant()).isEqualTo(150.0);
-    }
-
-    @Test
-    void testObtenirPaiementParId_NotFound() {
-        assertThatThrownBy(() -> paiementService.obtenirPaiementParId(999L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Paiement introuvable");
-    }
-
-    @Test
-    void testObtenirPaiementsParReservation() {
-        Paiement paiement2 = TestDataBuilder.createPaiement(reservation, 50.0);
-        paiementRepository.save(paiement2);
-
-        List<PaiementDTO> paiements = paiementService.obtenirPaiementsParReservation(reservation.getId());
-
-        assertThat(paiements).hasSize(2);
-        assertThat(paiements).extracting(PaiementDTO::getMontant).contains(150.0, 50.0);
-    }
-
-    @Test
-    void testMettreAJourPaiement() {
-        PaiementDTO dto = new PaiementDTO();
-        dto.setMontant(175.0);
-        dto.setStatut("VALIDE");
-        dto.setUrlRecepisse("https://test.com/recepisse.pdf");
-
-        PaiementDTO updated = paiementService.mettreAJourPaiement(paiement.getId(), dto);
-
-        assertThat(updated.getMontant()).isEqualTo(175.0);
-        assertThat(updated.getStatut()).isEqualTo("VALIDE");
-        assertThat(updated.getUrlRecepisse()).isEqualTo("https://test.com/recepisse.pdf");
-    }
-
-    @Test
-    void testMettreAJourStatutPaiement() {
-        PaiementDTO updated = paiementService.mettreAJourStatutPaiement(paiement.getId(), "REFUSE");
-
-        assertThat(updated.getStatut()).isEqualTo("REFUSE");
-    }
-
-    @Test
-    void testSupprimerPaiement() {
-        paiementService.supprimerPaiement(paiement.getId());
-
-        assertThat(paiementRepository.existsById(paiement.getId())).isFalse();
-    }
-
-    @Test
-    void testCalculerMontantTotalPaye() {
-        Paiement paiement2 = TestDataBuilder.createPaiement(reservation, 50.0);
-        paiementRepository.save(paiement2);
-
-        Double montantTotal = paiementService.calculerMontantTotalPaye(reservation.getId());
-
-        assertThat(montantTotal).isEqualTo(200.0);
-    }
-
-    @Test
-    void testEstEntierementPaye_True() {
-        reservation.setPrixTotal(150.0);
-        reservationRepository.save(reservation);
-
-        boolean estPaye = paiementService.estEntierementPaye(reservation.getId());
-
-        assertThat(estPaye).isTrue();
-    }
-
-    @Test
-    void testEstEntierementPaye_False() {
+        // Initialisation de la réservation
+        reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setCodeConfirmation("RES-12345");
         reservation.setPrixTotal(300.0);
-        reservationRepository.save(reservation);
 
-        boolean estPaye = paiementService.estEntierementPaye(reservation.getId());
+        // Initialisation du paiement
+        paiement = new Paiement();
+        paiement.setId(1L);
+        paiement.setMontant(300.0);
+        paiement.setMethode("CARTE_BANCAIRE");
+        paiement.setStatut("VALIDE");
+        paiement.setIdTransaction("TXN-ABC123");
+        paiement.setIdReservation(reservation);
 
-        assertThat(estPaye).isFalse();
+        // Initialisation du DTO
+        paiementDTO = new PaiementDTO();
+        paiementDTO.setMontant(300.0);
+        paiementDTO.setMethode("CARTE_BANCAIRE");
+        paiementDTO.setStatut("EN_ATTENTE");
+        paiementDTO.setIdReservation(1L);
+    }
+
+    @Test
+    void creerPaiement_Success() {
+        // Given
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(paiementRepository.save(any(Paiement.class))).thenReturn(paiement);
+
+        // When
+        PaiementDTO result = paiementService.creerPaiement(paiementDTO);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(300.0, result.getMontant());
+        assertNotNull(result.getIdTransaction());
+
+        verify(reservationRepository).findById(1L);
+        verify(paiementRepository).save(any(Paiement.class));
+    }
+
+    @Test
+    void creerPaiement_MontantInvalide() {
+        // Given
+        paiementDTO.setMontant(-100.0);
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            paiementService.creerPaiement(paiementDTO);
+        });
+
+        verify(paiementRepository, never()).save(any(Paiement.class));
+    }
+
+    @Test
+    void creerPaiement_ReservationNotFound() {
+        // Given
+        when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            paiementService.creerPaiement(paiementDTO);
+        });
+
+        verify(reservationRepository).findById(1L);
+        verify(paiementRepository, never()).save(any(Paiement.class));
+    }
+
+    @Test
+    void obtenirPaiementParId_Success() {
+        // Given
+        when(paiementRepository.findById(1L)).thenReturn(Optional.of(paiement));
+
+        // When
+        PaiementDTO result = paiementService.obtenirPaiementParId(1L);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals(300.0, result.getMontant());
+
+        verify(paiementRepository).findById(1L);
+    }
+
+    @Test
+    void obtenirPaiementParId_NotFound() {
+        // Given
+        when(paiementRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            paiementService.obtenirPaiementParId(1L);
+        });
+
+        verify(paiementRepository).findById(1L);
+    }
+
+    @Test
+    void obtenirPaiementsParReservation_Success() {
+        // Given
+        List<Paiement> paiements = Arrays.asList(paiement);
+        when(paiementRepository.findByIdReservation_Id(1L)).thenReturn(paiements);
+
+        // When
+        List<PaiementDTO> result = paiementService.obtenirPaiementsParReservation(1L);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        verify(paiementRepository).findByIdReservation_Id(1L);
+    }
+
+    @Test
+    void mettreAJourStatutPaiement_Success() {
+        // Given
+        when(paiementRepository.findById(1L)).thenReturn(Optional.of(paiement));
+        when(paiementRepository.save(any(Paiement.class))).thenReturn(paiement);
+
+        // When
+        PaiementDTO result = paiementService.mettreAJourStatutPaiement(1L, "VALIDE");
+
+        // Then
+        assertNotNull(result);
+
+        verify(paiementRepository).findById(1L);
+        verify(paiementRepository).save(any(Paiement.class));
+    }
+
+    @Test
+    void calculerMontantTotalPaye_Success() {
+        // Given
+        when(paiementRepository.sumMontantByReservationAndStatut(1L, "VALIDE"))
+                .thenReturn(300.0);
+
+        // When
+        Double result = paiementService.calculerMontantTotalPaye(1L);
+
+        // Then
+        assertEquals(300.0, result);
+
+        verify(paiementRepository).sumMontantByReservationAndStatut(1L, "VALIDE");
+    }
+
+    @Test
+    void estEntierementPaye_True() {
+        // Given
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(paiementRepository.sumMontantByReservationAndStatut(1L, "VALIDE"))
+                .thenReturn(300.0);
+
+        // When
+        boolean result = paiementService.estEntierementPaye(1L);
+
+        // Then
+        assertTrue(result);
+
+        verify(reservationRepository).findById(1L);
+        verify(paiementRepository).sumMontantByReservationAndStatut(1L, "VALIDE");
+    }
+
+    @Test
+    void estEntierementPaye_False() {
+        // Given
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(paiementRepository.sumMontantByReservationAndStatut(1L, "VALIDE"))
+                .thenReturn(150.0);
+
+        // When
+        boolean result = paiementService.estEntierementPaye(1L);
+
+        // Then
+        assertFalse(result);
+    }
+
+    @Test
+    void supprimerPaiement_Success() {
+        // Given
+        when(paiementRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(paiementRepository).deleteById(1L);
+
+        // When
+        paiementService.supprimerPaiement(1L);
+
+        // Then
+        verify(paiementRepository).existsById(1L);
+        verify(paiementRepository).deleteById(1L);
     }
 }

@@ -6,7 +6,7 @@ import com.example.backend.entities.Voyageur;
 import com.example.backend.mappers.AvisMapper;
 import com.example.backend.repositories.AvisRepos;
 import com.example.backend.repositories.VoyageurRepos;
-import com.example.backend.services.implementation.AvisService;
+import com.example.backend.services.implementations.AvisService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

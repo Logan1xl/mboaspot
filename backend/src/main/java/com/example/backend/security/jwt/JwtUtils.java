@@ -85,4 +85,16 @@ public class JwtUtils {
             return false;
         }
     }
+
+    public String getEmailFromToken(String token) {
+        return extractEmail(token);
+    }
+
+    public String getRoleFromToken(String token) {
+        return extractRole(token);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return extractUserId(token);
+    }
 }

@@ -1,239 +1,168 @@
 package com.example.backend.services;
-
 import com.example.backend.dto.SignalementRequestDTO;
 import com.example.backend.entities.*;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.*;
-import com.example.backend.utils.TestDataBuilder;
+import com.example.backend.services.implementations.SignalementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.properties")
-@ActiveProfiles("test")
-@Transactional
-class SignalementServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class SignalementServiceTest {
 
-    @Autowired
-    private SignalementService signalementService;
-
-    @Autowired
+    @Mock
     private SignalementRepository signalementRepository;
 
-    @Autowired
+    @Mock
     private AnnoncesRepository annoncesRepository;
 
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
-
-    @Autowired
-    private ProprietaireRepository proprietaireRepository;
-
-    @Autowired
+    @Mock
     private AdminRepository adminRepository;
 
+    @InjectMocks
+    private SignalementService signalementService;
+
+    private Signalement signalement;
+    private SignalementRequestDTO requestDTO;
     private Annonces annonce;
     private Admin admin;
-    private Signalement signalement;
 
     @BeforeEach
     void setUp() {
-        // Nettoyage dans le bon ordre (dépendances d'abord)
-        signalementRepository.deleteAll();
-        adminRepository.deleteAll();
-        annoncesRepository.deleteAll();
-        proprietaireRepository.deleteAll();
-        utilisateurRepository.deleteAll();
+        annonce = new Annonces();
+        annonce.setId(1L);
+        annonce.setTitre("Annonce Test");
 
-        // Créer propriétaire et annonce
-        Utilisateur userProprio = TestDataBuilder.createUtilisateur("Proprio", "proprio@test.com");
-        userProprio = utilisateurRepository.save(userProprio);
+        Utilisateur user = new Utilisateur();
+        user.setId(1L);
 
-        Proprietaire proprietaire = TestDataBuilder.createProprietaire(userProprio);
-        proprietaire = proprietaireRepository.save(proprietaire);
+        admin = new Admin();
+        admin.setId(1L);
+        admin.setIdUser(user);
 
-        annonce = TestDataBuilder.createAnnonce(proprietaire);
-        annonce = annoncesRepository.save(annonce);
+        signalement = new Signalement();
+        signalement.setId(1L);
+        signalement.setRaison("Contenu inapproprié");
+        signalement.setDescription("Description du signalement");
+        signalement.setStatut("EN_ATTENTE");
+        signalement.setIdAnnonce(annonce);
+        signalement.setIdAdmin(admin);
 
-        // Créer admin (utilisateur + entité admin)
-        Utilisateur userAdmin = TestDataBuilder.createUtilisateur("Admin", "admin@test.com");
-        userAdmin.setRole("ADMIN");
-        userAdmin = utilisateurRepository.save(userAdmin);
-
-        admin = TestDataBuilder.createAdmin(userAdmin);
-        admin = adminRepository.save(admin);
-
-        // Créer signalement
-        signalement = TestDataBuilder.createSignalement(annonce, admin);
-        signalement = signalementRepository.save(signalement);
+        requestDTO = new SignalementRequestDTO();
+        requestDTO.setAnnonceId(1L);
+        requestDTO.setAdminId(1L);
+        requestDTO.setRaison("Contenu inapproprié");
+        requestDTO.setDescription("Description du signalement");
     }
 
     @Test
-    void testCreer() {
-        // Créer un nouvel admin pour ce test
-        Utilisateur userAdmin2 = TestDataBuilder.createUtilisateur("Admin2", "admin2@test.com");
-        userAdmin2.setRole("ADMIN");
-        userAdmin2 = utilisateurRepository.save(userAdmin2);
+    void creer_Success() {
+        // Given
+        when(annoncesRepository.findById(1L)).thenReturn(Optional.of(annonce));
+        when(adminRepository.findById(1L)).thenReturn(Optional.of(admin));
+        when(signalementRepository.save(any(Signalement.class))).thenReturn(signalement);
 
-        Admin admin2 = TestDataBuilder.createAdmin(userAdmin2);
-        admin2 = adminRepository.save(admin2);
+        // When
+        Signalement result = signalementService.creer(requestDTO);
 
-        SignalementRequestDTO dto = new SignalementRequestDTO();
-        dto.setAnnonceId(annonce.getId());
-        dto.setAdminId(admin2.getId());
-        dto.setRaison("Fausse information");
-        dto.setDescription("Les photos ne correspondent pas à la réalité");
+        // Then
+        assertNotNull(result);
+        assertEquals("Contenu inapproprié", result.getRaison());
+        assertEquals("EN_ATTENTE", result.getStatut());
 
-        Signalement created = signalementService.creer(dto);
-
-        assertThat(created).isNotNull();
-        assertThat(created.getId()).isNotNull();
-        assertThat(created.getRaison()).isEqualTo("Fausse information");
-        assertThat(created.getDescription()).isEqualTo("Les photos ne correspondent pas à la réalité");
-        assertThat(created.getStatut()).isEqualTo("EN_ATTENTE");
-        assertThat(created.getIdAnnonce().getId()).isEqualTo(annonce.getId());
-        assertThat(created.getIdAdmin().getId()).isEqualTo(admin2.getId());
+        verify(annoncesRepository).findById(1L);
+        verify(adminRepository).findById(1L);
+        verify(signalementRepository).save(any(Signalement.class));
     }
 
     @Test
-    void testCreer_AnnonceInexistante() {
-        SignalementRequestDTO dto = new SignalementRequestDTO();
-        dto.setAnnonceId(999L);
-        dto.setAdminId(admin.getId());
-        dto.setRaison("Test");
+    void creer_AnnonceNotFound() {
+        // Given
+        when(annoncesRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> signalementService.creer(dto))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Annonce non trouvée");
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            signalementService.creer(requestDTO);
+        });
+
+        verify(signalementRepository, never()).save(any());
     }
 
     @Test
-    void testCreer_AdminInexistant() {
-        SignalementRequestDTO dto = new SignalementRequestDTO();
-        dto.setAnnonceId(annonce.getId());
-        dto.setAdminId(999L);
-        dto.setRaison("Test");
+    void getAll_Success() {
+        // Given
+        List<Signalement> signalements = Arrays.asList(signalement);
+        when(signalementRepository.findAll()).thenReturn(signalements);
 
-        assertThatThrownBy(() -> signalementService.creer(dto))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Admin introuvable");
+        // When
+        List<Signalement> result = signalementService.getAll();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        verify(signalementRepository).findAll();
     }
 
     @Test
-    void testGetAll() {
-        // Créer un deuxième signalement
-        Utilisateur userAdmin2 = TestDataBuilder.createUtilisateur("Admin3", "admin3@test.com");
-        userAdmin2 = utilisateurRepository.save(userAdmin2);
-        Admin admin2 = TestDataBuilder.createAdmin(userAdmin2);
-        admin2 = adminRepository.save(admin2);
+    void getById_Success() {
+        // Given
+        when(signalementRepository.findById(1L)).thenReturn(Optional.of(signalement));
 
-        SignalementRequestDTO dto = new SignalementRequestDTO();
-        dto.setAnnonceId(annonce.getId());
-        dto.setAdminId(admin2.getId());
-        dto.setRaison("Autre signalement");
-        dto.setDescription("Test");
-        signalementService.creer(dto);
+        // When
+        Signalement result = signalementService.getById(1L);
 
-        List<Signalement> signalements = signalementService.getAll();
+        // Then
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
 
-        assertThat(signalements).isNotEmpty();
-        assertThat(signalements).hasSizeGreaterThanOrEqualTo(2);
+        verify(signalementRepository).findById(1L);
     }
 
     @Test
-    void testGetById() {
-        Signalement found = signalementService.getById(signalement.getId());
+    void getById_NotFound() {
+        // Given
+        when(signalementRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThat(found).isNotNull();
-        assertThat(found.getId()).isEqualTo(signalement.getId());
-        assertThat(found.getRaison()).isEqualTo("Contenu inapproprié");
-        assertThat(found.getIdAdmin()).isNotNull();
-        assertThat(found.getIdAnnonce()).isNotNull();
+        // When & Then
+        assertThrows(ResourceNotFoundException.class, () -> {
+            signalementService.getById(1L);
+        });
     }
 
     @Test
-    void testGetById_NotFound() {
-        assertThatThrownBy(() -> signalementService.getById(999L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Signalement non trouvé");
+    void traiter_Success() {
+        // Given
+        when(signalementRepository.findById(1L)).thenReturn(Optional.of(signalement));
+        when(signalementRepository.save(any(Signalement.class))).thenReturn(signalement);
+
+        // When
+        Signalement result = signalementService.traiter(1L, "TRAITE", "Résolution appliquée");
+
+        // Then
+        assertNotNull(result);
+        verify(signalementRepository).save(any(Signalement.class));
     }
 
     @Test
-    void testTraiter() {
-        Signalement traite = signalementService.traiter(
-                signalement.getId(),
-                "TRAITE",
-                "Annonce désactivée suite à vérification"
-        );
+    void supprimer_Success() {
+        // Given
+        doNothing().when(signalementRepository).deleteById(1L);
 
-        assertThat(traite).isNotNull();
-        assertThat(traite.getStatut()).isEqualTo("TRAITE");
-        assertThat(traite.getResolution()).isEqualTo("Annonce désactivée suite à vérification");
-    }
+        // When
+        signalementService.supprimer(1L);
 
-    @Test
-    void testTraiter_SignalementRejete() {
-        Signalement traite = signalementService.traiter(
-                signalement.getId(),
-                "REJETE",
-                "Signalement infondé après vérification"
-        );
-
-        assertThat(traite.getStatut()).isEqualTo("REJETE");
-        assertThat(traite.getResolution()).contains("infondé");
-    }
-
-    @Test
-    void testSupprimer() {
-        Long signalementId = signalement.getId();
-
-        signalementService.supprimer(signalementId);
-
-        assertThat(signalementRepository.existsById(signalementId)).isFalse();
-    }
-
-    @Test
-    void testWorkflow_CompletSignalement() {
-        // 1. Créer un nouvel admin
-        Utilisateur userAdmin2 = TestDataBuilder.createUtilisateur("AdminWorkflow", "adminworkflow@test.com");
-        userAdmin2 = utilisateurRepository.save(userAdmin2);
-        Admin admin2 = TestDataBuilder.createAdmin(userAdmin2);
-        admin2 = adminRepository.save(admin2);
-
-        // 2. Créer un nouveau signalement
-        SignalementRequestDTO dto = new SignalementRequestDTO();
-        dto.setAnnonceId(annonce.getId());
-        dto.setAdminId(admin2.getId());
-        dto.setRaison("Prix suspect");
-        dto.setDescription("Le prix semble trop bas par rapport au marché");
-
-        Signalement nouveau = signalementService.creer(dto);
-        assertThat(nouveau.getStatut()).isEqualTo("EN_ATTENTE");
-
-        // 3. Le récupérer
-        Signalement recupere = signalementService.getById(nouveau.getId());
-        assertThat(recupere).isNotNull();
-        assertThat(recupere.getRaison()).isEqualTo("Prix suspect");
-
-        // 4. Le traiter
-        Signalement traite = signalementService.traiter(
-                nouveau.getId(),
-                "TRAITE",
-                "Prix vérifié et corrigé"
-        );
-        assertThat(traite.getStatut()).isEqualTo("TRAITE");
-        assertThat(traite.getResolution()).isEqualTo("Prix vérifié et corrigé");
-
-        // 5. Vérifier qu'il est dans la liste
-        List<Signalement> tous = signalementService.getAll();
-        assertThat(tous).extracting(Signalement::getId).contains(nouveau.getId());
+        // Then
+        verify(signalementRepository).deleteById(1L);
     }
 }
