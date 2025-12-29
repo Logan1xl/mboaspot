@@ -1,0 +1,1117 @@
+package com.example.backend.controllers;
+
+import com.example.backend.dto.*;
+import com.example.backend.services.implementations.AnnonceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/annonces")
+@CrossOrigin(origins = "*")
+public class AnnonceController {
+
+    @Autowired
+    private AnnonceService annonceService;
+
+    // ===== CRUD Annonces (version simplifiée) =====
+
+    @PostMapping("/v1")
+    public ResponseEntity<AnnonceResponseDTO> creerAnnonce(@RequestBody AnnonceRequestDTO request) {
+        AnnonceResponseDTO annonce = annonceService.creerAnnonce(request);
+        return ResponseEntity.ok(annonce);
+    }
+
+    @GetMapping("/v1/{id}")
+    public ResponseEntity<AnnonceResponseDTO> obtenirAnnonce(@PathVariable Long id) {
+        AnnonceResponseDTO annonce = annonceService.obtenirAnnonce(id);
+        return ResponseEntity.ok(annonce);
+    }
+
+    @GetMapping("/v1/actives")
+    public ResponseEntity<List<AnnonceResponseDTO>> obtenirAnnoncesActives() {
+        List<AnnonceResponseDTO> annonces = annonceService.obtenirAnnoncesActives();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/v1/proprietaire/{proprietaireId}")
+    public ResponseEntity<List<AnnonceResponseDTO>> obtenirAnnoncesProprietaire(@PathVariable Long proprietaireId) {
+        List<AnnonceResponseDTO> annonces = annonceService.obtenirAnnoncesProprietaire(proprietaireId);
+        return ResponseEntity.ok(annonces);
+    }
+
+    @PutMapping("/v1/{id}")
+    public ResponseEntity<AnnonceResponseDTO> mettreAJourAnnonce(
+            @PathVariable Long id,
+            @RequestBody AnnonceRequestDTO request) {
+        AnnonceResponseDTO annonce = annonceService.mettreAJourAnnonce(id, request);
+        return ResponseEntity.ok(annonce);
+    }
+
+    @PutMapping("/v1/{id}/statut")
+    public ResponseEntity<AnnonceResponseDTO> changerStatutAnnonce(
+            @PathVariable Long id,
+            @RequestParam Boolean estActive) {
+        AnnonceResponseDTO annonce = annonceService.changerStatutAnnonce(id, estActive);
+        return ResponseEntity.ok(annonce);
+    }
+
+    @DeleteMapping("/v1/{id}")
+    public ResponseEntity<Void> supprimerAnnonce(@PathVariable Long id) {
+        annonceService.supprimerAnnonce(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ===== CRUD Annonces (version complète DTO) =====
+
+    @GetMapping
+    public ResponseEntity<List<AnnonceDTO>> getAllAnnonces() {
+        return ResponseEntity.ok(annonceService.getAllAnnonces());
+    }
+
+    @GetMapping("/actives")
+    public ResponseEntity<List<AnnonceDTO>> getAnnoncesActives() {
+        return ResponseEntity.ok(annonceService.getAnnoncesActives());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AnnonceDTO> getAnnonceById(@PathVariable Long id) {
+        return annonceService.getAnnonceById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<AnnonceDTO> createAnnonce(@RequestBody AnnonceDTO dto) {
+        try {
+            AnnonceDTO created = annonceService.createAnnonce(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AnnonceDTO> updateAnnonce(
+            @PathVariable Long id,
+            @RequestBody AnnonceDTO dto) {
+        try {
+            AnnonceDTO updated = annonceService.updateAnnonce(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnnonce(@PathVariable Long id) {
+        try {
+            annonceService.deleteAnnonce(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{id}/activer")
+    public ResponseEntity<Void> activerAnnonce(
+            @PathVariable Long id,
+            @RequestParam Boolean activer) {
+        try {
+            annonceService.activerAnnonce(id, activer);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // ===== Recherche avancée =====
+
+    @PostMapping("/recherche")
+    public ResponseEntity<List<AnnonceDTO>> rechercherAnnonces(@RequestBody RechercheDTO recherche) {
+        List<AnnonceDTO> resultats = annonceService.rechercherAnnonces(recherche);
+        return ResponseEntity.ok(resultats);
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<AnnonceDTO>> getTopAnnonces() {
+        return ResponseEntity.ok(annonceService.getTopAnnonces());
+    }
+
+    @GetMapping("/villes")
+    public ResponseEntity<List<String>> getVillesDisponibles() {
+        return ResponseEntity.ok(annonceService.getVillesDisponibles());
+    }
+
+    @GetMapping("/quartiers")
+    public ResponseEntity<List<String>> getQuartiers(@RequestParam String ville) {
+        return ResponseEntity.ok(annonceService.getQuartiersByVille(ville));
+    }
+
+    // ===== Gestion Disponibilité =====
+
+    @GetMapping("/{id}/disponibilites")
+    public ResponseEntity<List<DisponibiliteDTO>> getDisponibilites(@PathVariable Long id) {
+        return ResponseEntity.ok(annonceService.getDisponibilites(id));
+    }
+
+    @PostMapping("/disponibilites")
+    public ResponseEntity<DisponibiliteDTO> addDisponibilite(@RequestBody DisponibiliteDTO dto) {
+        try {
+            DisponibiliteDTO created = annonceService.addDisponibilite(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{id}/verifier-disponibilite")
+    public ResponseEntity<Boolean> verifierDisponibilite(
+            @PathVariable Long id,
+            @RequestParam Date dateDebut,
+            @RequestParam Date dateFin) {
+        boolean disponible = annonceService.verifierDisponibilite(id, dateDebut, dateFin);
+        return ResponseEntity.ok(disponible);
+    }
+
+    // ===== Gestion Localisation =====
+
+    @GetMapping("/{id}/localisation")
+    public ResponseEntity<LocalisationDTO> getLocalisation(@PathVariable Long id) {
+        return annonceService.getLocalisation(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/localisation")
+    public ResponseEntity<LocalisationDTO> updateLocalisation(
+            @PathVariable Long id,
+            @RequestBody LocalisationDTO dto) {
+        try {
+            LocalisationDTO updated = annonceService.updateLocalisation(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // ===== Gestion des exceptions =====
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.services.implementations.AuthService;
+import com.example.backend.dto.AuthResponseDTO;
+import com.example.backend.dto.LoginDTO;
+import com.example.backend.dto.RegisterDTO;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
+public class AuthController {
+
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterDTO dto) {
+        if ("ADMIN".equalsIgnoreCase(dto.getRole())) {
+            throw new RuntimeException("Impossible de s'inscrire en tant qu'administrateur");
+        }
+        AuthResponseDTO response = authService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginDTO dto) {
+        AuthResponseDTO response = authService.login(dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("API fonctionne !");
+    }
+
+    // ====== GESTIONNAIRE D'EXCEPTIONS ======
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.dto.AvisDTO;
+import com.example.backend.services.implementations.AvisService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/avis")
+public class AvisController {
+    private AvisService avisService;
+
+    public AvisController(AvisService avisService) {
+        this.avisService = avisService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createAvis(AvisDTO avisDTO){
+        try{
+            return new ResponseEntity<>(avisService.ajouterAvis(avisDTO), HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    @GetMapping
+    public ResponseEntity<?> getAllAvis(){
+        try{
+            return new ResponseEntity<>(avisService.listerAvis(), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAvisById(Long id){
+        try{
+            return new ResponseEntity<>(avisService.obtenirAvisParId(id), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAvis(@PathVariable Long id, @RequestBody AvisDTO avisDTO){
+        try{
+            return new ResponseEntity<>(avisService.mettreAJourAvis(id, avisDTO), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteAvis(@PathVariable Long id){
+        try{
+            avisService.supprimerAvis(id);
+            return new ResponseEntity<>("Avis supprimé avec succès", HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+}
+package com.example.backend.controllers;
+
+import com.example.backend.dto.EquipementDTO;
+import com.example.backend.services.implementations.EquipementService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/equipement")
+public class EquipementController {
+
+    private final EquipementService equipementService;
+
+    // Injection par constructeur (recommandé)
+    public EquipementController(EquipementService equipementService) {
+        this.equipementService = equipementService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> save(@RequestBody EquipementDTO equipementDTO) {
+        try {
+            EquipementDTO saved = equipementService.save(equipementDTO);
+            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody EquipementDTO equipementDTO) {
+        try {
+            // Utilisation d'une méthode update (à créer dans votre service)
+            EquipementDTO updated = equipementService.update(id, equipementDTO);
+            return new ResponseEntity<>(updated, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try {
+            equipementService.deleteById(id); // Utilise le nom exact défini dans le service
+            return new ResponseEntity<>("Équipement supprimé avec succès", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Long id) {
+        try {
+            EquipementDTO equipement = equipementService.getById(id); // Récupère l'ID précis
+            return new ResponseEntity<>(equipement, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<EquipementDTO>> getAll() {
+        try {
+            return new ResponseEntity<>(equipementService.getAll(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.dto.FavoriDTO;
+import com.example.backend.services.implementations.FavoriService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/favori")
+public class FavoriController {
+    private FavoriService favoriService;
+
+    public FavoriController(FavoriService favoriService) {
+        this.favoriService = favoriService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getFavorisByUserId(@PathVariable Long id) {
+        try {
+            FavoriDTO favoris = favoriService.obtenirFavoriParId(id);
+            return new ResponseEntity<>(favoris, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createFavori(@RequestBody FavoriDTO favoriDTO) {
+        try {
+            FavoriDTO createdFavori = favoriService.ajouterFavori(favoriDTO);
+            return new ResponseEntity<>(createdFavori, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateFavori(@PathVariable Long id, @RequestBody FavoriDTO favoriDTO) {
+        try {
+            FavoriDTO updatedFavori = favoriService.mettreAJourFavori(id, favoriDTO);
+            return new ResponseEntity<>(updatedFavori, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteFavori(@PathVariable Long id) {
+        try {
+            favoriService.supprimerFavori(id);
+            return new ResponseEntity<>("Favori supprimé avec succès", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.dto.LocalisationDTO;
+import com.example.backend.services.implementations.LocalisationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/localisation")
+public class LocalisationController {
+
+    private final LocalisationService localisationService;
+
+    public LocalisationController(LocalisationService localisationService) {
+        this.localisationService = localisationService;
+    }
+
+    // 1. CRÉER (POST)
+    @PostMapping
+    public ResponseEntity<LocalisationDTO> addLocalisation(@RequestBody LocalisationDTO localisationDTO) {
+        try {
+            LocalisationDTO savedLocalisation = localisationService.save(localisationDTO);
+            return new ResponseEntity<>(savedLocalisation, HttpStatus.CREATED);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Données invalides pour la création", e);
+        }
+    }
+
+    // 2. RÉCUPÉRER TOUT (GET ALL)
+    @GetMapping("/all")
+    public ResponseEntity<List<LocalisationDTO>> getAllLocalisation() {
+        try {
+            List<LocalisationDTO> localisations = localisationService.getAll();
+            return new ResponseEntity<>(localisations, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur lors de la récupération de la liste", e);
+        }
+    }
+
+    // 3. RÉCUPÉRER PAR ID (GET BY ID)
+    @GetMapping("/{id}")
+    public ResponseEntity<LocalisationDTO> getLocalisationById(@PathVariable Long id) {
+        try {
+            LocalisationDTO dto = localisationService.getById(id);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            // Renvoie 404 si l'élément n'existe pas dans la base
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Localisation introuvable avec l'ID : " + id);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur serveur", e);
+        }
+    }
+
+    // 4. METTRE À JOUR (PUT)
+    @PutMapping("/{id}")
+    public ResponseEntity<LocalisationDTO> updateLocalisation(@PathVariable Long id, @RequestBody LocalisationDTO localisationDTO) {
+        try {
+            LocalisationDTO updatedLocalisation = localisationService.update(id, localisationDTO);
+            return new ResponseEntity<>(updatedLocalisation, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Impossible de mettre à jour : ID inexistant");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erreur lors de la mise à jour", e);
+        }
+    }
+
+    // 5. SUPPRIMER (DELETE)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLocalisation(@PathVariable Long id) {
+        try {
+            localisationService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Suppression impossible : ID " + id + " introuvable");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur lors de la suppression", e);
+        }
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.dto.NotificationDTO;
+import com.example.backend.services.implementations.NotificationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("api/notifications")
+public class NotificationController {
+
+    private final NotificationService notificationService;
+
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> creerNotification(@RequestBody NotificationDTO notificationDTO) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            NotificationDTO created = notificationService.creerNotification(notificationDTO);
+            response.put("success", true);
+            response.put("data", created);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> obtenirToutesLesNotifications() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<NotificationDTO> list = notificationService.obtenirToutesLesNotifications();
+            response.put("success", true);
+            response.put("data", list);
+            response.put("count", list.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> obtenirNotificationParId(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        return notificationService.obtenirNotificationParId(id)
+                .map(n -> {
+                    response.put("success", true);
+                    response.put("data", n);
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    response.put("success", false);
+                    response.put("message", "Non trouvée");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                });
+    }
+
+    @GetMapping("/utilisateur/{idUser}")
+    public ResponseEntity<Map<String, Object>> obtenirNotificationsParUtilisateur(@PathVariable Long idUser) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<NotificationDTO> list = notificationService.obtenirNotificationsParUtilisateur(idUser);
+            response.put("success", true);
+            response.put("data", list);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> mettreAJourNotification(@PathVariable Long id, @RequestBody NotificationDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            NotificationDTO updated = notificationService.mettreAJourNotification(id, dto);
+            response.put("success", true);
+            response.put("data", updated);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    @PatchMapping("/{id}/lue")
+    public ResponseEntity<Map<String, Object>> marquerCommeLue(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            NotificationDTO updated = notificationService.marquerCommeLue(id);
+            response.put("success", true);
+            response.put("data", updated);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> supprimerNotification(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            notificationService.supprimerNotification(id);
+            response.put("success", true);
+            response.put("message", "Supprimée");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.dto.PaiementDTO;
+import com.example.backend.services.implementations.PaiementService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Controller REST pour la gestion des paiements
+ * @author Wulfrid MBONGO
+ */
+@RestController
+@RequestMapping("/api/paiement")
+@CrossOrigin(origins = "*")
+public class PaiementController {
+
+    @Autowired
+    private PaiementService paiementService;
+
+    /**
+     * Crée un nouveau paiement
+     * POST /api/paiement
+     */
+    @PostMapping
+    public ResponseEntity<?> creerPaiement(@RequestBody PaiementDTO paiementDTO) {
+        try {
+            PaiementDTO paiementCree = paiementService.creerPaiement(paiementDTO);
+            return new ResponseEntity<>(paiementCree, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la création du paiement: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Récupère tous les paiements
+     * GET /api/paiement
+     */
+    @GetMapping
+    public ResponseEntity<?> obtenirTousLesPaiements() {
+        try {
+            List<PaiementDTO> paiements = paiementService.obtenirTousLesPaiements();
+            return ResponseEntity.ok(paiements);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la récupération des paiements: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Récupère un paiement par son ID
+     * GET /api/paiement/{id}
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenirPaiementParId(@PathVariable Long id) {
+        try {
+            PaiementDTO paiement = paiementService.obtenirPaiementParId(id);
+            return ResponseEntity.ok(paiement);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la récupération du paiement: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Récupère tous les paiements d'une réservation
+     * GET /api/paiement/reservation/{idReservation}
+     */
+    @GetMapping("/reservation/{idReservation}")
+    public ResponseEntity<?> obtenirPaiementsParReservation(@PathVariable Long idReservation) {
+        try {
+            List<PaiementDTO> paiements = paiementService.obtenirPaiementsParReservation(idReservation);
+            return ResponseEntity.ok(paiements);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la récupération des paiements: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Récupère un paiement par son ID de transaction
+     * GET /api/paiement/transaction/{idTransaction}
+     */
+    @GetMapping("/transaction/{idTransaction}")
+    public ResponseEntity<?> obtenirPaiementParIdTransaction(@PathVariable String idTransaction) {
+        try {
+            PaiementDTO paiement = paiementService.obtenirPaiementParIdTransaction(idTransaction);
+            return ResponseEntity.ok(paiement);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la récupération du paiement: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Récupère tous les paiements par statut
+     * GET /api/paiement/statut/{statut}
+     */
+    @GetMapping("/statut/{statut}")
+    public ResponseEntity<?> obtenirPaiementsParStatut(@PathVariable String statut) {
+        try {
+            List<PaiementDTO> paiements = paiementService.obtenirPaiementsParStatut(statut);
+            return ResponseEntity.ok(paiements);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la récupération des paiements: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Met à jour un paiement
+     * PUT /api/paiement/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> mettreAJourPaiement(@PathVariable Long id, @RequestBody PaiementDTO paiementDTO) {
+        try {
+            PaiementDTO paiementMisAJour = paiementService.mettreAJourPaiement(id, paiementDTO);
+            return ResponseEntity.ok(paiementMisAJour);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la mise à jour du paiement: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Met à jour le statut d'un paiement
+     * PATCH /api/paiement/{id}/statut
+     */
+    @PatchMapping("/{id}/statut")
+    public ResponseEntity<?> mettreAJourStatutPaiement(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        try {
+            String nouveauStatut = body.get("statut");
+            if (nouveauStatut == null || nouveauStatut.isEmpty()) {
+                return ResponseEntity.badRequest().body(creerMessageErreur("Le statut est obligatoire"));
+            }
+
+            PaiementDTO paiementMisAJour = paiementService.mettreAJourStatutPaiement(id, nouveauStatut);
+            return ResponseEntity.ok(paiementMisAJour);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la mise à jour du statut: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Supprime un paiement
+     * DELETE /api/paiement/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> supprimerPaiement(@PathVariable Long id) {
+        try {
+            paiementService.supprimerPaiement(id);
+            return ResponseEntity.ok(creerMessageSucces("Paiement supprimé avec succès"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la suppression du paiement: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Calcule le montant total payé pour une réservation
+     * GET /api/paiement/reservation/{idReservation}/montant-total
+     */
+    @GetMapping("/reservation/{idReservation}/montant-total")
+    public ResponseEntity<?> calculerMontantTotalPaye(@PathVariable Long idReservation) {
+        try {
+            Double montantTotal = paiementService.calculerMontantTotalPaye(idReservation);
+            Map<String, Object> response = new HashMap<>();
+            response.put("idReservation", idReservation);
+            response.put("montantTotalPaye", montantTotal);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors du calcul du montant total: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Vérifie si une réservation est entièrement payée
+     * GET /api/paiement/reservation/{idReservation}/est-paye
+     */
+    @GetMapping("/reservation/{idReservation}/est-paye")
+    public ResponseEntity<?> verifierSiEntierementPaye(@PathVariable Long idReservation) {
+        try {
+            boolean estPaye = paiementService.estEntierementPaye(idReservation);
+            Map<String, Object> response = new HashMap<>();
+            response.put("idReservation", idReservation);
+            response.put("estEntierementPaye", estPaye);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(creerMessageErreur(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(creerMessageErreur("Erreur lors de la vérification du paiement: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Crée un message d'erreur formaté
+     */
+    private Map<String, String> creerMessageErreur(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("erreur", message);
+        return response;
+    }
+
+    /**
+     * Crée un message de succès formaté
+     */
+    private Map<String, String> creerMessageSucces(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return response;
+    }
+}package com.example.backend.controllers;
+
+import com.example.backend.dto.DisponibiliteRequestDTO;
+import com.example.backend.dto.ReservationRequestDTO;
+import com.example.backend.dto.ReservationResponseDTO;
+import com.example.backend.services.implementations.ReservationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@RestController
+    @RequestMapping("/api/reservations")
+    @CrossOrigin(origins = "*")
+    public class ReservationController {
+
+        @Autowired
+        private ReservationService reservationService;
+
+        // Vérifier disponibilité
+        @PostMapping("/disponibilite")
+        public ResponseEntity<Boolean> verifierDisponibilite(@RequestBody DisponibiliteRequestDTO request) {
+            boolean disponible = reservationService.verifierDisponibilite(request);
+            return ResponseEntity.ok(disponible);
+        }
+
+        // Créer une réservation
+        @PostMapping
+        public ResponseEntity<ReservationResponseDTO> creerReservation(@RequestBody ReservationRequestDTO request) {
+            ReservationResponseDTO reservation = reservationService.creerReservation(request);
+            return ResponseEntity.ok(reservation);
+        }
+
+        // Obtenir une réservation par ID
+        @GetMapping("/{id}")
+        public ResponseEntity<ReservationResponseDTO> obtenirReservation(@PathVariable Long id) {
+            ReservationResponseDTO reservation = reservationService.obtenirReservation(id);
+            return ResponseEntity.ok(reservation);
+        }
+
+        // Obtenir les réservations d'un voyageur
+        @GetMapping("/voyageur/{voyageurId}")
+        public ResponseEntity<List<ReservationResponseDTO>> obtenirReservationsVoyageur(@PathVariable Long voyageurId) {
+            List<ReservationResponseDTO> reservations = reservationService.obtenirReservationsVoyageur(voyageurId);
+            return ResponseEntity.ok(reservations);
+        }
+
+        // Annuler une réservation
+        @PutMapping("/{id}/annuler")
+        public ResponseEntity<ReservationResponseDTO> annulerReservation(@PathVariable Long id) {
+            ReservationResponseDTO reservation = reservationService.annulerReservation(id);
+            return ResponseEntity.ok(reservation);
+        }
+
+        // Confirmer une réservation (après paiement)
+        @PutMapping("/{id}/confirmer")
+        public ResponseEntity<ReservationResponseDTO> confirmerReservation(@PathVariable Long id) {
+            ReservationResponseDTO reservation = reservationService.confirmerReservation(id);
+            return ResponseEntity.ok(reservation);
+        }
+
+        // Obtenir par code de confirmation
+        @GetMapping("/confirmation/{code}")
+        public ResponseEntity<ReservationResponseDTO> obtenirParCodeConfirmation(@PathVariable String code) {
+            ReservationResponseDTO reservation = reservationService.obtenirParCodeConfirmation(code);
+            return ResponseEntity.ok(reservation);
+        }
+        @GetMapping
+        public ResponseEntity<List<ReservationResponseDTO>> obtenirTouteResvervation(){
+            return ResponseEntity.ok(reservationService.obtenirTouteResvervation());
+        }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+}
+
+package com.example.backend.controllers;
+
+import com.example.backend.dto.SignalementRequestDTO;
+import com.example.backend.dto.SignalementResponseDTO;
+import com.example.backend.entities.Signalement;
+import com.example.backend.mappers.SignalementMapper;
+import com.example.backend.services.implementations.SignalementService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/signalements")
+@CrossOrigin
+public class SignalementController {
+
+    private final SignalementService signalementService;
+
+    public SignalementController(SignalementService signalementService) {
+        this.signalementService = signalementService;
+    }
+
+    // CREATE
+    @PostMapping
+    public ResponseEntity<SignalementResponseDTO> creer(
+            @RequestBody SignalementRequestDTO dto) {
+
+        Signalement s = signalementService.creer(dto);
+        return ResponseEntity.ok(SignalementMapper.toDTO(s));
+    }
+
+
+
+    // READ ALL
+    @GetMapping
+    public ResponseEntity<List<SignalementResponseDTO>> getAll() {
+        return ResponseEntity.ok(
+                signalementService.getAll()
+                        .stream()
+                        .map(SignalementMapper::toDTO)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    // READ ONE
+    @GetMapping("/{id}")
+    public ResponseEntity<SignalementResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                SignalementMapper.toDTO(signalementService.getById(id)));
+
+    }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<SignalementResponseDTO> traiter(
+            @PathVariable Long id,
+            @RequestParam String statut,
+            @RequestParam String resolution) {
+
+        return ResponseEntity.ok(
+                SignalementMapper.toDTO(
+                        signalementService.traiter(id, statut, resolution)
+                )
+        );
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        signalementService.supprimer(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+package com.example.backend.controllers;
+
+import com.example.backend.dto.UtilisateurDTO;
+import com.example.backend.services.implementations.UtilisateurService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/users")
+public class UtilisateurController {
+
+
+    private final UtilisateurService utilisateurService;
+
+
+    public UtilisateurController(UtilisateurService utilisateurService) {
+        this.utilisateurService = utilisateurService;
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllUtilisateurs() {
+        return ResponseEntity.ok(utilisateurService.getAllUtilisateurs());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUtilisateurById(@PathVariable Long id) {
+        try {
+            UtilisateurDTO utilisateurDTO  = utilisateurService.getUtilisateurById(id);
+            return new ResponseEntity<>(utilisateurDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createUtilisateur(@RequestBody UtilisateurDTO utilisateurDTO) {
+        try {
+            UtilisateurDTO createdUtilisateur = utilisateurService.createUtilisateur(utilisateurDTO);
+            return new ResponseEntity<>(createdUtilisateur, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUtilisateur(@PathVariable Long id, @RequestBody UtilisateurDTO utilisateurDTO) {
+        try {
+            UtilisateurDTO updatedUtilisateur = utilisateurService.updateUtilisateur(id, utilisateurDTO);
+            return new ResponseEntity<>(updatedUtilisateur, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUtilisateur(@PathVariable Long id) {
+        try {
+            utilisateurService.deleteUtilisateur(id);
+            return new ResponseEntity<>("Utilisateur supprimé avec succès", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+}

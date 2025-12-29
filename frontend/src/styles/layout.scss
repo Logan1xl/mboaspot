@@ -1,0 +1,60 @@
+@use './_variables' as vars;
+
+// Reset and base styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: vars.$font-family-base;
+  font-size: vars.$font-size-base;
+  line-height: vars.$line-height-normal;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+html, body {
+  height: 100%;
+}
+
+.container {
+  max-width: vars.$breakpoint-wide;
+  margin: 0 auto;
+  padding: 0 vars.$spacing-md;
+}
+
+// Responsive utilities
+@media (max-width: vars.$breakpoint-desktop) {
+  .container {
+    max-width: vars.$breakpoint-desktop;
+  }
+}
+
+@media (max-width: vars.$breakpoint-tablet) {
+  .container {
+    max-width: vars.$breakpoint-tablet;
+  }
+}
+
+@media (max-width: vars.$breakpoint-mobile) {
+  .container {
+    max-width: vars.$breakpoint-mobile;
+  }
+}
+
+// Layout helpers
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: calc(-1 * vars.$spacing-md);
+
+  > * {
+    padding: vars.$spacing-md;
+  }
+}
+
+.col {
+  flex: 1 1 auto;
+}
