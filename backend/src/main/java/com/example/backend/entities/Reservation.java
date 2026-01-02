@@ -44,9 +44,9 @@ public class Reservation implements Serializable {
     @JoinColumn(name="id_annonces",referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Annonces annonce;
-    @Column(name = "date_debut",nullable = false)
+    @Column(name = "date_debut")
     private Date dateDebut;
-    @Column(name = "date_fin", nullable = false)
+    @Column(name = "date_fin")
     private Date dateFin;
 
     public Reservation(Date dateFin, Date dateDebut, Annonces annonce) {

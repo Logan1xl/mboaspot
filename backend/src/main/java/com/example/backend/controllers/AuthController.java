@@ -1,11 +1,16 @@
 package com.example.backend.controllers;
 
+import com.example.backend.entities.Utilisateur;
+import com.example.backend.repositories.UtilisateurRepository;
+import com.example.backend.security.jwt.JwtUtils;
 import com.example.backend.services.implementations.AuthService;
 import com.example.backend.dto.AuthResponseDTO;
 import com.example.backend.dto.LoginDTO;
 import com.example.backend.dto.RegisterDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.example.backend.security.jwt.JwtUtils;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,4 +52,5 @@ public class AuthController {
         error.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
 }

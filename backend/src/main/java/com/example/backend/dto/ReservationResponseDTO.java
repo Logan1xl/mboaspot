@@ -1,31 +1,53 @@
 package com.example.backend.dto;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 public class ReservationResponseDTO {
     private Long id;
     private String CodeConfirmation;
     private Integer nombreInvites;
     private Double prixTotal;
+
+    private Date dateDebut;
+    private Date dateFin;
     private String statut;
     private Long annonceId;
     private String annonceTitre;
     private String annonceVille;
     private Long voyageurId;
 
-    public ReservationResponseDTO(Long id, String codeConfirmation, Integer nombreInvites, Double prixTotal, String statut, Long annonceId, String annonceTitre, String annonceVille, Long voyageurId) {
+    public Date getDateDebut() {
+        return dateDebut;
+    }
+
+    public void setDateDebut(Date dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public Date getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(Date dateFin) {
+        this.dateFin = dateFin;
+    }
+
+    public ReservationResponseDTO() {
+    }
+
+    public ReservationResponseDTO(Long id, String codeConfirmation, Integer nombreInvites, Double prixTotal, Date dateDebut, Date dateFin, String statut, Long annonceId, String annonceTitre, String annonceVille, Long voyageurId) {
         this.id = id;
         CodeConfirmation = codeConfirmation;
         this.nombreInvites = nombreInvites;
         this.prixTotal = prixTotal;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
         this.statut = statut;
         this.annonceId = annonceId;
         this.annonceTitre = annonceTitre;
         this.annonceVille = annonceVille;
         this.voyageurId = voyageurId;
-    }
-
-    public ReservationResponseDTO() {
     }
 
     public Long getId() {

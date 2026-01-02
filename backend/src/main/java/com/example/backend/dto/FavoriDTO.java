@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FavoriDTO {
+public class FavoriDTO { 
 
     private Long id;
     private Voyageur idVoyageur;
