@@ -2,7 +2,9 @@ package com.example.backend.entities;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
+
 
 
 /**
@@ -10,7 +12,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "reservation", catalog = "logement_cameroun", schema = "")
 @NamedQueries({
     @NamedQuery(name = "Reservation.findAll", query = "SELECT r FROM Reservation r"),
     @NamedQuery(name = "Reservation.findById", query = "SELECT r FROM Reservation r WHERE r.id = :id"),
@@ -40,6 +41,43 @@ public class Reservation implements Serializable {
     @JoinColumn(name = "id_voyageur", referencedColumnName = "id")
     @ManyToOne
     private Voyageur idVoyageur;
+    @JoinColumn(name="id_annonces",referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Annonces annonce;
+    @Column(name = "date_debut")
+    private Date dateDebut;
+    @Column(name = "date_fin")
+    private Date dateFin;
+
+    public Reservation(Date dateFin, Date dateDebut, Annonces annonce) {
+        this.dateFin = dateFin;
+        this.dateDebut = dateDebut;
+        this.annonce = annonce;
+    }
+
+    public Annonces getAnnonce() {
+        return annonce;
+    }
+
+    public void setAnnonce(Annonces annonce) {
+        this.annonce = annonce;
+    }
+
+    public Date getDateDebut() {
+        return dateDebut;
+    }
+
+    public void setDateDebut(Date dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public Date getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(Date dateFin) {
+        this.dateFin = dateFin;
+    }
 
     public Reservation() {
     }

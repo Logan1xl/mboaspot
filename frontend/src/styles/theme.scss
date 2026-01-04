@@ -1,0 +1,36 @@
+@use './_variables' as vars;
+
+// Theme definition
+:root {
+  --color-primary: #{vars.$color-primary};
+  --color-secondary: #{vars.$color-secondary};
+  --color-accent: #{vars.$color-accent};
+  --color-success: #{vars.$color-success};
+  --color-error: #{vars.$color-error};
+  --color-warning: #{vars.$color-warning};
+  --color-info: #{vars.$color-info};
+  --color-white: #{vars.$color-white};
+  --color-light-gray: #{vars.$color-light-gray};
+  --color-gray: #{vars.$color-gray};
+  --color-dark-gray: #{vars.$color-dark-gray};
+  --color-very-dark: #{vars.$color-very-dark};
+  --color-black: #{vars.$color-black};
+}
+
+// Light theme
+html[data-theme="light"] {
+  --bg-primary: #{vars.$color-white};
+  --bg-secondary: #{vars.$color-light-gray};
+  --text-primary: #{vars.$color-very-dark};
+  --text-secondary: #{vars.$color-dark-gray};
+  --border-color: #{vars.$color-light-gray};
+}
+
+// Dark theme
+html[data-theme="dark"] {
+  --bg-primary: #{vars.$color-very-dark};
+  --bg-secondary: #{vars.$color-dark-gray};
+  --text-primary: #{vars.$color-white};
+  --text-secondary: #{vars.$color-light-gray};
+  --border-color: #{vars.$color-gray};
+}

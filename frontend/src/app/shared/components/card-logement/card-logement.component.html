@@ -1,0 +1,15 @@
+<div class="card-logement" role="article">
+  <div class="thumb">
+    <img [src]="logement?.images?.[0] || logement?.imageUrl || '/assets/images/default.jpg'" alt="{{ logement?.title || 'Logement' }}" />
+    <button class="fav" (click)="onFavorite($event)" aria-label="Ajouter aux favoris">❤</button>
+  </div>
+
+  <div class="body">
+    <h3 class="title">{{ logement?.title || logement?.nom || 'Titre' }}</h3>
+    <p class="location">{{ logement?.localisation?.ville || logement?.ville || logement?.lieu || '-' }}</p>
+    <div class="meta">
+      <span class="price">{{ logement?.prix ? (logement.prix + ' XAF') : '-' }}</span>
+      <span class="rating">⭐ {{ logement?.noteMoyenne ?? logement?.rating ?? '-' }}</span>
+    </div>
+  </div>
+</div>

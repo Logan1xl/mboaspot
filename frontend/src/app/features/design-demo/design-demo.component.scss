@@ -1,0 +1,40 @@
+@use '../../../styles/_variables' as *;
+@use '../../../styles/_mixins' as *;
+
+.design-demo {
+  padding: $spacing-xl;
+
+  h1 {
+    margin-bottom: $spacing-md;
+  }
+
+  .palette {
+    margin-bottom: $spacing-lg;
+
+    .swatches {
+      display: flex;
+      gap: $spacing-md;
+
+      .swatch {
+        padding: $spacing-md $spacing-lg;
+        border-radius: $border-radius-sm;
+        color: $color-white;
+        font-weight: $font-weight-semibold;
+      }
+
+      .primary { background: $color-primary; }
+      .secondary { background: $color-secondary; }
+      .accent { background: $color-accent; }
+      .success { background: $color-success; }
+      .error { background: $color-error; }
+      .info { background: $color-info; }
+    }
+  }
+
+  .components {
+    display: grid;
+    gap: $spacing-lg;
+
+    .btn-row { display:flex; gap: $spacing-md; align-items:center; }
+  }
+}

@@ -1,0 +1,13 @@
+@use '../../../../styles/_variables' as *;
+@use '../../../../styles/_mixins' as *;
+
+label {
+  display: block;
+  margin-bottom: $spacing-sm;
+  color: $color-dark-gray;
+  font-size: $font-size-sm;
+}
+
+input {
+  @include input-base;
+}

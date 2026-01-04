@@ -1,0 +1,99 @@
+// MboaSpot — Global Typography
+@import './variables';
+
+// Headings
+.heading-1 {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $color-very-dark;
+}
+
+.heading-2 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $color-very-dark;
+}
+
+.heading-3 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+  color: $color-very-dark;
+}
+
+// Body text
+.text-sm {
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+}
+
+.text-base {
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+  line-height: $line-height-normal;
+}
+
+// Text colors
+.text-primary {
+  color: $color-primary;
+}
+
+.text-secondary {
+  color: $color-secondary;
+}
+
+.text-accent {
+  color: $color-accent;
+}
+
+.text-muted {
+  color: $color-gray;
+}
+
+.text-success {
+  color: $color-success;
+}
+
+.text-error {
+  color: $color-error;
+}
+
+.text-warning {
+  color: $color-warning;
+}
+
+// Text styles
+.text-bold {
+  font-weight: $font-weight-bold;
+}
+
+.text-semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.text-light {
+  font-weight: $font-weight-light;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}

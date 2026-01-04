@@ -1,0 +1,15 @@
+@use './_variables' as *;
+@use './_mixins' as *;
+@use './_reset' as *;
+@use './_typography' as *;
+
+// Global theme overrides (Angular Material can import this)
+
+:root {
+  --primary: #2ECC71;
+  --secondary: #3498DB;
+}
+
+body {
+  background-color: $color-light-gray;
+}

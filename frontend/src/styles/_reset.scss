@@ -1,0 +1,83 @@
+// MboaSpot — CSS Reset & Defaults
+@import './variables';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $color-dark-gray;
+  background-color: $color-white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-heading;
+  font-weight: $font-weight-bold;
+  color: $color-very-dark;
+  line-height: $line-height-tight;
+}
+
+h1 {
+  font-size: $font-size-3xl;
+  margin-bottom: $spacing-lg;
+}
+
+h2 {
+  font-size: $font-size-2xl;
+  margin-bottom: $spacing-md;
+}
+
+h3 {
+  font-size: $font-size-xl;
+  margin-bottom: $spacing-md;
+}
+
+p {
+  margin-bottom: $spacing-md;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color $transition-fast;
+  
+  &:hover {
+    color: $color-primary-hover;
+  }
+}
+
+button {
+  font-family: $font-family-base;
+}
+
+input, textarea, select {
+  font-family: $font-family-base;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid $color-light-gray;
+  margin: $spacing-lg 0;
+}

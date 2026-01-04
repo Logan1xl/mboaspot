@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.roles.RoleUtilisateur;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.List;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "utilisateur", catalog = "logement_cameroun", schema = "")
 @NamedQueries({
     @NamedQuery(name = "Utilisateur.findAll", query = "SELECT u FROM Utilisateur u"),
     @NamedQuery(name = "Utilisateur.findById", query = "SELECT u FROM Utilisateur u WHERE u.id = :id"),
@@ -46,10 +46,11 @@ public class Utilisateur implements Serializable {
     @Column(name = "est_actif")
     private Boolean estActif;
     @Basic(optional = false)
-    @Column(name = "role")
-    private String role;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
-    private List<Admin> adminList;
+    @Enumerated(EnumType.STRING)  // Utilise STRING au lieu d'ORDINAL
+    @Column(name = "role", nullable = false)
+    private RoleUtilisateur role;
+    @OneToOne( mappedBy = "idUser")
+    private Admin admin;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
     private List<Notification> notificationList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUser")
@@ -64,7 +65,7 @@ public class Utilisateur implements Serializable {
         this.id = id;
     }
 
-    public Utilisateur(Long id, String email, String motDePasse, String role) {
+    public Utilisateur(Long id, String email, String motDePasse, RoleUtilisateur role) {
         this.id = id;
         this.email = email;
         this.motDePasse = motDePasse;
@@ -135,21 +136,22 @@ public class Utilisateur implements Serializable {
         this.estActif = estActif;
     }
 
-    public String getRole() {
+    public RoleUtilisateur getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(RoleUtilisateur role) {
         this.role = role;
     }
 
-    public List<Admin> getAdminList() {
-        return adminList;
+    public Admin getAdmin() {
+        return admin;
     }
 
-    public void setAdminList(List<Admin> adminList) {
-        this.adminList = adminList;
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
+
 
     public List<Notification> getNotificationList() {
         return notificationList;

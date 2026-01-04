@@ -11,7 +11,6 @@ import java.util.Date;
  * @author Wulfrid MBONGO
  */
 @Entity
-@Table(name = "disponibilite", catalog = "logement_cameroun", schema = "")
 @NamedQueries({
     @NamedQuery(name = "Disponibilite.findAll", query = "SELECT d FROM Disponibilite d"),
     @NamedQuery(name = "Disponibilite.findById", query = "SELECT d FROM Disponibilite d WHERE d.id = :id"),
