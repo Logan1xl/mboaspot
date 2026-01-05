@@ -1,0 +1,248 @@
+// src/app/features/logements/listing/listing.component.scss
+@use '../../../../styles/_variables' as *;
+@use '../../../../styles/_mixins' as *;
+
+.listing-page {
+  min-height: calc(100vh - 70px);
+  padding: $spacing-2xl 0;
+  background: $color-light-gray;
+
+  .listing-header {
+    @include flex-between;
+    margin-bottom: $spacing-2xl;
+    padding-bottom: $spacing-lg;
+    border-bottom: 2px solid $color-white;
+
+    @include mobile-only {
+      flex-direction: column;
+      gap: $spacing-lg;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      h1 {
+        font-size: $font-size-2xl;
+        color: $color-dark-gray;
+        margin-bottom: $spacing-xs;
+      }
+
+      .results-count {
+        color: $color-gray;
+        font-size: $font-size-base;
+      }
+    }
+
+    .header-actions {
+      @include flex-start;
+      gap: $spacing-md;
+
+      .btn-filters {
+        @include btn-ghost;
+        @include flex-center;
+        gap: $spacing-xs;
+      }
+
+      .sort-select {
+        @include input-base;
+        min-width: 200px;
+
+        @include mobile-only {
+          min-width: 150px;
+        }
+      }
+    }
+  }
+
+  .listing-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: $spacing-2xl;
+
+    @include tablet-only {
+      grid-template-columns: 1fr;
+    }
+
+    @include mobile-only {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Sidebar Filtres
+  .filters-sidebar {
+    background: $color-white;
+    border-radius: $border-radius-md;
+    padding: $spacing-lg;
+    height: fit-content;
+    position: sticky;
+    top: 90px;
+
+    @include tablet-only {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      height: 100vh;
+      z-index: 1000;
+      width: 300px;
+      box-shadow: $shadow-xl;
+      transition: left $transition-normal;
+
+      &.show {
+        left: 0;
+      }
+    }
+
+    @include mobile-only {
+      width: 280px;
+    }
+
+    .sidebar-header {
+      @include flex-between;
+      margin-bottom: $spacing-lg;
+      padding-bottom: $spacing-md;
+      border-bottom: 1px solid $color-light-gray;
+
+      h3 {
+        font-size: $font-size-xl;
+        color: $color-dark-gray;
+      }
+
+      .btn-close {
+        display: none;
+        background: none;
+        border: none;
+        font-size: $font-size-xl;
+        color: $color-gray;
+        cursor: pointer;
+
+        @include tablet-only {
+          display: block;
+        }
+      }
+    }
+
+    .filters-form {
+      .filter-group {
+        margin-bottom: $spacing-lg;
+
+        label {
+          @include flex-start;
+          gap: $spacing-xs;
+          font-weight: $font-weight-semibold;
+          color: $color-dark-gray;
+          margin-bottom: $spacing-sm;
+          font-size: $font-size-sm;
+
+          i {
+            color: $color-primary;
+          }
+        }
+
+        .form-control {
+          @include input-base;
+        }
+
+        .price-inputs {
+          @include flex-start;
+          gap: $spacing-sm;
+
+          input {
+            flex: 1;
+          }
+
+          span {
+            color: $color-gray;
+          }
+        }
+      }
+
+      .btn-reset {
+        @include btn-ghost;
+        width: 100%;
+        @include flex-center;
+        gap: $spacing-xs;
+      }
+    }
+  }
+
+  // Contenu
+  .listing-content {
+    .loading-state,
+    .empty-state {
+      @include flex-column-center;
+      padding: $spacing-2xl * 2;
+      background: $color-white;
+      border-radius: $border-radius-md;
+
+      i {
+        font-size: $font-size-3xl * 1.5;
+        color: $color-gray;
+        margin-bottom: $spacing-lg;
+      }
+
+      h3 {
+        color: $color-dark-gray;
+        margin-bottom: $spacing-sm;
+      }
+
+      p {
+        color: $color-gray;
+        margin-bottom: $spacing-lg;
+      }
+    }
+
+    .annonces-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $spacing-xl;
+
+      @include desktop-and-up {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      @include tablet-only {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @include mobile-only {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    // Pagination
+    .pagination {
+      @include flex-center;
+      gap: $spacing-sm;
+      margin-top: $spacing-2xl;
+
+      .page-btn {
+        @include flex-center;
+        width: 40px;
+        height: 40px;
+        background: $color-white;
+        border: 1px solid $color-light-gray;
+        border-radius: $border-radius-sm;
+        color: $color-dark-gray;
+        font-weight: $font-weight-semibold;
+        cursor: pointer;
+        transition: all $transition-fast;
+
+        &:hover:not(:disabled) {
+          background: $color-primary;
+          color: $color-white;
+          border-color: $color-primary;
+        }
+
+        &.active {
+          background: $color-primary;
+          color: $color-white;
+          border-color: $color-primary;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}

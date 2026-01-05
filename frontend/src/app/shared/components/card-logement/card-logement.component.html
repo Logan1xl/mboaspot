@@ -1,15 +1,66 @@
-<div class="card-logement" role="article">
-  <div class="thumb">
-    <img [src]="logement?.images?.[0] || logement?.imageUrl || '/assets/images/default.jpg'" alt="{{ logement?.title || 'Logement' }}" />
-    <button class="fav" (click)="onFavorite($event)" aria-label="Ajouter aux favoris">❤</button>
+
+<div class="card-logement" [routerLink]="['/logements', annonce.id]">
+  <div class="card-image">
+    <img [src]="getImageUrl()" [alt]="annonce.titre" />
+
+    <button
+      *ngIf="showFavoriteBtn"
+      class="favorite-btn"
+      [class.active]="isFavorite"
+      (click)="toggleFavorite($event)"
+    >
+      <i [class]="isFavorite ? 'fas fa-heart' : 'far fa-heart'"></i>
+    </button>
+
+    <div class="card-badge" *ngIf="annonce.typeAnnonce">
+      <i class="fas fa-tag"></i>
+      {{ annonce.typeAnnonce }}
+    </div>
   </div>
 
-  <div class="body">
-    <h3 class="title">{{ logement?.title || logement?.nom || 'Titre' }}</h3>
-    <p class="location">{{ logement?.localisation?.ville || logement?.ville || logement?.lieu || '-' }}</p>
-    <div class="meta">
-      <span class="price">{{ logement?.prix ? (logement.prix + ' XAF') : '-' }}</span>
-      <span class="rating">⭐ {{ logement?.noteMoyenne ?? logement?.rating ?? '-' }}</span>
+  <div class="card-content">
+    <div class="card-header">
+      <h3 class="card-title">{{ annonce.titre }}</h3>
+      <div class="card-rating">
+        <div class="stars">
+          <i
+            *ngFor="let star of getStars(); let i = index"
+            [class]="isStarFilled(i) ? 'fas fa-star' : 'far fa-star'"
+          ></i>
+        </div>
+        <span class="rating-count">({{ annonce.totalAvis }})</span>
+      </div>
+    </div>
+
+    <div class="card-location">
+      <i class="fas fa-map-marker-alt"></i>
+      <span>{{ annonce.ville }}</span>
+    </div>
+
+    <div class="card-features">
+      <div class="feature">
+        <i class="fas fa-bed"></i>
+        <span>{{ annonce.nbreChambres }} ch.</span>
+      </div>
+      <div class="feature">
+        <i class="fas fa-users"></i>
+        <span>{{ annonce.maxInvites }} pers.</span>
+      </div>
+      <div class="feature">
+        <i class="fas fa-door-open"></i>
+        <span>{{ annonce.nbreLits }} lits</span>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="card-price">
+        <span class="price-amount">{{ annonce.prix | number:'1.0-0' }} FCFA</span>
+        <span class="price-period">/ nuit</span>
+      </div>
+      <button class="btn-view">
+        Voir détails
+        <i class="fas fa-arrow-right"></i>
+      </button>
     </div>
   </div>
 </div>

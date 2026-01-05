@@ -1,5 +1,5 @@
 // MboaSpot — Global Typography
-@import './variables';
+@use './_variables' as *;
 
 // Headings
 .heading-1 {
