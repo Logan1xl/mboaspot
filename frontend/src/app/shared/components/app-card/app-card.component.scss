@@ -1,5 +1,5 @@
-@use '../../../../styles/_variables' as *;
-@use '../../../../styles/_mixins' as *;
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
 
 .card {
   @include card;

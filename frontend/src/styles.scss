@@ -4,7 +4,7 @@
 @use 'bootstrap/scss/bootstrap' as bootstrap;
 
 // Import custom styles (must be before Material to avoid conflicts)
-@use './styles/_variables' as vars;
+@use './styles/variables' as vars;
 @use './styles/theme';
 @use './styles/layout';
 
