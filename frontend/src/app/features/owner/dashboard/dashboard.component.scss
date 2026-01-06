@@ -1,0 +1,270 @@
+// src/app/features/owner/dashboard/dashboard.component.scss
+@use '../../../../styles/_variables' as *;
+@use '../../../../styles/_mixins' as *;
+
+.owner-dashboard {
+  min-height: calc(100vh - 70px);
+  padding: $spacing-2xl 0;
+  background: $color-light-gray;
+
+  .page-header {
+    @include flex-between;
+    margin-bottom: $spacing-2xl;
+
+    @include mobile-only {
+      flex-direction: column;
+      gap: $spacing-lg;
+      align-items: flex-start;
+    }
+
+    h1 {
+      font-size: $font-size-3xl;
+      color: $color-dark-gray;
+      margin-bottom: $spacing-xs;
+    }
+
+    p {
+      color: $color-gray;
+      font-size: $font-size-base;
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-xl;
+    margin-bottom: $spacing-2xl;
+
+    @include tablet-only {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include mobile-only {
+      grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+      @include card;
+      @include flex-start;
+      gap: $spacing-lg;
+      padding: $spacing-xl;
+
+      .stat-icon {
+        @include flex-center;
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius-md;
+
+        i {
+          font-size: $font-size-2xl;
+        }
+      }
+
+      .stat-content {
+        h3 {
+          font-size: $font-size-3xl;
+          color: $color-dark-gray;
+          margin-bottom: $spacing-xs;
+        }
+
+        p {
+          color: $color-gray;
+          font-size: $font-size-sm;
+        }
+      }
+    }
+  }
+
+  .quick-actions {
+    margin-bottom: $spacing-2xl;
+
+    h2 {
+      font-size: $font-size-xl;
+      color: $color-dark-gray;
+      margin-bottom: $spacing-lg;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: $spacing-lg;
+
+      @include tablet-only {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @include mobile-only {
+        grid-template-columns: 1fr;
+      }
+
+      .action-card {
+        @include card;
+        @include flex-column-center;
+        gap: $spacing-md;
+        padding: $spacing-xl;
+        text-decoration: none;
+        transition: all $transition-normal;
+
+        i {
+          font-size: $font-size-3xl;
+          color: $color-primary;
+        }
+
+        span {
+          font-weight: $font-weight-semibold;
+          color: $color-dark-gray;
+          text-align: center;
+        }
+
+        &:hover {
+          transform: translateY(-4px);
+
+          i {
+            color: $color-primary-hover;
+          }
+        }
+      }
+    }
+  }
+
+  .recent-section {
+    h2 {
+      font-size: $font-size-xl;
+      color: $color-dark-gray;
+      margin-bottom: $spacing-lg;
+    }
+
+    .section-header {
+      @include flex-between;
+      margin-bottom: $spacing-lg;
+
+      .view-all {
+        @include flex-center;
+        gap: $spacing-xs;
+        color: $color-primary;
+        font-weight: $font-weight-semibold;
+        text-decoration: none;
+        transition: gap $transition-fast;
+
+        &:hover {
+          gap: $spacing-md;
+        }
+      }
+    }
+
+    .annonces-table {
+      background: $color-white;
+      border-radius: $border-radius-md;
+      overflow: hidden;
+      box-shadow: $shadow-md;
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+
+        thead {
+          background: $color-light-gray;
+
+          th {
+            padding: $spacing-md $spacing-lg;
+            text-align: left;
+            font-weight: $font-weight-semibold;
+            color: $color-dark-gray;
+            font-size: $font-size-sm;
+            text-transform: uppercase;
+          }
+        }
+
+        tbody {
+          tr {
+            border-bottom: 1px solid $color-light-gray;
+            transition: background $transition-fast;
+
+            &:hover {
+              background: rgba($color-primary, 0.02);
+            }
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            td {
+              padding: $spacing-lg;
+              font-size: $font-size-base;
+              color: $color-dark-gray;
+
+              .annonce-title {
+                strong {
+                  display: block;
+                  margin-bottom: $spacing-xs;
+                }
+              }
+
+              .status-badge {
+                display: inline-block;
+                padding: $spacing-xs $spacing-md;
+                border-radius: $border-radius-full;
+                font-size: $font-size-sm;
+                font-weight: $font-weight-semibold;
+
+                &.status-active {
+                  background: rgba($color-success, 0.1);
+                  color: $color-success;
+                }
+
+                &.status-inactive {
+                  background: rgba($color-gray, 0.1);
+                  color: $color-gray;
+                }
+              }
+
+              .action-buttons {
+                @include flex-start;
+                gap: $spacing-sm;
+
+                .btn-icon {
+                  @include flex-center;
+                  width: 36px;
+                  height: 36px;
+                  background: $color-light-gray;
+                  border-radius: $border-radius-sm;
+                  color: $color-dark-gray;
+                  text-decoration: none;
+                  transition: all $transition-fast;
+
+                  &:hover {
+                    background: $color-primary;
+                    color: $color-white;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      @include flex-column-center;
+      padding: $spacing-2xl * 2;
+      background: $color-white;
+      border-radius: $border-radius-md;
+
+      i {
+        font-size: $font-size-3xl * 1.5;
+        color: $color-gray;
+        margin-bottom: $spacing-lg;
+      }
+
+      h3 {
+        color: $color-dark-gray;
+        margin-bottom: $spacing-sm;
+      }
+
+      p {
+        color: $color-gray;
+        margin-bottom: $spacing-lg;
+      }
+    }
+  }
+}
