@@ -1,59 +1,52 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
-} from '@angular/common/http';
+// src/app/core/interceptors/jwt.interceptor.ts
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../auth/auth.service';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { AuthService } from '../auth/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
-@Injectable()
-export class JwtInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) { }
+export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+  const authService = inject(AuthService);
+  const token = authService.getToken();
 
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    // Ajouter le token JWT à la requête
-    const token = localStorage.getItem('accessToken');
-    if (token && !request.url.includes('login') && !request.url.includes('register')) {
-      request = request.clone({
+  // Ne pas ajouter le token pour les requêtes d'auth
+  if (req.url.includes('/auth/login') || req.url.includes('/auth/register')) {
+    return next(req);
+  }
+
+  // Cloner la requête et ajouter le token si disponible
+  const authReq = token
+    ? req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
         }
-      });
-    }
-
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          // Token expiré - essayer de rafraîchir
-          return this.authService.refreshToken().pipe(
-            switchMap((response: any) => {
-              const newToken = response.accessToken;
-              localStorage.setItem('accessToken', newToken);
-
-              // Réessayer la requête avec le nouveau token
-              const clonedRequest = request.clone({
-                setHeaders: {
-                  Authorization: `Bearer ${newToken}`
-                }
-              });
-
-              return next.handle(clonedRequest);
-            }),
-            catchError(() => {
-              // Si le rafraîchissement échoue, déconnecter l'utilisateur
-              this.authService.logout();
-              return throwError(() => error);
-            })
-          );
-        }
-
-        return throwError(() => error);
       })
-    );
-  }
-}
+    : req;
 
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      // Si erreur 401 et refresh token disponible
+      if (error.status === 401 && authService.getRefreshToken()) {
+        return authService.refreshToken().pipe(
+          switchMap(() => {
+            const newToken = authService.getToken();
+            const retryReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${newToken}`
+              }
+            });
+            return next(retryReq);
+          }),
+          catchError((refreshError) => {
+            authService.logout();
+            return throwError(() => refreshError);
+          })
+        );
+      }
+
+      // Autres erreurs
+      return throwError(() => error);
+    })
+  );
+};

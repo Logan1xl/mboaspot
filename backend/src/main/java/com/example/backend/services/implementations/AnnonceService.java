@@ -49,11 +49,10 @@ public class AnnonceService {
         annonce.setDescription(request.getDescription());
         annonce.setTypeAnnonce(request.getTypeAnnonce());
         annonce.setIdProprietaire(proprietaire);
-        annonce.setEstActive(true);  // Active par défaut
+        annonce.setEstActive(true);
         annonce.setEvaluationMoyenne(0.0);
         annonce.setTotalAvis(0);
 
-        // Si latitude/longitude fournies dans la requête
         if (request.getLatitude() != null) {
             annonce.setLatitude(request.getLatitude());
         }
@@ -74,15 +73,11 @@ public class AnnonceService {
             localisationRepository.save(localisation);
         }
 
-        // Créer une disponibilité par défaut (1 an)
         creerDisponibiliteParDefaut(annonce);
 
         return convertirEnResponseDTO(annonce);
     }
 
-    /**
-     * Créer une annonce à partir d'un AnnonceDTO complet
-     */
     public AnnonceDTO createAnnonce(AnnonceDTO dto) {
         Annonces annonce = convertToEntity(dto);
         annonce.setEstActive(true);
@@ -91,7 +86,6 @@ public class AnnonceService {
 
         Annonces saved = annoncesRepository.save(annonce);
 
-        // Créer la localisation si fournie
         if (dto.getLocalisation() != null) {
             LocalisationDTO locDTO = dto.getLocalisation();
             Localisation localisation = new Localisation();
@@ -103,15 +97,11 @@ public class AnnonceService {
             localisationRepository.save(localisation);
         }
 
-        // Créer disponibilité par défaut
         creerDisponibiliteParDefaut(saved);
 
         return convertToDTO(saved);
     }
 
-    /**
-     * Obtenir toutes les annonces
-     */
     public List<AnnonceDTO> getAllAnnonces() {
         return annoncesRepository.findAll()
                 .stream()
@@ -119,26 +109,17 @@ public class AnnonceService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtenir une annonce par ID
-     */
     public AnnonceResponseDTO obtenirAnnonce(Long id) {
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
         return convertirEnResponseDTO(annonce);
     }
 
-    /**
-     * Obtenir une annonce par ID (version DTO)
-     */
     public Optional<AnnonceDTO> getAnnonceById(Long id) {
         return annoncesRepository.findById(id)
                 .map(this::convertToDTO);
     }
 
-    /**
-     * Obtenir toutes les annonces actives
-     */
     public List<AnnonceResponseDTO> obtenirAnnoncesActives() {
         List<Annonces> annonces = annoncesRepository.findByEstActive(true);
         return annonces.stream()
@@ -146,9 +127,6 @@ public class AnnonceService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtenir les annonces actives (version DTO)
-     */
     public List<AnnonceDTO> getAnnoncesActives() {
         return annoncesRepository.findAll()
                 .stream()
@@ -157,9 +135,6 @@ public class AnnonceService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtenir les annonces d'un propriétaire
-     */
     public List<AnnonceResponseDTO> obtenirAnnoncesProprietaire(Long proprietaireId) {
         List<Annonces> annonces = annoncesRepository.findByIdProprietaire_Id(proprietaireId);
         return annonces.stream()
@@ -167,14 +142,10 @@ public class AnnonceService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Mettre à jour une annonce
-     */
     public AnnonceResponseDTO mettreAJourAnnonce(Long id, AnnonceRequestDTO request) {
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
-        // Mettre à jour les champs
         annonce.setTitre(request.getTitre());
         annonce.setPrix(request.getPrix());
         annonce.setAdresse(request.getAdresse());
@@ -190,14 +161,10 @@ public class AnnonceService {
         return convertirEnResponseDTO(annonce);
     }
 
-    /**
-     * Mettre à jour une annonce (version DTO)
-     */
     public AnnonceDTO updateAnnonce(Long id, AnnonceDTO dto) {
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
-        // Mise à jour des champs
         annonce.setTitre(dto.getTitre());
         annonce.setPrix(dto.getPrix());
         annonce.setAdresse(dto.getAdresse());
@@ -219,9 +186,6 @@ public class AnnonceService {
         return convertToDTO(updated);
     }
 
-    /**
-     * Changer le statut d'une annonce (activer/désactiver)
-     */
     public AnnonceResponseDTO changerStatutAnnonce(Long id, Boolean estActive) {
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
@@ -232,9 +196,6 @@ public class AnnonceService {
         return convertirEnResponseDTO(annonce);
     }
 
-    /**
-     * Activer/désactiver une annonce
-     */
     public void activerAnnonce(Long id, Boolean activer) {
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Annonce non trouvée"));
@@ -242,21 +203,14 @@ public class AnnonceService {
         annoncesRepository.save(annonce);
     }
 
-    /**
-     * Supprimer (désactiver) une annonce
-     */
     public void supprimerAnnonce(Long id) {
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
-        // Désactiver au lieu de supprimer
         annonce.setEstActive(false);
         annoncesRepository.save(annonce);
     }
 
-    /**
-     * Supprimer définitivement une annonce
-     */
     public void deleteAnnonce(Long id) {
         annoncesRepository.deleteById(id);
     }
@@ -274,13 +228,16 @@ public class AnnonceService {
                     recherche.getRayon()
             );
         } else {
-            // Recherche par critères
-            resultats = annoncesRepository.rechercheAvancee(
+            // Recherche avancée complète avec tous les critères
+            resultats = annoncesRepository.rechercheAvanceeComplete(
                     recherche.getVille(),
+                    recherche.getQuartier(),
                     recherche.getTypeAnnonce(),
                     recherche.getPrixMin(),
                     recherche.getPrixMax(),
-                    recherche.getNbreChambres(),
+                    recherche.getNbreChambresMin(),
+                    recherche.getNbreLitsMin(),
+                    recherche.getMaxInvitesMin(),
                     recherche.getEvaluationMin()
             );
         }
@@ -297,12 +254,89 @@ public class AnnonceService {
                 .collect(Collectors.toList());
     }
 
+    // ===== NOUVELLES MÉTHODES POUR LA PAGE HOME =====
+
+    /**
+     * Récupère toutes les villes disponibles
+     */
     public List<String> getVillesDisponibles() {
-        return localisationRepository.findAllVilles();
+        List<String> villes = annoncesRepository.findAllVillesDistinct();
+
+        // Fallback sur la table localisation si aucune ville dans annonces
+        if (villes == null || villes.isEmpty()) {
+            villes = localisationRepository.findAllVilles();
+        }
+
+        return villes != null ? villes : new ArrayList<>();
     }
 
+    /**
+     * Récupère les quartiers d'une ville
+     */
     public List<String> getQuartiersByVille(String ville) {
-        return localisationRepository.findQuartiersByVille(ville);
+        if (ville == null || ville.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> quartiers = annoncesRepository.findQuartiersByVille(ville);
+
+        // Fallback sur la table localisation
+        if (quartiers == null || quartiers.isEmpty()) {
+            quartiers = localisationRepository.findQuartiersByVille(ville);
+        }
+
+        return quartiers != null ? quartiers : new ArrayList<>();
+    }
+
+    /**
+     * Récupère tous les types d'annonces
+     */
+    public List<String> getTypesAnnonces() {
+        List<String> types = annoncesRepository.findAllTypesAnnonces();
+
+        // Si aucun type trouvé, retourner des valeurs par défaut
+        if (types == null || types.isEmpty()) {
+            types = Arrays.asList("Appartement", "Maison", "Studio", "Villa", "Hôtel");
+        }
+
+        return types;
+    }
+
+    /**
+     * Compte le nombre d'annonces actives
+     */
+    public Long countAnnoncesActives() {
+        Long count = annoncesRepository.countAnnoncesActives();
+        return count != null ? count : 0L;
+    }
+
+    /**
+     * Récupère les annonces recommandées (top annonces)
+     */
+    public List<AnnonceDTO> getAnnoncesRecommandees(int limit) {
+        List<Annonces> annonces = annoncesRepository.findTopAnnonces();
+
+        return annonces.stream()
+                .limit(limit)
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère les fourchettes de prix (min, max, moyenne)
+     */
+    public Map<String, Double> getFourchettePrix() {
+        Map<String, Double> fourchette = new HashMap<>();
+
+        Double min = annoncesRepository.findMinPrix();
+        Double max = annoncesRepository.findMaxPrix();
+        Double avg = annoncesRepository.findAvgPrix();
+
+        fourchette.put("min", min != null ? min : 0.0);
+        fourchette.put("max", max != null ? max : 1000000.0);
+        fourchette.put("moyenne", avg != null ? avg : 100000.0);
+
+        return fourchette;
     }
 
     // ===== Gestion Disponibilité =====
@@ -365,10 +399,10 @@ public class AnnonceService {
     private void creerDisponibiliteParDefaut(Annonces annonce) {
         Disponibilite disponibilite = new Disponibilite();
         disponibilite.setIdAnnonce(annonce);
-        disponibilite.setDateDebut(new Date());  // Aujourd'hui
+        disponibilite.setDateDebut(new Date());
 
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, 1);  // +1 an
+        cal.add(Calendar.YEAR, 1);
         disponibilite.setDateFin(cal.getTime());
 
         disponibilite.setEstDisponible(true);
@@ -395,9 +429,10 @@ public class AnnonceService {
         dto.setTotalAvis(annonce.getTotalAvis());
         dto.setUrlImagePrincipale(annonce.getUrlImagePrincipale());
 
-        // Infos du propriétaire
-        dto.setProprietaireId(annonce.getIdProprietaire().getId());
-        dto.setProprietaireNom(annonce.getIdProprietaire().getNomEntreprise());
+        if (annonce.getIdProprietaire() != null) {
+            dto.setProprietaireId(annonce.getIdProprietaire().getId());
+            dto.setProprietaireNom(annonce.getIdProprietaire().getNomEntreprise());
+        }
 
         return dto;
     }
@@ -421,7 +456,7 @@ public class AnnonceService {
         dto.setUrlImagePrincipale(annonce.getUrlImagePrincipale());
         dto.setTypeAnnonce(annonce.getTypeAnnonce());
 
-        if (annonce.getUrlImages() != null) {
+        if (annonce.getUrlImages() != null && !annonce.getUrlImages().isEmpty()) {
             dto.setUrlImages(Arrays.asList(annonce.getUrlImages().split(",")));
         }
 

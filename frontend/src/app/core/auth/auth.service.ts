@@ -1,160 +1,198 @@
+// src/app/core/auth/auth.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'client' | 'owner' | 'admin';
-  avatar?: string;
-  phone?: string;
-  verified?: boolean;
-}
-
-export interface AuthToken {
-  accessToken: string;
-  refreshToken?: string;
-  expiresIn?: number;
-}
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly TOKEN_KEY = 'mboaspot_token';
+  private readonly REFRESH_TOKEN_KEY = 'mboaspot_refresh_token';
+  private readonly USER_KEY = 'mboaspot_user';
+
   private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
-  public isLoggedIn$ = this.isLoggedInSubject.asObservable();
-
-  constructor() { }
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   /**
-   * Récupère le token du localStorage
+   * Connexion utilisateur
    */
-  private getToken(): string | null {
-    return localStorage.getItem('accessToken');
+  login(credentials: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap(response => this.handleAuthSuccess(response))
+      );
   }
 
   /**
-   * Vérifie s'il existe un token valide
+   * Inscription utilisateur
    */
-  private hasToken(): boolean {
-    const token = this.getToken();
-    return !!token;
+  register(userData: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData)
+      .pipe(
+        tap(response => this.handleAuthSuccess(response))
+      );
   }
 
   /**
-   * Récupère l'utilisateur du localStorage
+   * Récupérer l'utilisateur connecté
    */
-  private getUserFromStorage(): User | null {
-    const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user) : null;
+  getCurrentUser(): Observable<AuthResponse> {
+    return this.http.get<AuthResponse>(`${environment.apiUrl}/auth/me`)
+      .pipe(
+        tap(response => {
+          const user: User = {
+            id: response.userId,
+            email: response.email,
+            nom: response.nom,
+            prenom: response.prenom,
+            role: response.role,
+            numeroTelephone: response.numeroTelephone,
+            photoProfil: response.photoProfil,
+            estActif: true
+          };
+          this.saveUser(user);
+        })
+      );
   }
 
   /**
-   * Effectue la connexion
+   * Rafraîchir le token
    */
-  login(email: string, password: string): Observable<AuthToken> {
-    // À remplacer par un appel API réel
-    return new Observable(observer => {
-      // Simulation API
-      setTimeout(() => {
-        const mockUser: User = {
-          id: '1',
-          email,
-          name: 'User',
-          role: 'client'
-        };
-
-        const mockToken: AuthToken = {
-          accessToken: 'mock-token-' + Date.now()
-        };
-
-        this.setSession(mockUser, mockToken);
-        observer.next(mockToken);
-        observer.complete();
-      }, 1000);
-    });
+  refreshToken(): Observable<{token: string}> {
+    const refreshToken = this.getRefreshToken();
+    return this.http.post<{token: string}>(`${environment.apiUrl}/auth/refresh-token`, { refreshToken })
+      .pipe(
+        tap(response => {
+          this.saveToken(response.token);
+        })
+      );
   }
 
   /**
-   * Effectue la déconnexion
+   * Déconnexion
    */
   logout(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
     this.currentUserSubject.next(null);
-    this.isLoggedInSubject.next(false);
+    this.router.navigate(['/auth/login']);
   }
 
   /**
-   * Enregistre une nouvelle session
+   * Vérifier si l'utilisateur est connecté
    */
-  private setSession(user: User, authToken: AuthToken): void {
-    localStorage.setItem('accessToken', authToken.accessToken);
-    if (authToken.refreshToken) {
-      localStorage.setItem('refreshToken', authToken.refreshToken);
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    return !!token && !this.isTokenExpired(token);
+  }
+
+  /**
+   * Obtenir le rôle de l'utilisateur
+   */
+  getUserRole(): string | null {
+    const user = this.currentUserSubject.value;
+    return user ? user.role : null;
+  }
+
+  /**
+   * Vérifier si l'utilisateur a un rôle spécifique
+   */
+  hasRole(role: string | string[]): boolean {
+    const userRole = this.getUserRole();
+    if (!userRole) return false;
+
+    if (Array.isArray(role)) {
+      return role.includes(userRole);
     }
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    return userRole === role;
+  }
+
+  /**
+   * Obtenir le token JWT
+   */
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Obtenir le refresh token
+   */
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
+
+  /**
+   * Obtenir l'ID de l'utilisateur connecté
+   */
+  getCurrentUserId(): number | null {
+    const user = this.currentUserSubject.value;
+    return user ? user.id : null;
+  }
+
+  // ========== Méthodes privées ==========
+
+  private handleAuthSuccess(response: AuthResponse): void {
+    this.saveToken(response.token);
+    if (response.refreshToken) {
+      this.saveRefreshToken(response.refreshToken);
+    }
+
+    const user: User = {
+      id: response.userId,
+      email: response.email,
+      nom: response.nom,
+      prenom: response.prenom,
+      role: response.role,
+      numeroTelephone: response.numeroTelephone,
+      photoProfil: response.photoProfil,
+      estActif: true
+    };
+
+    this.saveUser(user);
+  }
+
+  private saveToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
+
+  private saveRefreshToken(token: string): void {
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
+  }
+
+  private saveUser(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     this.currentUserSubject.next(user);
-    this.isLoggedInSubject.next(true);
   }
 
-  /**
-   * Récupère l'utilisateur actuel
-   */
-  getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
-  }
-
-  /**
-   * Vérifie si l'utilisateur est connecté
-   */
-  isLoggedIn(): boolean {
-    return this.isLoggedInSubject.value;
-  }
-
-  /**
-   * Rafraîchit le token
-   */
-  refreshToken(): Observable<AuthToken> {
-    return new Observable(observer => {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        observer.error(new Error('No refresh token available'));
-        return;
+  private getUserFromStorage(): User | null {
+    const userJson = localStorage.getItem(this.USER_KEY);
+    if (userJson) {
+      try {
+        return JSON.parse(userJson);
+      } catch {
+        return null;
       }
-
-      // À remplacer par un appel API réel
-      setTimeout(() => {
-        const mockToken: AuthToken = {
-          accessToken: 'mock-token-' + Date.now()
-        };
-        localStorage.setItem('accessToken', mockToken.accessToken);
-        observer.next(mockToken);
-        observer.complete();
-      }, 500);
-    });
+    }
+    return null;
   }
 
-  /**
-   * Inscription d'un nouvel utilisateur
-   */
-  register(email: string, password: string, name: string): Observable<User> {
-    return new Observable(observer => {
-      // À remplacer par un appel API réel
-      setTimeout(() => {
-        const newUser: User = {
-          id: Math.random().toString(),
-          email,
-          name,
-          role: 'client'
-        };
-        observer.next(newUser);
-        observer.complete();
-      }, 1000);
-    });
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp;
+      return (Math.floor((new Date).getTime() / 1000)) >= expiry;
+    } catch {
+      return true;
+    }
   }
 }

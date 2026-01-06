@@ -1,3 +1,77 @@
+<!-- src/app/shared/components/navbar/navbar.component.html -->
 <nav class="navbar">
-  <!-- Navbar content -->
+  <div class="container">
+    <div class="navbar-brand">
+      <a routerLink="/home" class="logo">
+        <i class="fas fa-home"></i>
+        <span>MboaSpot</span>
+      </a>
+      <button class="navbar-toggler" (click)="toggleMenu()" [class.active]="isMenuOpen">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="navbar-menu" [class.active]="isMenuOpen">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+            <i class="fas fa-home"></i> Accueil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/logements" routerLinkActive="active" class="nav-link">
+            <i class="fas fa-search"></i> Explorer
+          </a>
+        </li>
+      </ul>
+
+      <div class="navbar-actions" *ngIf="currentUser$ | async as user; else guestActions">
+        <a [routerLink]="getDashboardLink(user.role)" class="nav-link">
+          <i class="fas fa-chart-line"></i>
+          <span *ngIf="user.role === 'ADMIN'">Admin</span>
+          <span *ngIf="user.role === 'PROPRIETAIRE'">Mes annonces</span>
+          <span *ngIf="user.role === 'VOYAGEUR'">Mes réservations</span>
+        </a>
+
+        <a routerLink="/mes-favoris" class="nav-link" *ngIf="user.role === 'VOYAGEUR'">
+          <i class="fas fa-heart"></i>
+        </a>
+
+        <div class="user-menu">
+          <button class="user-btn">
+            <img [src]="user.photoProfil || 'assets/images/default-avatar.png'"
+                 alt="Avatar"
+                 class="user-avatar">
+            <span>{{user.prenom}}</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a [routerLink]="getDashboardLink(user.role)" class="dropdown-item">
+              <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            </a>
+            <a routerLink="/profil" class="dropdown-item">
+              <i class="fas fa-user"></i> Mon profil
+            </a>
+            <div class="dropdown-divider"></div>
+            <button (click)="logout()" class="dropdown-item logout">
+              <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #guestActions>
+        <div class="navbar-actions">
+          <a routerLink="/auth/login" class="btn btn-ghost">
+            <i class="fas fa-sign-in-alt"></i> Connexion
+          </a>
+          <a routerLink="/auth/register" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Inscription
+          </a>
+        </div>
+      </ng-template>
+    </div>
+  </div>
 </nav>

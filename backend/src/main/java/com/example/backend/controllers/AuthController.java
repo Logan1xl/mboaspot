@@ -1,5 +1,6 @@
 package com.example.backend.controllers;
 
+import com.example.backend.dto.RefreshTokenDTO;
 import com.example.backend.entities.Utilisateur;
 import com.example.backend.repositories.UtilisateurRepository;
 import com.example.backend.security.jwt.JwtUtils;
@@ -24,6 +25,8 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterDTO dto) {
@@ -40,17 +43,19 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("API fonctionne !");
-    }
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Map> refreshToken(@RequestBody RefreshTokenDTO dto) {
+        try {
+            String newToken = jwtUtils.generateTokenFromRefreshToken(dto.getRefreshToken());
 
-    // ====== GESTIONNAIRE D'EXCEPTIONS ======
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
+            Map response = new HashMap<>();
+            response.put("token", newToken);
 
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+    }
 }

@@ -86,6 +86,21 @@ public class JwtUtils {
         }
     }
 
+    public String generateTokenFromRefreshToken(String refreshToken){
+        //Verifier que le token est encore valide
+        if(!validateToken(refreshToken)){
+            throw new RuntimeException("Refresh token invalide ou expirer");
+
+        }
+        // extraire les infos de refresh token
+        String email = extractEmail(refreshToken);
+        String role = extractRole(refreshToken);
+        Long userId = extractUserId(refreshToken);
+
+        //generer le nouveau token
+        return generateToken(email,role,userId);
+    }
+
     public String getEmailFromToken(String token) {
         return extractEmail(token);
     }

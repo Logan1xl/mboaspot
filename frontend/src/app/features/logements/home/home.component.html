@@ -1,0 +1,194 @@
+<!-- src/app/features/logements/home/home.component.html -->
+<app-navbar></app-navbar>
+
+<main class="home-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <h1 class="hero-title">
+          Trouvez votre logement idéal au Cameroun
+        </h1>
+        <p class="hero-subtitle">
+          Des milliers de logements disponibles dans toutes les villes
+        </p>
+
+        <!-- Search Form -->
+        <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+          <div class="search-field">
+            <label>
+              <i class="fas fa-map-marker-alt"></i>
+            </label>
+            <select formControlName="ville" class="form-control" (change)="onVilleChange($event.target.value)">
+              <option value="">Toutes les villes</option>
+              <option *ngFor="let ville of villes" [value]="ville">{{ ville }}</option>
+            </select>
+          </div>
+
+          <div class="search-field">
+            <label>
+              <i class="fas fa-calendar"></i>
+            </label>
+            <input
+              type="date"
+              formControlName="dateDebut"
+              class="form-control"
+              placeholder="Date d'arrivée"
+            />
+          </div>
+
+          <div class="search-field">
+            <label>
+              <i class="fas fa-calendar"></i>
+            </label>
+            <input
+              type="date"
+              formControlName="dateFin"
+              class="form-control"
+              placeholder="Date de départ"
+            />
+          </div>
+
+          <div class="search-field">
+            <label>
+              <i class="fas fa-users"></i>
+            </label>
+            <input
+              type="number"
+              formControlName="nombrePersonnes"
+              class="form-control"
+              min="1"
+              placeholder="Personnes"
+            />
+          </div>
+
+          <button type="submit" class="btn-search">
+            <i class="fas fa-search"></i>
+            Rechercher
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-home"></i>
+          </div>
+          <h3>Large sélection</h3>
+          <p>Des milliers de logements disponibles partout au Cameroun</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Paiement sécurisé</h3>
+          <p>Transactions sécurisées via Mobile Money (MTN, Orange)</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <h3>Avis vérifiés</h3>
+          <p>Consultez les avis authentiques d'autres voyageurs</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h3>Support 24/7</h3>
+          <p>Notre équipe est disponible pour vous aider à tout moment</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top Annonces Section -->
+  <section class="top-annonces-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Logements populaires</h2>
+        <a routerLink="/logements" class="view-all">
+          Voir tout <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Carte avec tous les logements -->
+      <div class="map-section" *ngIf="mapMarkers.length > 0">
+        <h3>Carte des logements</h3>
+        <app-map
+          [markers]="mapMarkers"
+          [interactive]="false"
+          [zoom]="6"
+          [latitude]="4.0511"
+          [longitude]="9.7679"
+          height="500px"
+        ></app-map>
+      </div>
+
+      <div class="annonces-grid" *ngIf="!isLoading">
+        <app-card-logement
+          *ngFor="let annonce of topAnnonces"
+          [annonce]="annonce"
+          (favoriteToggle)="onFavoriteToggle($event)"
+        ></app-card-logement>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Chargement des logements...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Vous êtes propriétaire ?</h2>
+        <p>Mettez votre logement en location et générez des revenus</p>
+        <a routerLink="/auth/register" class="btn btn-cta">
+          <i class="fas fa-plus-circle"></i>
+          Proposer mon logement
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>MboaSpot</h4>
+        <p>Votre plateforme de location de logements au Cameroun</p>
+      </div>
+      <div class="footer-section">
+        <h4>Liens rapides</h4>
+        <ul>
+          <li><a routerLink="/logements">Explorer</a></li>
+          <li><a routerLink="/auth/register">Devenir hôte</a></li>
+          <li><a href="#">À propos</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <ul>
+          <li><i class="fas fa-envelope"></i> contact@mboaspot.cm</li>
+          <li><i class="fas fa-phone"></i> +237 6XX XXX XXX</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 MboaSpot. Tous droits réservés.</p>
+    </div>
+  </div>
+</footer>

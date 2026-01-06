@@ -1,0 +1,189 @@
+<!-- src/app/features/admin/dashboard/dashboard.component.html -->
+<app-navbar></app-navbar>
+
+<div class="admin-dashboard">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1>Administration</h1>
+        <p>Vue d'ensemble de la plateforme</p>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.totalUsers }}</h3>
+          <p>Utilisateurs</p>
+        </div>
+      </div>
+
+      <div class="stat-card success">
+        <div class="stat-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.totalAnnonces }}</h3>
+          <p>Annonces</p>
+        </div>
+      </div>
+
+      <div class="stat-card info">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.totalReservations }}</h3>
+          <p>Réservations</p>
+        </div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.revenuTotal | number:'1.0-0' }} FCFA</h3>
+          <p>Revenus totaux</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Villes populaires -->
+    <div class="popular-cities">
+      <h2>Villes populaires</h2>
+      <div class="cities-grid">
+        <div *ngFor="let city of stats.villesPopulaires" class="city-card">
+          <i class="fas fa-map-marker-alt"></i>
+          <h3>{{ city.ville }}</h3>
+          <p>{{ city.count }} annonces</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two columns layout -->
+    <div class="two-columns">
+
+      <!-- Annonces en attente -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2>
+            <i class="fas fa-clock"></i>
+            Annonces en attente
+            <span class="count">{{ annoncesEnAttente.length }}</span>
+          </h2>
+        </div>
+
+        <div class="list-items" *ngIf="annoncesEnAttente.length > 0">
+          <div *ngFor="let annonce of annoncesEnAttente" class="list-item">
+            <div class="item-info">
+              <h4>{{ annonce.titre }}</h4>
+              <p>Par {{ annonce.proprietaire }}</p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-icon success" (click)="approuverAnnonce(annonce)" title="Approuver">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="btn-icon danger" (click)="rejeterAnnonce(annonce)" title="Rejeter">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-message" *ngIf="annoncesEnAttente.length === 0">
+          <i class="fas fa-check-circle"></i>
+          <p>Aucune annonce en attente</p>
+        </div>
+      </div>
+
+      <!-- Signalements -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2>
+            <i class="fas fa-flag"></i>
+            Signalements
+            <span class="count alert">{{ signalements.length }}</span>
+          </h2>
+        </div>
+
+        <div class="list-items" *ngIf="signalements.length > 0">
+          <div *ngFor="let signal of signalements" class="list-item">
+            <div class="item-info">
+              <h4>{{ signal.annonce }}</h4>
+              <p class="reason">{{ signal.raison }}</p>
+            </div>
+            <button class="btn-sm" (click)="traiterSignalement(signal)">
+              Traiter
+            </button>
+          </div>
+        </div>
+
+        <div class="empty-message" *ngIf="signalements.length === 0">
+          <i class="fas fa-check-circle"></i>
+          <p>Aucun signalement</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Utilisateurs récents -->
+    <div class="section-card full-width">
+      <div class="section-header">
+        <h2>
+          <i class="fas fa-user-plus"></i>
+          Utilisateurs récents
+        </h2>
+        <a routerLink="/admin/users" class="view-all">
+          Voir tous <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="users-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of recentUsers">
+              <td>
+                <strong>{{ user.prenom }} {{ user.nom }}</strong>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+                  {{ getRoleLabel(user.role) }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [class.active]="user.estActif">
+                  {{ user.estActif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn-icon"
+                  (click)="toggleUserStatus(user)"
+                  [title]="user.estActif ? 'Désactiver' : 'Activer'"
+                >
+                  <i [class]="user.estActif ? 'fas fa-ban' : 'fas fa-check'"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

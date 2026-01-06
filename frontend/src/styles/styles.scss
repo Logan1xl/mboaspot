@@ -1,5 +1,5 @@
-@use './_variables' as *;
-@use './_mixins' as *;
+@use './variables' as *;
+@use './mixins' as *;
 @use './_reset' as *;
 @use './_typography' as *;
 
@@ -12,4 +12,5 @@
 
 body {
   background-color: $color-light-gray;
+
 }

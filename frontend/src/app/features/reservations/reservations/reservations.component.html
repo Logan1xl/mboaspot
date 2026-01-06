@@ -1,0 +1,121 @@
+<!-- src/app/features/reservations/mes-reservations/mes-reservations.component.html -->
+<app-navbar></app-navbar>
+
+<div class="mes-reservations-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1>Mes réservations</h1>
+      <p>Gérez toutes vos réservations en un seul endroit</p>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filters-bar">
+      <button
+        *ngFor="let filter of filters"
+        class="filter-btn"
+        [class.active]="activeFilter === filter.value"
+        (click)="applyFilter(filter.value)"
+      >
+        {{ filter.label }}
+        <span class="count">{{ filter.count }}</span>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Chargement de vos réservations...</p>
+    </div>
+
+    <!-- Liste des réservations -->
+    <div class="reservations-list" *ngIf="!isLoading && filteredReservations.length > 0">
+      <div
+        *ngFor="let reservation of filteredReservations"
+        class="reservation-card"
+      >
+        <div class="card-header">
+          <div class="header-left">
+            <h3>{{ reservation.annonceTitre || 'Logement' }}</h3>
+            <span class="code">Réf: {{ reservation.codeConfirmation }}</span>
+          </div>
+          <div class="status-badge" [ngClass]="getStatusClass(reservation.statut)">
+            <i [class]="getStatusIcon(reservation.statut)"></i>
+            {{ getStatusLabel(reservation.statut) }}
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <i class="fas fa-calendar"></i>
+              <div>
+                <span class="label">Dates</span>
+                <span class="value">
+                  {{ reservation.dateDebut | date:'dd/MM/yyyy' }} - {{ reservation.dateFin | date:'dd/MM/yyyy' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <i class="fas fa-users"></i>
+              <div>
+                <span class="label">Invités</span>
+                <span class="value">{{ reservation.nombreInvites }} personne(s)</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <i class="fas fa-money-bill"></i>
+              <div>
+                <span class="label">Montant total</span>
+                <span class="value">{{ reservation.prixTotal | number:'1.0-0' }} FCFA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button
+            *ngIf="canPay(reservation)"
+            class="btn btn-primary"
+            [routerLink]="['/paiement', reservation.id]"
+          >
+            <i class="fas fa-credit-card"></i>
+            Payer maintenant
+          </button>
+
+          <button
+            class="btn btn-ghost"
+            [routerLink]="['/logements', reservation.annonceId]"
+          >
+            <i class="fas fa-eye"></i>
+            Voir le logement
+          </button>
+
+          <button
+            *ngIf="canCancel(reservation)"
+            class="btn btn-danger"
+            (click)="annulerReservation(reservation)"
+          >
+            <i class="fas fa-times"></i>
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- État vide -->
+    <div class="empty-state" *ngIf="!isLoading && filteredReservations.length === 0">
+      <i class="fas fa-calendar-times"></i>
+      <h3>Aucune réservation</h3>
+      <p *ngIf="activeFilter === 'all'">Vous n'avez pas encore effectué de réservation.</p>
+      <p *ngIf="activeFilter !== 'all'">Aucune réservation avec ce statut.</p>
+      <a routerLink="/logements" class="btn btn-primary">
+        <i class="fas fa-search"></i>
+        Explorer les logements
+      </a>
+    </div>
+  </div>
+</div>

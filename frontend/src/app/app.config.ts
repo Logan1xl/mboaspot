@@ -1,9 +1,15 @@
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ToastrModule } from 'ngx-toastr';
+import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
+
 
 import { routes } from './app.routes';
 
@@ -11,8 +17,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+
     provideAnimations(),
     provideHttpClient(),
+     provideHttpClient(withInterceptors([jwtInterceptor])),
+     provideRouter(routes),
     importProvidersFrom([
       MatNativeDateModule,
       ToastrModule.forRoot({
@@ -20,8 +29,8 @@ export const appConfig: ApplicationConfig = {
         positionClass: 'toast-top-right',
         preventDuplicates: true,
         progressBar: true,
-        progressAnimation: 'increasing'
-      })
-    ])
-  ]
+        progressAnimation: 'increasing',
+      }),
+    ]),
+  ],
 };

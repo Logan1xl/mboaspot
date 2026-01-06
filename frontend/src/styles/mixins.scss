@@ -1,5 +1,5 @@
 // MboaSpot — Mixins SCSS réutilisables
-@use './_variables' as *;
+@use './variables' as *;
 
 // ============================================================================
 // RESPONSIVE
@@ -83,7 +83,7 @@
   transition: all $transition-normal;
   text-decoration: none;
   display: inline-block;
-  
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
@@ -94,13 +94,13 @@
   @include btn-base;
   background-color: $color-primary;
   color: $color-white;
-  
+
   &:hover:not(:disabled) {
     background-color: $color-primary-hover;
     box-shadow: $shadow-md;
     transform: translateY(-2px);
   }
-  
+
   &:active:not(:disabled) {
     background-color: $color-primary-active;
     transform: translateY(0);
@@ -111,13 +111,13 @@
   @include btn-base;
   background-color: $color-secondary;
   color: $color-white;
-  
+
   &:hover:not(:disabled) {
     background-color: $color-secondary-hover;
     box-shadow: $shadow-md;
     transform: translateY(-2px);
   }
-  
+
   &:active:not(:disabled) {
     background-color: $color-secondary-active;
   }
@@ -127,13 +127,13 @@
   @include btn-base;
   background-color: $color-accent;
   color: $color-white;
-  
+
   &:hover:not(:disabled) {
     background-color: $color-accent-hover;
     box-shadow: $shadow-md;
     transform: translateY(-2px);
   }
-  
+
   &:active:not(:disabled) {
     background-color: $color-accent-active;
   }
@@ -144,7 +144,7 @@
   background-color: transparent;
   color: $color-primary;
   border: 2px solid $color-primary;
-  
+
   &:hover:not(:disabled) {
     background-color: rgba($color-primary, 0.1);
   }
@@ -160,7 +160,7 @@
   box-shadow: $shadow-md;
   padding: $spacing-lg;
   transition: box-shadow $transition-normal, transform $transition-normal;
-  
+
   &:hover {
     box-shadow: $shadow-lg;
     transform: translateY(-4px);
@@ -186,19 +186,19 @@
   font-family: $font-family-base;
   font-size: $font-size-base;
   transition: border-color $transition-fast, box-shadow $transition-fast;
-  
+
   &:focus {
     outline: none;
     border-color: $color-primary;
     box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
   }
-  
+
   &:disabled {
     background-color: $color-light-gray;
     cursor: not-allowed;
     opacity: 0.6;
   }
-  
+
   &::placeholder {
     color: $color-gray;
   }
@@ -256,7 +256,7 @@
   max-width: $breakpoint-wide;
   margin: 0 auto;
   padding: 0 $spacing-md;
-  
+
   @include tablet-and-up {
     padding: 0 $spacing-lg;
   }
@@ -266,7 +266,7 @@
   display: grid;
   gap: $spacing-lg;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  
+
   @include mobile-only {
     grid-template-columns: 1fr;
   }
