@@ -1,6 +1,7 @@
 // src/app/features/owner/mes-annonces/mes-annonces.component.scss
-@use '../../../../styles/_variables' as *;
-@use '../../../../styles/_mixins' as *;
+@use "../../../../styles/_variables" as *;
+@use "../../../../styles/_mixins" as *;
+@use "sass:color";
 
 .mes-annonces-page {
   min-height: calc(100vh - 70px);
@@ -307,7 +308,7 @@
             cursor: pointer;
 
             &:hover {
-              color: darken($color-error, 10%);
+              background: color.scale($color-error, $lightness: -15.987%);
             }
           }
         }

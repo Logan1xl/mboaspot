@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MapComponent } from '../../../shared/components/map/map.component';
-import { AnnonceService } from '../../../core/services/annonce.service';
+import { AnnoncesService } from '../../../core/services/annonces.service';
 import { ReservationsService } from '../../../core/services/reservations.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Annonce } from '../../../core/models';
@@ -18,7 +18,8 @@ import { environment } from '../../../../environments/environment';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    NavbarComponent
+    NavbarComponent,
+    MapComponent
   ],
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss']
@@ -31,18 +32,20 @@ export class DetailComponent implements OnInit {
   reservationForm: FormGroup;
   isCheckingAvailability = false;
   isCreatingReservation = false;
-  
+  today: string;
+
   apiUrl = environment.apiUrl;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    private annoncesService: AnnonceService,
+    private annoncesService: AnnoncesService,
     private reservationsService: ReservationsService,
     private authService: AuthService,
     private toastr: ToastrService
   ) {
+    this.today = new Date().toISOString().split('T')[0];
     this.reservationForm = this.fb.group({
       dateDebut: ['', Validators.required],
       dateFin: ['', Validators.required],
@@ -60,7 +63,7 @@ export class DetailComponent implements OnInit {
       next: (annonce) => {
         this.annonce = annonce;
         this.isLoading = false;
-        
+
         // Mettre à jour le max invités
         if (annonce.maxInvites) {
           this.reservationForm.get('nombreInvites')?.setValidators([
@@ -80,19 +83,19 @@ export class DetailComponent implements OnInit {
 
   getImages(): string[] {
     if (!this.annonce) return [];
-    
+
     const images: string[] = [];
-    
+
     if (this.annonce.urlImagePrincipale) {
       images.push(`${this.apiUrl}${this.annonce.urlImagePrincipale}`);
     }
-    
+
     if (this.annonce.urlImages && this.annonce.urlImages.length > 0) {
       this.annonce.urlImages.forEach(url => {
         images.push(`${this.apiUrl}${url}`);
       });
     }
-    
+
     return images.length > 0 ? images : ['assets/images/default-house.jpg'];
   }
 
@@ -121,8 +124,8 @@ export class DetailComponent implements OnInit {
   openReservationModal(): void {
     if (!this.authService.isAuthenticated()) {
       this.toastr.warning('Veuillez vous connecter pour réserver', 'Connexion requise');
-      this.router.navigate(['/auth/login'], { 
-        queryParams: { returnUrl: this.router.url } 
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: this.router.url }
       });
       return;
     }
@@ -196,7 +199,7 @@ export class DetailComponent implements OnInit {
         this.isCreatingReservation = false;
         this.toastr.success('Réservation créée avec succès !', 'Succès');
         this.closeReservationModal();
-        
+
         // Rediriger vers la page de paiement
         this.router.navigate(['/paiement', reservation.id]);
       },
@@ -216,8 +219,8 @@ export class DetailComponent implements OnInit {
     const debut = new Date(this.reservationForm.value.dateDebut);
     const fin = new Date(this.reservationForm.value.dateFin);
     const jours = Math.ceil((fin.getTime() - debut.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     return jours > 0 ? jours * this.annonce.prix : 0;
   }
-  // test git 
+  // test git
 }

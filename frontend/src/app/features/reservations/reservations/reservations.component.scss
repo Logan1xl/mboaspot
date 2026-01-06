@@ -1,6 +1,7 @@
 // src/app/features/reservations/mes-reservations/mes-reservations.component.scss
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/mixins' as *;
+@use "../../../../styles/_variables" as *;
+@use "../../../../styles/_mixins" as *;
+@use "sass:color";
 
 .mes-reservations-page {
   min-height: calc(100vh - 70px);
@@ -111,7 +112,11 @@
         @include flex-between;
         padding: $spacing-lg;
         border-bottom: 1px solid $color-light-gray;
-        background: linear-gradient(to right, rgba($color-primary, 0.05), transparent);
+        background: linear-gradient(
+          to right,
+          rgba($color-primary, 0.05),
+          transparent
+        );
 
         @include mobile-only {
           flex-direction: column;
@@ -233,7 +238,7 @@
           transition: all $transition-fast;
 
           &:hover {
-            background: darken($color-error, 10%);
+            background: color.scale($color-error, $lightness: -15.987%);
           }
         }
       }

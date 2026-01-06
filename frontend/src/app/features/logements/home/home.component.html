@@ -7,22 +7,26 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <div class="container">
-        <h1 class="hero-title">
-          Trouvez votre logement idéal au Cameroun
-        </h1>
+        <h1 class="hero-title">Trouvez votre logement idéal au Cameroun</h1>
         <p class="hero-subtitle">
           Des milliers de logements disponibles dans toutes les villes
         </p>
 
         <!-- Search Form -->
-        <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+        <form
+          [formGroup]="searchForm"
+          (ngSubmit)="onSearch()"
+          class="search-form"
+        >
           <div class="search-field">
             <label>
               <i class="fas fa-map-marker-alt"></i>
             </label>
-            <select formControlName="ville" class="form-control" (change)="onVilleChange($event.target.value)">
+            <select formControlName="ville" class="form-control">
               <option value="">Toutes les villes</option>
-              <option *ngFor="let ville of villes" [value]="ville">{{ ville }}</option>
+              <option *ngFor="let ville of villes" [value]="ville">
+                {{ ville }}
+              </option>
             </select>
           </div>
 
@@ -182,7 +186,7 @@
       <div class="footer-section">
         <h4>Contact</h4>
         <ul>
-          <li><i class="fas fa-envelope"></i> contact@mboaspot.cm</li>
+        <li><i class="fas fa-envelope"></i> contact&#64;mboaspot.cm</li>
           <li><i class="fas fa-phone"></i> +237 6XX XXX XXX</li>
         </ul>
       </div>

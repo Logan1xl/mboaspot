@@ -55,7 +55,7 @@ export interface Statistiques {
   providedIn: 'root'
 })
 export class AnnonceService {
-  private apiUrl = `${environment.apiUrl}/api/annonces`;
+  private apiUrl = `${environment.apiUrl}/annonces`;
 
   constructor(private http: HttpClient) {}
 

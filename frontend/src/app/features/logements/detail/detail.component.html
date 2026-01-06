@@ -3,7 +3,6 @@
 
 <div class="detail-page" *ngIf="!isLoading && annonce">
   <div class="container">
-    
     <!-- Galerie d'images -->
     <div class="image-gallery">
       <div class="main-image">
@@ -16,7 +15,7 @@
         </button>
       </div>
       <div class="thumbnails">
-        <div 
+        <div
           *ngFor="let img of getImages(); let i = index"
           class="thumbnail"
           [class.active]="i === currentImageIndex"
@@ -29,10 +28,8 @@
 
     <!-- Contenu principal -->
     <div class="detail-layout">
-      
       <!-- Informations -->
       <div class="detail-content">
-        
         <!-- En-tête -->
         <div class="detail-header">
           <div>
@@ -44,7 +41,7 @@
             </div>
             <div class="rating">
               <div class="stars">
-                <i 
+                <i
                   *ngFor="let star of getStars(); let i = index"
                   [class]="isStarFilled(i) ? 'fas fa-star' : 'far fa-star'"
                 ></i>
@@ -96,16 +93,19 @@
               <i class="fas fa-user"></i>
             </div>
             <div class="owner-info">
-              <h3>{{ annonce.proprietaireNom || 'Propriétaire' }}</h3>
+              <h3>{{ annonce.proprietaireNom || "Propriétaire" }}</h3>
               <p>Membre depuis 2024</p>
             </div>
           </div>
         </div>
 
         <!-- Localisation avec carte -->
-        <div class="location-section" *ngIf="annonce.latitude && annonce.longitude">
+        <div
+          class="location-section"
+          *ngIf="annonce.latitude && annonce.longitude"
+        >
           <h2>Localisation</h2>
-          <app-map 
+          <app-map
             [latitude]="annonce.latitude"
             [longitude]="annonce.longitude"
             [zoom]="15"
@@ -123,12 +123,17 @@
       <div class="booking-card">
         <div class="price-section">
           <div class="price">
-            <span class="amount">{{ annonce.prix | number:'1.0-0' }} FCFA</span>
+            <span class="amount"
+              >{{ annonce.prix | number : "1.0-0" }} FCFA</span
+            >
             <span class="period">/ nuit</span>
           </div>
         </div>
 
-        <button class="btn btn-primary btn-block" (click)="openReservationModal()">
+        <button
+          class="btn btn-primary btn-block"
+          (click)="openReservationModal()"
+        >
           <i class="fas fa-calendar-check"></i>
           Réserver maintenant
         </button>
@@ -144,7 +149,11 @@
 </div>
 
 <!-- Modal de réservation -->
-<div class="modal-overlay" *ngIf="showReservationModal" (click)="closeReservationModal()">
+<div
+  class="modal-overlay"
+  *ngIf="showReservationModal"
+  (click)="closeReservationModal()"
+>
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Réserver ce logement</h2>
@@ -156,9 +165,9 @@
     <form [formGroup]="reservationForm" class="modal-body">
       <div class="form-group">
         <label>Date d'arrivée</label>
-        <input 
-          type="date" 
-          formControlName="dateDebut" 
+        <input
+          type="date"
+          formControlName="dateDebut"
           class="form-control"
           [min]="today"
         />
@@ -166,9 +175,9 @@
 
       <div class="form-group">
         <label>Date de départ</label>
-        <input 
-          type="date" 
-          formControlName="dateFin" 
+        <input
+          type="date"
+          formControlName="dateFin"
           class="form-control"
           [min]="reservationForm.value.dateDebut"
         />
@@ -176,26 +185,26 @@
 
       <div class="form-group">
         <label>Nombre de personnes</label>
-        <input 
-          type="number" 
-          formControlName="nombreInvites" 
+        <input
+          type="number"
+          formControlName="nombreInvites"
           class="form-control"
           min="1"
-          [max]="annonce?.maxInvites"
+          [max]="annonce?.maxInvites ?? 10"
         />
       </div>
 
       <div class="price-summary">
         <div class="summary-row">
           <span>Prix total</span>
-          <strong>{{ calculerPrixTotal() | number:'1.0-0' }} FCFA</strong>
+          <strong>{{ calculerPrixTotal() | number : "1.0-0" }} FCFA</strong>
         </div>
       </div>
     </form>
 
     <div class="modal-footer">
-      <button 
-        class="btn btn-ghost" 
+      <button
+        class="btn btn-ghost"
         (click)="verifierDisponibilite()"
         [disabled]="isCheckingAvailability"
       >
@@ -206,9 +215,9 @@
           <i class="fas fa-spinner fa-spin"></i> Vérification...
         </span>
       </button>
-      
-      <button 
-        class="btn btn-primary" 
+
+      <button
+        class="btn btn-primary"
         (click)="creerReservation()"
         [disabled]="isCreatingReservation || reservationForm.invalid"
       >

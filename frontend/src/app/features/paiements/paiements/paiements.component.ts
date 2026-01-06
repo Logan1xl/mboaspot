@@ -2,11 +2,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
-import { ReservationsService } from '../../core/services/reservations.service';
-import { PaiementsService } from '../../core/services/paiements.service';
-import { Reservation } from '../../core/models';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { ReservationsService } from '../../../core/services/reservations.service';
+import { PaiementsService } from '../../../core/services/paiements.service';
+import { Reservation } from '../../../core/models';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -14,7 +19,7 @@ import { ToastrService } from 'ngx-toastr';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NavbarComponent],
   templateUrl: './paiement.component.html',
-  styleUrls: ['./paiement.component.scss']
+  styleUrls: ['./paiement.component.scss'],
 })
 export class PaiementComponent implements OnInit {
   reservation: Reservation | null = null;
@@ -25,8 +30,18 @@ export class PaiementComponent implements OnInit {
   transactionId: string = '';
 
   methodesDisponibles = [
-    { value: 'MTN', label: 'MTN Mobile Money', icon: 'fas fa-mobile-alt', color: '#FFCC00' },
-    { value: 'ORANGE', label: 'Orange Money', icon: 'fas fa-mobile-alt', color: '#FF6600' }
+    {
+      value: 'MTN',
+      label: 'MTN Mobile Money',
+      icon: 'fas fa-mobile-alt',
+      color: '#FFCC00',
+    },
+    {
+      value: 'ORANGE',
+      label: 'Orange Money',
+      icon: 'fas fa-mobile-alt',
+      color: '#FF6600',
+    },
   ];
 
   constructor(
@@ -39,7 +54,10 @@ export class PaiementComponent implements OnInit {
   ) {
     this.paiementForm = this.fb.group({
       methode: ['MTN', Validators.required],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^6[0-9]{8}$/)]]
+      phoneNumber: [
+        '',
+        [Validators.required, Validators.pattern(/^6[0-9]{8}$/)],
+      ],
     });
   }
 
@@ -58,13 +76,16 @@ export class PaiementComponent implements OnInit {
         this.isLoading = false;
         this.toastr.error('Réservation non trouvée', 'Erreur');
         this.router.navigate(['/mes-reservations']);
-      }
+      },
     });
   }
 
   onSubmitPaiement(): void {
     if (this.paiementForm.invalid || !this.reservation) {
-      this.toastr.warning('Veuillez remplir tous les champs', 'Formulaire incomplet');
+      this.toastr.warning(
+        'Veuillez remplir tous les champs',
+        'Formulaire incomplet'
+      );
       return;
     }
 
@@ -78,17 +99,21 @@ export class PaiementComponent implements OnInit {
       reservationId: this.reservation.id,
       phoneNumber,
       montant: this.reservation.prixTotal,
-      methode
+      methode,
     };
 
-    const initiatePayment = methode === 'MTN'
-      ? this.paiementsService.initierPaiementMTN(paiementRequest)
-      : this.paiementsService.initierPaiementOrange(paiementRequest);
+    const initiatePayment =
+      methode === 'MTN'
+        ? this.paiementsService.initierPaiementMTN(paiementRequest)
+        : this.paiementsService.initierPaiementOrange(paiementRequest);
 
     initiatePayment.subscribe({
       next: (response) => {
         this.transactionId = response.transactionId;
-        this.toastr.info('Paiement en cours de traitement...', 'Veuillez patienter');
+        this.toastr.info(
+          'Paiement en cours de traitement...',
+          'Veuillez patienter'
+        );
 
         // Simuler la vérification du statut après 3 secondes
         setTimeout(() => {
@@ -98,8 +123,8 @@ export class PaiementComponent implements OnInit {
       error: () => {
         this.isProcessing = false;
         this.paymentStatus = 'failed';
-        this.toastr.error('Erreur lors de l\'initiation du paiement', 'Échec');
-      }
+        this.toastr.error("Erreur lors de l'initiation du paiement", 'Échec');
+      },
     });
   }
 
@@ -113,7 +138,9 @@ export class PaiementComponent implements OnInit {
 
           // Confirmer la réservation
           if (this.reservation) {
-            this.reservationsService.confirmerReservation(this.reservation.id).subscribe();
+            this.reservationsService
+              .confirmerReservation(this.reservation.id)
+              .subscribe();
           }
         } else {
           this.paymentStatus = 'failed';
@@ -125,7 +152,7 @@ export class PaiementComponent implements OnInit {
         this.paymentStatus = 'failed';
         this.isProcessing = false;
         this.toastr.error('Erreur lors de la vérification', 'Échec');
-      }
+      },
     });
   }
 
@@ -146,6 +173,8 @@ export class PaiementComponent implements OnInit {
 
   getMethodeColor(): string {
     const methode = this.paiementForm.get('methode')?.value;
-    return this.methodesDisponibles.find(m => m.value === methode)?.color || '#333';
+    return (
+      this.methodesDisponibles.find((m) => m.value === methode)?.color || '#333'
+    );
   }
 }

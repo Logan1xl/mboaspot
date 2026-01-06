@@ -77,33 +77,44 @@ export class RegisterComponent {
     }
   }
 
-  onSubmit(): void {
-    if (this.registerForm.invalid) {
-      Object.keys(this.registerForm.controls).forEach(key => {
-        this.registerForm.get(key)?.markAsTouched();
-      });
-      return;
-    }
+onSubmit(): void {
+  if (this.registerForm.invalid) {
+    Object.keys(this.registerForm.controls).forEach(key => {
+      this.registerForm.get(key)?.markAsTouched();
+    });
+    this.toastr.warning('Veuillez remplir tous les champs correctement', 'Formulaire incomplet');
+    return;
+  }
 
-    this.isLoading = true;
-    const formData = { ...this.registerForm.value };
-    delete formData.confirmPassword;
+  this.isLoading = true;
+  const formData = { ...this.registerForm.value };
+  delete formData.confirmPassword;
 
-    this.authService.register(formData).subscribe({
-      next: (response) => {
-        this.toastr.success('Compte créé avec succès !', 'Bienvenue');
+  this.authService.register(formData).subscribe({
+    next: (response) => {
+      this.isLoading = false;
+      this.toastr.success('Compte créé avec succès !', 'Bienvenue');
 
-        if (response.role === 'PROPRIETAIRE') {
-          this.router.navigate(['/owner/dashboard']);
-        } else {
-          this.router.navigate(['/home']);
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
+      if (response.role === 'PROPRIETAIRE') {
+        this.router.navigate(['/owner/dashboard']);
+      } else {
+        this.router.navigate(['/home']);
+      }
+    },
+    error: (error) => {
+      this.isLoading = false;
+      console.error('Erreur inscription:', error);
+      
+      // ✅ Gestion spécifique pour l'email déjà utilisé
+      if (error.status === 400 || error.error?.message?.includes('email')) {
+        this.toastr.error('Cet email est déjà utilisé. Veuillez en choisir un autre.', 'Email existant');
+        this.registerForm.get('email')?.setErrors({ emailExists: true });
+        this.registerForm.get('email')?.markAsTouched();
+      } else {
         const message = error.error?.message || 'Erreur lors de l\'inscription';
         this.toastr.error(message, 'Erreur');
       }
-    });
-  }
+    }
+  });
+}
 }

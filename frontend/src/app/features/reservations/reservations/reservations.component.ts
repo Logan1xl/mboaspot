@@ -12,8 +12,8 @@ import { ToastrService } from 'ngx-toastr';
   selector: 'app-mes-reservations',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent],
-  templateUrl: './mes-reservations.component.html',
-  styleUrls: ['./mes-reservations.component.scss']
+  templateUrl: './reservations.component.html',
+  styleUrls: ['./reservations.component.scss']
 })
 export class MesReservationsComponent implements OnInit {
   reservations: Reservation[] = [];
