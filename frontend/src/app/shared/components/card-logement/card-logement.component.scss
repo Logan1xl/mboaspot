@@ -1,103 +1,200 @@
+@use '../../../../styles/_variables' as *;
+@use '../../../../styles/_mixins' as *;
+
 .card-logement {
-  border: none;
-  border-radius: 12px;
+  @include card;
+  cursor: pointer;
   overflow: hidden;
-  background: white;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  height: 100%;
+  transition: all $transition-normal;
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    box-shadow: $shadow-xl;
   }
 
-  .thumb {
+  .card-image {
     position: relative;
+    width: 100%;
     height: 220px;
     overflow: hidden;
-    background: #f0f0f0;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
-      transition: transform 300ms ease;
+      transition: transform $transition-slow;
     }
 
-    &:hover img {
-      transform: scale(1.05);
-    }
-
-    .fav {
+    .favorite-btn {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      background: white;
+      top: $spacing-md;
+      right: $spacing-md;
+      width: 40px;
+      height: 40px;
+      @include flex-center;
+      background: rgba(255, 255, 255, 0.9);
       border: none;
-      padding: 8px 10px;
-      border-radius: 8px;
+      border-radius: 50%;
       cursor: pointer;
-      font-size: 18px;
-      transition: all 200ms ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: all $transition-fast;
+      z-index: 10;
+
+      i {
+        color: $color-gray;
+        font-size: $font-size-lg;
+        transition: color $transition-fast;
+      }
 
       &:hover {
-        background: #2ecc71;
+        background: $color-white;
         transform: scale(1.1);
+
+        i {
+          color: $color-error;
+        }
+      }
+
+      &.active i {
+        color: $color-error;
+      }
+    }
+
+    .card-badge {
+      position: absolute;
+      top: $spacing-md;
+      left: $spacing-md;
+      @include flex-center;
+      gap: $spacing-xs;
+      background: $color-primary;
+      color: $color-white;
+      padding: $spacing-xs $spacing-md;
+      border-radius: $border-radius-full;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      text-transform: uppercase;
+    }
+  }
+
+  &:hover .card-image img {
+    transform: scale(1.1);
+  }
+
+  .card-content {
+    padding: $spacing-lg;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    margin-bottom: $spacing-md;
+
+    .card-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-dark-gray;
+      margin: 0 0 $spacing-xs;
+      @include truncate;
+    }
+
+    .card-rating {
+      @include flex-start;
+      gap: $spacing-xs;
+
+      .stars {
+        @include flex-start;
+        gap: 2px;
+
+        i {
+          font-size: $font-size-sm;
+          color: $color-warning;
+        }
+      }
+
+      .rating-count {
+        font-size: $font-size-sm;
+        color: $color-gray;
       }
     }
   }
 
-  .body {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+  .card-location {
+    @include flex-start;
+    gap: $spacing-xs;
+    color: $color-gray;
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-md;
 
-    .title {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 1.3;
-      color: #2c3e50;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+    i {
+      color: $color-primary;
     }
+  }
 
-    .location {
-      margin: 0 0 12px 0;
-      color: #7f8c8d;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+  .card-features {
+    @include flex-start;
+    gap: $spacing-lg;
+    padding: $spacing-md 0;
+    border-top: 1px solid $color-light-gray;
+    border-bottom: 1px solid $color-light-gray;
+    margin-bottom: $spacing-md;
+
+    .feature {
+      @include flex-start;
+      gap: $spacing-xs;
+      font-size: $font-size-sm;
+      color: $color-dark-gray;
+
+      i {
+        color: $color-secondary;
+      }
     }
+  }
 
-    .meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 12px;
-      border-top: 1px solid #ecf0f1;
-      margin-top: auto;
+  .card-footer {
+    @include flex-between;
+    margin-top: auto;
 
-      .price {
-        font-weight: 700;
-        font-size: 16px;
-        color: #2ecc71;
+    .card-price {
+      @include flex-column;
+      gap: 2px;
+
+      .price-amount {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+        color: $color-primary;
       }
 
-      .rating {
-        font-size: 13px;
-        color: #f39c12;
-        font-weight: 600;
+      .price-period {
+        font-size: $font-size-sm;
+        color: $color-gray;
+      }
+    }
+
+    .btn-view {
+      @include flex-center;
+      gap: $spacing-xs;
+      background: $color-secondary;
+      color: $color-white;
+      border: none;
+      padding: $spacing-sm $spacing-md;
+      border-radius: $border-radius-sm;
+      font-weight: $font-weight-semibold;
+      cursor: pointer;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: $color-secondary-hover;
+        transform: translateX(4px);
+      }
+
+      i {
+        transition: transform $transition-fast;
+      }
+
+      &:hover i {
+        transform: translateX(4px);
       }
     }
   }

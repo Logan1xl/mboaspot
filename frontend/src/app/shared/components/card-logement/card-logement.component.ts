@@ -1,32 +1,42 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { Annonce } from '../../../core/models';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-card-logement',
-  templateUrl: './card-logement.component.html',
-  styleUrls: ['./card-logement.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterLink],
+  templateUrl: './card-logement.component.html',
+  styleUrls: ['./card-logement.component.scss']
 })
 export class CardLogementComponent {
-  /**
-   * `logement` : objet contenant les informations de l'annonce
-   * Exemple attendu : { id, title, prix, noteMoyenne, localisation: { ville }, images: [] }
-   */
-  @Input() logement: any;
+  @Input() annonce!: Annonce;
+  @Input() showFavoriteBtn = true;
+  @Input() isFavorite = false;
+  @Output() favoriteToggle = new EventEmitter<number>();
 
-  /** Indique si le composant est en état de chargement */
-  @Input() loading = false;
+  apiUrl = environment.apiUrl;
 
-  /** Emet un événement lorsque l'utilisateur clique sur le bouton favoris */
-  @Output() favorite = new EventEmitter<any>();
+  getImageUrl(): string {
+    if (this.annonce.urlImagePrincipale) {
+      return `${environment.apiUrl}${this.annonce.urlImagePrincipale}`;
+    }
+    return 'assets/images/default-house.jpg';
+  }
 
-  /**
-   * Méthode appelée au clic sur le bouton favoris.
-   * On stoppe la propagation pour éviter la navigation sur la carte.
-   */
-  onFavorite(event: Event) {
+  toggleFavorite(event: Event): void {
+    event.preventDefault();
     event.stopPropagation();
-    this.favorite.emit(this.logement);
+    this.favoriteToggle.emit(this.annonce.id);
+  }
+
+  getStars(): number[] {
+    return Array(5).fill(0).map((_, i) => i);
+  }
+
+  isStarFilled(index: number): boolean {
+    return index < Math.floor(this.annonce.evaluationMoyenne || 0);
   }
 }

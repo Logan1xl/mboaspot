@@ -1,0 +1,182 @@
+<!-- src/app/features/logements/listing/listing.component.html -->
+<app-navbar></app-navbar>
+
+<div class="listing-page">
+  <div class="container">
+
+    <!-- Header avec filtres -->
+    <div class="listing-header">
+      <div class="header-left">
+        <h1>Explorez nos logements</h1>
+        <p class="results-count">{{ annonces.length }} logement(s) trouvé(s)</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-filters" (click)="toggleFilters()">
+          <i class="fas fa-filter"></i>
+          Filtres
+        </button>
+        <select class="sort-select" formControlName="sort" [formGroup]="filterForm">
+          <option value="">Trier par</option>
+          <option *ngFor="let opt of sortOptions" [value]="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Layout avec sidebar et contenu -->
+    <div class="listing-layout">
+
+      <!-- Sidebar Filtres -->
+      <aside class="filters-sidebar" [class.show]="showFilters">
+        <div class="sidebar-header">
+          <h3>Filtres</h3>
+          <button class="btn-close" (click)="toggleFilters()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="filterForm" class="filters-form">
+
+          <!-- Ville -->
+          <div class="filter-group">
+            <label>
+              <i class="fas fa-map-marker-alt"></i>
+              Ville
+            </label>
+            <select formControlName="ville" class="form-control">
+              <option value="">Toutes les villes</option>
+              <option *ngFor="let ville of villes" [value]="ville">{{ ville }}</option>
+            </select>
+          </div>
+
+          <!-- Type de logement -->
+          <div class="filter-group">
+            <label>
+              <i class="fas fa-home"></i>
+              Type de logement
+            </label>
+            <select formControlName="typeAnnonce" class="form-control">
+              <option value="">Tous les types</option>
+              <option *ngFor="let type of types" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+
+          <!-- Prix -->
+          <div class="filter-group">
+            <label>
+              <i class="fas fa-money-bill"></i>
+              Prix (FCFA / nuit)
+            </label>
+            <div class="price-inputs">
+              <input
+                type="number"
+                formControlName="prixMin"
+                class="form-control"
+                placeholder="Min"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                formControlName="prixMax"
+                class="form-control"
+                placeholder="Max"
+              />
+            </div>
+          </div>
+
+          <!-- Chambres -->
+          <div class="filter-group">
+            <label>
+              <i class="fas fa-bed"></i>
+              Nombre de chambres
+            </label>
+            <select formControlName="nbreChambres" class="form-control">
+              <option value="">Tous</option>
+              <option value="1">1 chambre</option>
+              <option value="2">2 chambres</option>
+              <option value="3">3 chambres</option>
+              <option value="4">4+ chambres</option>
+            </select>
+          </div>
+
+          <!-- Évaluation -->
+          <div class="filter-group">
+            <label>
+              <i class="fas fa-star"></i>
+              Évaluation minimum
+            </label>
+            <select formControlName="evaluationMin" class="form-control">
+              <option value="">Toutes</option>
+              <option value="3">3+ étoiles</option>
+              <option value="4">4+ étoiles</option>
+              <option value="4.5">4.5+ étoiles</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn-reset" (click)="resetFilters()">
+            <i class="fas fa-redo"></i>
+            Réinitialiser
+          </button>
+        </form>
+      </aside>
+
+      <!-- Contenu principal -->
+      <div class="listing-content">
+
+        <!-- Loading -->
+        <div class="loading-state" *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Recherche en cours...</p>
+        </div>
+
+        <!-- Résultats -->
+        <div class="annonces-grid" *ngIf="!isLoading && filteredAnnonces.length > 0">
+          <app-card-logement
+            *ngFor="let annonce of filteredAnnonces"
+            [annonce]="annonce"
+            (favoriteToggle)="onFavoriteToggle($event)"
+          ></app-card-logement>
+        </div>
+
+        <!-- Aucun résultat -->
+        <div class="empty-state" *ngIf="!isLoading && filteredAnnonces.length === 0">
+          <i class="fas fa-search"></i>
+          <h3>Aucun logement trouvé</h3>
+          <p>Essayez de modifier vos critères de recherche</p>
+          <button class="btn btn-primary" (click)="resetFilters()">
+            Réinitialiser les filtres
+          </button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="!isLoading && filteredAnnonces.length > 0">
+          <button
+            class="page-btn"
+            [disabled]="currentPage === 0"
+            (click)="changePage(currentPage - 1)"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <button
+            *ngFor="let page of getPages()"
+            class="page-btn"
+            [class.active]="page === currentPage"
+            (click)="changePage(page)"
+          >
+            {{ page + 1 }}
+          </button>
+
+          <button
+            class="page-btn"
+            [disabled]="currentPage === totalPages - 1"
+            (click)="changePage(currentPage + 1)"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

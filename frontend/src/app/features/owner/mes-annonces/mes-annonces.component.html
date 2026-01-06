@@ -1,0 +1,250 @@
+<!-- src/app/features/owner/mes-annonces/mes-annonces.component.html -->
+<app-navbar></app-navbar>
+
+<div class="mes-annonces-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1>Mes annonces</h1>
+        <p>Gérez toutes vos annonces</p>
+      </div>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i class="fas fa-plus"></i>
+        Nouvelle annonce
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Chargement...</p>
+    </div>
+
+    <!-- Liste des annonces -->
+    <div class="annonces-grid" *ngIf="!isLoading && annonces.length > 0">
+      <div *ngFor="let annonce of annonces" class="annonce-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(annonce.urlImagePrincipale || '')" [alt]="annonce.titre" />
+          <div class="status-badge" [class.active]="annonce.estActive">
+            {{ annonce.estActive ? 'Active' : 'Inactive' }}
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h3>{{ annonce.titre }}</h3>
+          <p class="description">{{ annonce.description }}</p>
+
+          <div class="info-row">
+            <span><i class="fas fa-map-marker-alt"></i> {{ annonce.ville }}</span>
+            <span><i class="fas fa-bed"></i> {{ annonce.nbreChambres }} ch.</span>
+          </div>
+
+          <div class="price">{{ annonce.prix | number:'1.0-0' }} FCFA/nuit</div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-icon" (click)="openEditModal(annonce)" title="Modifier">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button
+            class="btn-icon"
+            (click)="toggleActivation(annonce)"
+            [title]="annonce.estActive ? 'Désactiver' : 'Activer'"
+          >
+            <i [class]="annonce.estActive ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+          <button class="btn-icon danger" (click)="deleteAnnonce(annonce)" title="Supprimer">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="!isLoading && annonces.length === 0">
+      <i class="fas fa-home"></i>
+      <h3>Aucune annonce</h3>
+      <p>Créez votre première annonce pour commencer</p>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i class="fas fa-plus"></i>
+        Créer une annonce
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Créer/Modifier -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Modifier' : 'Créer' }} une annonce</h2>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="annonceForm" (ngSubmit)="onSubmit()" class="modal-body">
+
+      <!-- Informations de base -->
+      <div class="form-section">
+        <h3>Informations de base</h3>
+
+        <div class="form-group">
+          <label>Titre <span class="required">*</span></label>
+          <input type="text" formControlName="titre" class="form-control"
+                 placeholder="Ex: Bel appartement meublé à Douala" />
+          <div class="error" *ngIf="annonceForm.get('titre')?.invalid && annonceForm.get('titre')?.touched">
+            Le titre est requis (minimum 5 caractères)
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type <span class="required">*</span></label>
+            <select formControlName="typeAnnonce" class="form-control">
+              <option *ngFor="let type of types" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Prix/nuit (FCFA) <span class="required">*</span></label>
+            <input type="number" formControlName="prix" class="form-control" placeholder="50000" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description <span class="required">*</span></label>
+          <textarea formControlName="description" class="form-control" rows="4"
+                    placeholder="Décrivez votre logement..."></textarea>
+          <div class="error" *ngIf="annonceForm.get('description')?.invalid && annonceForm.get('description')?.touched">
+            La description est requise (minimum 20 caractères)
+          </div>
+        </div>
+      </div>
+
+      <!-- Localisation -->
+      <div class="form-section">
+        <h3>Localisation</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ville <span class="required">*</span></label>
+            <select formControlName="ville" class="form-control">
+              <option value="">Sélectionner...</option>
+              <option *ngFor="let ville of villes" [value]="ville">{{ ville }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Adresse <span class="required">*</span></label>
+            <input type="text" formControlName="adresse" class="form-control"
+                   placeholder="Quartier, rue..." />
+          </div>
+        </div>
+
+        <!-- Carte interactive pour sélectionner la position -->
+        <div class="map-selector">
+          <label>Position sur la carte</label>
+          <p class="helper-text">Cliquez sur la carte pour définir la position exacte de votre logement</p>
+          <app-map
+            [latitude]="annonceForm.get('latitude')?.value || 4.0511"
+            [longitude]="annonceForm.get('longitude')?.value || 9.7679"
+            [zoom]="13"
+            [interactive]="true"
+            (locationSelected)="onMapLocationSelected($event)"
+            height="400px"
+          ></app-map>
+          <div class="coordinates" *ngIf="annonceForm.get('latitude')?.value">
+            <small>
+              <i class="fas fa-map-pin"></i>
+              Position : {{ annonceForm.get('latitude')?.value | number:'1.4-4' }},
+              {{ annonceForm.get('longitude')?.value | number:'1.4-4' }}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Capacité -->
+      <div class="form-section">
+        <h3>Capacité</h3>
+
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label>Chambres <span class="required">*</span></label>
+            <input type="number" formControlName="nbreChambres" class="form-control" min="1" />
+          </div>
+
+          <div class="form-group">
+            <label>Lits <span class="required">*</span></label>
+            <input type="number" formControlName="nbreLits" class="form-control" min="1" />
+          </div>
+
+          <div class="form-group">
+            <label>Invités max <span class="required">*</span></label>
+            <input type="number" formControlName="maxInvites" class="form-control" min="1" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos -->
+      <div class="form-section">
+        <h3>Photos</h3>
+
+        <div class="upload-zone">
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+            multiple
+            (change)="onFileSelect($event)"
+            style="display: none"
+          />
+          <label for="fileInput" class="upload-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Cliquez pour ajouter des photos (max 5)</span>
+          </label>
+        </div>
+
+        <div class="selected-files" *ngIf="selectedFiles.length > 0">
+          <div *ngFor="let file of selectedFiles; let i = index" class="file-item">
+            <i class="fas fa-image"></i>
+            <span>{{ file.name }}</span>
+            <button type="button" (click)="removeFile(i)" class="btn-remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="uploaded-images" *ngIf="uploadedImageUrls.length > 0">
+          <p>Images existantes :</p>
+          <div class="images-preview">
+            <img *ngFor="let url of uploadedImageUrls" [src]="getImageUrl(url)" alt="Preview" />
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" (click)="closeModal()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting || annonceForm.invalid"
+      >
+        <span *ngIf="!isSubmitting">
+          <i class="fas fa-check"></i>
+          {{ isEditMode ? 'Modifier' : 'Créer' }}
+        </span>
+        <span *ngIf="isSubmitting">
+          <i class="fas fa-spinner fa-spin"></i>
+          Traitement...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
