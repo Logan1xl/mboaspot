@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import {MatSnackBarRef} from '@angular/material/snack-bar';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
@@ -49,6 +50,7 @@ export class NotificationService {
       progressBar: true
     });
   }
+
 
   /**
    * Affiche une notification générique
