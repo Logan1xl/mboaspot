@@ -102,7 +102,7 @@ export class PdfService {
       });
 
       yPosition += 7;
-      
+
       // Data
       tableData.forEach(row => {
         xPosition = 20;

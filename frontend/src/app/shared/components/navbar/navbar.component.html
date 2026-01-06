@@ -1,5 +1,4 @@
-/ src/app/shared/components/navbar/navbar.component.html
-
+<!-- src/app/shared/components/navbar/navbar.component.html -->
 <nav class="navbar">
   <div class="container">
     <div class="navbar-brand">
@@ -17,7 +16,7 @@
     <div class="navbar-menu" [class.active]="isMenuOpen">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a routerLink="/home" routerLinkActive="active" class="nav-link">
+          <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
             <i class="fas fa-home"></i> Accueil
           </a>
         </li>

@@ -59,3 +59,345 @@ app-root {
   right: 20px;
 }
 // Third-party CSS (Material, toastr) are loaded via angular.json styles array.
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// Importation de Material Theme
+
+
+// Styles personnalisés pour les notifications Material
+.custom-snackbar {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 12px !important;
+  padding: 0 !important;
+  min-width: 300px;
+  max-width: 500px;
+
+  .mat-simple-snackbar {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    color: white;
+  }
+
+  .mat-simple-snack-bar-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .mat-button {
+    color: white !important;
+    font-weight: 600;
+    margin-left: 1rem;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// Notification Success
+.notification-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4) !important;
+
+  .mat-simple-snack-bar-content::before {
+    content: '✓';
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 0.75rem;
+  }
+}
+
+// Notification Error
+.notification-error {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+  box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4) !important;
+
+  .mat-simple-snack-bar-content::before {
+    content: '✗';
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 0.75rem;
+  }
+}
+
+// Notification Warning
+.notification-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%) !important;
+  color: #212529 !important;
+  box-shadow: 0 5px 20px rgba(255, 193, 7, 0.4) !important;
+
+  .mat-simple-snack-bar-content::before {
+    content: '⚠';
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 0.75rem;
+  }
+
+  .mat-simple-snackbar,
+  .mat-button {
+    color: #212529 !important;
+  }
+
+  .mat-button:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+// Notification Info
+.notification-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+  box-shadow: 0 5px 20px rgba(23, 162, 184, 0.4) !important;
+
+  .mat-simple-snack-bar-content::before {
+    content: 'ℹ';
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 0.75rem;
+  }
+}
+
+// Notification Loading
+.notification-loading {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+  box-shadow: 0 5px 20px rgba(108, 117, 125, 0.4) !important;
+
+  .mat-simple-snack-bar-content {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+// Dialog personnalisé
+.custom-dialog {
+  .mat-dialog-container {
+    border-radius: 15px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .mat-dialog-title {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+
+  .mat-dialog-content {
+    padding: 2rem;
+    margin: 0;
+  }
+
+  .mat-dialog-actions {
+    padding: 1rem 1.5rem;
+    margin: 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+
+    .mat-button {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mat-raised-button {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+      box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+      transition: all 0.3s;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Scrollbar personnalisée
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  border-radius: 10px;
+
+  &:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  }
+}
+
+// Transitions globales
+* {
+  transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+}
+
+// Material Form Field personnalisé
+.mat-form-field {
+  width: 100%;
+
+  .mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mat-form-field-underline {
+    background-color: #dee2e6;
+  }
+
+  &.mat-focused {
+    .mat-form-field-underline {
+      background-color: #dc3545;
+    }
+
+    .mat-form-field-label {
+      color: #dc3545;
+    }
+  }
+
+  .mat-form-field-ripple {
+    background-color: #dc3545;
+  }
+}
+
+// Material Select personnalisé
+.mat-select {
+  .mat-select-trigger {
+    .mat-select-value {
+      color: #212529;
+    }
+  }
+
+  &.mat-select-disabled {
+    .mat-select-value {
+      color: #6c757d;
+    }
+  }
+}
+
+.mat-option {
+  &:hover:not(.mat-option-disabled),
+  &.mat-selected:not(.mat-option-disabled) {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  &.mat-active {
+    background: rgba(220, 53, 69, 0.05);
+    color: #dc3545;
+  }
+}
+
+// Material Checkbox personnalisé
+.mat-checkbox {
+  .mat-checkbox-frame {
+    border-color: #dee2e6;
+  }
+
+  &.mat-checkbox-checked {
+    .mat-checkbox-background {
+      background-color: #dc3545;
+    }
+  }
+
+  &:hover {
+    .mat-checkbox-frame {
+      border-color: #dc3545;
+    }
+  }
+}
+
+// Material Progress Spinner personnalisé
+.mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: #dc3545;
+}
+
+// Material Button personnalisé
+.mat-button,
+.mat-raised-button,
+.mat-flat-button,
+.mat-stroked-button {
+  border-radius: 25px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  &.mat-primary {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+  }
+
+  &.mat-accent {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+  }
+
+  &.mat-warn {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #212529;
+  }
+}
+
+// Responsive Material
+@media (max-width: 768px) {
+  .custom-snackbar {
+    min-width: 280px;
+    max-width: 90vw;
+
+    .mat-simple-snackbar {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .custom-dialog {
+    max-width: 90vw !important;
+
+    .mat-dialog-title {
+      padding: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .mat-dialog-content {
+      padding: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .mat-dialog-actions {
+      padding: 0.75rem 1rem;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

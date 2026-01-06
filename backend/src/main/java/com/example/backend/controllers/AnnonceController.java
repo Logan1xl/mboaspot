@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Array;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -145,14 +144,84 @@ public class AnnonceController {
         return ResponseEntity.ok(annonceService.getTopAnnonces());
     }
 
+    // ===== NOUVEAUX ENDPOINTS POUR LA PAGE HOME =====
+
+    /**
+     * Récupère la liste de toutes les villes disponibles
+     */
     @GetMapping("/villes")
     public ResponseEntity<List<String>> getVillesDisponibles() {
         return ResponseEntity.ok(annonceService.getVillesDisponibles());
     }
 
+    /**
+     * Récupère les quartiers d'une ville spécifique
+     */
     @GetMapping("/quartiers")
     public ResponseEntity<List<String>> getQuartiers(@RequestParam String ville) {
         return ResponseEntity.ok(annonceService.getQuartiersByVille(ville));
+    }
+
+    /**
+     * Récupère tous les types d'annonces disponibles
+     */
+    @GetMapping("/types")
+    public ResponseEntity<List<String>> getTypesAnnonces() {
+        return ResponseEntity.ok(annonceService.getTypesAnnonces());
+    }
+
+    /**
+     * Récupère les statistiques pour la page d'accueil
+     */
+    @GetMapping("/statistiques")
+    public ResponseEntity<Map<String, Object>> getStatistiques() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalAnnonces", annonceService.countAnnoncesActives());
+        stats.put("villesDisponibles", annonceService.getVillesDisponibles().size());
+        stats.put("typesLogements", annonceService.getTypesAnnonces().size());
+        return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * Recherche rapide pour la barre de recherche principale
+     */
+    @GetMapping("/recherche-rapide")
+    public ResponseEntity<List<AnnonceDTO>> rechercheRapide(
+            @RequestParam(required = false) String ville,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Double prixMin,
+            @RequestParam(required = false) Double prixMax,
+            @RequestParam(required = false) Integer chambres,
+            @RequestParam(required = false) Integer invites) {
+
+        RechercheDTO recherche = new RechercheDTO();
+        recherche.setVille(ville);
+        recherche.setTypeAnnonce(type);
+        recherche.setPrixMin(prixMin);
+        recherche.setPrixMax(prixMax);
+        recherche.setNbreChambresMin(chambres);
+        recherche.setMaxInvitesMin(invites);
+
+        List<AnnonceDTO> resultats = annonceService.rechercherAnnonces(recherche);
+        return ResponseEntity.ok(resultats);
+    }
+
+    /**
+     * Récupère les annonces recommandées pour la page d'accueil
+     */
+    @GetMapping("/recommandations")
+    public ResponseEntity<List<AnnonceDTO>> getRecommandations(
+            @RequestParam(defaultValue = "6") int limit) {
+        return ResponseEntity.ok(annonceService.getAnnoncesRecommandees(limit));
+    }
+
+    /**
+     * Récupère les fourchettes de prix disponibles
+     */
+    @GetMapping("/fourchettes-prix")
+    public ResponseEntity<Map<String, Double>> getFourchettePrix() {
+        Map<String, Double> fourchette = annonceService.getFourchettePrix();
+        return ResponseEntity.ok(fourchette);
     }
 
     // ===== Gestion Disponibilité =====
@@ -201,8 +270,6 @@ public class AnnonceController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 
     // ===== Gestion des exceptions =====
 

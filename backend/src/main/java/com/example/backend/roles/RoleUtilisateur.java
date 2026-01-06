@@ -4,5 +4,5 @@ public enum RoleUtilisateur {
     PROPRIETAIRE,
     ADMIN,
     VOYAGEUR
-
 }
+

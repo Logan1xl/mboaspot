@@ -1,5 +1,5 @@
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/mixins' as *;
+@use '../../../../styles/_variables' as *;
+@use '../../../../styles/_mixins' as *;
 
 button {
   font-family: $font-family-base;
