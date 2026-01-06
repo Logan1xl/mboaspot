@@ -1,0 +1,230 @@
+<!-- src/app/features/logements/detail/detail.component.html -->
+<app-navbar></app-navbar>
+
+<div class="detail-page" *ngIf="!isLoading && annonce">
+  <div class="container">
+    
+    <!-- Galerie d'images -->
+    <div class="image-gallery">
+      <div class="main-image">
+        <img [src]="getImages()[currentImageIndex]" [alt]="annonce.titre" />
+        <button class="nav-btn prev" (click)="prevImage()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-btn next" (click)="nextImage()">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div class="thumbnails">
+        <div 
+          *ngFor="let img of getImages(); let i = index"
+          class="thumbnail"
+          [class.active]="i === currentImageIndex"
+          (click)="selectImage(i)"
+        >
+          <img [src]="img" alt="Image {{ i + 1 }}" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="detail-layout">
+      
+      <!-- Informations -->
+      <div class="detail-content">
+        
+        <!-- En-tête -->
+        <div class="detail-header">
+          <div>
+            <span class="badge-type">{{ annonce.typeAnnonce }}</span>
+            <h1>{{ annonce.titre }}</h1>
+            <div class="location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ annonce.ville }}</span>
+            </div>
+            <div class="rating">
+              <div class="stars">
+                <i 
+                  *ngFor="let star of getStars(); let i = index"
+                  [class]="isStarFilled(i) ? 'fas fa-star' : 'far fa-star'"
+                ></i>
+              </div>
+              <span>({{ annonce.totalAvis }} avis)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Caractéristiques -->
+        <div class="features-section">
+          <h2>Caractéristiques</h2>
+          <div class="features-grid">
+            <div class="feature-item">
+              <i class="fas fa-bed"></i>
+              <div>
+                <strong>{{ annonce.nbreChambres }}</strong>
+                <span>Chambres</span>
+              </div>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-door-open"></i>
+              <div>
+                <strong>{{ annonce.nbreLits }}</strong>
+                <span>Lits</span>
+              </div>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-users"></i>
+              <div>
+                <strong>{{ annonce.maxInvites }}</strong>
+                <span>Invités max</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="description-section">
+          <h2>Description</h2>
+          <p>{{ annonce.description }}</p>
+        </div>
+
+        <!-- Propriétaire -->
+        <div class="owner-section">
+          <h2>Propriétaire</h2>
+          <div class="owner-card">
+            <div class="owner-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="owner-info">
+              <h3>{{ annonce.proprietaireNom || 'Propriétaire' }}</h3>
+              <p>Membre depuis 2024</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Localisation avec carte -->
+        <div class="location-section" *ngIf="annonce.latitude && annonce.longitude">
+          <h2>Localisation</h2>
+          <app-map 
+            [latitude]="annonce.latitude"
+            [longitude]="annonce.longitude"
+            [zoom]="15"
+            [interactive]="false"
+            height="350px"
+          ></app-map>
+          <p class="address-info">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ annonce.adresse }}, {{ annonce.ville }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Carte de réservation -->
+      <div class="booking-card">
+        <div class="price-section">
+          <div class="price">
+            <span class="amount">{{ annonce.prix | number:'1.0-0' }} FCFA</span>
+            <span class="period">/ nuit</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" (click)="openReservationModal()">
+          <i class="fas fa-calendar-check"></i>
+          Réserver maintenant
+        </button>
+
+        <div class="booking-info">
+          <p><i class="fas fa-check-circle"></i> Confirmation instantanée</p>
+          <p><i class="fas fa-shield-alt"></i> Paiement sécurisé</p>
+          <p><i class="fas fa-undo"></i> Annulation gratuite</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de réservation -->
+<div class="modal-overlay" *ngIf="showReservationModal" (click)="closeReservationModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Réserver ce logement</h2>
+      <button class="btn-close" (click)="closeReservationModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="reservationForm" class="modal-body">
+      <div class="form-group">
+        <label>Date d'arrivée</label>
+        <input 
+          type="date" 
+          formControlName="dateDebut" 
+          class="form-control"
+          [min]="today"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Date de départ</label>
+        <input 
+          type="date" 
+          formControlName="dateFin" 
+          class="form-control"
+          [min]="reservationForm.value.dateDebut"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Nombre de personnes</label>
+        <input 
+          type="number" 
+          formControlName="nombreInvites" 
+          class="form-control"
+          min="1"
+          [max]="annonce?.maxInvites"
+        />
+      </div>
+
+      <div class="price-summary">
+        <div class="summary-row">
+          <span>Prix total</span>
+          <strong>{{ calculerPrixTotal() | number:'1.0-0' }} FCFA</strong>
+        </div>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button 
+        class="btn btn-ghost" 
+        (click)="verifierDisponibilite()"
+        [disabled]="isCheckingAvailability"
+      >
+        <span *ngIf="!isCheckingAvailability">
+          <i class="fas fa-search"></i> Vérifier disponibilité
+        </span>
+        <span *ngIf="isCheckingAvailability">
+          <i class="fas fa-spinner fa-spin"></i> Vérification...
+        </span>
+      </button>
+      
+      <button 
+        class="btn btn-primary" 
+        (click)="creerReservation()"
+        [disabled]="isCreatingReservation || reservationForm.invalid"
+      >
+        <span *ngIf="!isCreatingReservation">
+          <i class="fas fa-check"></i> Confirmer la réservation
+        </span>
+        <span *ngIf="isCreatingReservation">
+          <i class="fas fa-spinner fa-spin"></i> Création...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-container" *ngIf="isLoading">
+  <i class="fas fa-spinner fa-spin"></i>
+  <p>Chargement...</p>
+</div>
