@@ -1,0 +1,394 @@
+// src/app/features/logements/detail/detail.component.scss
+@use '../../../../styles/_variables' as *;
+@use '../../../../styles/_mixins' as *;
+
+.detail-page {
+  padding: $spacing-2xl 0;
+  min-height: calc(100vh - 70px);
+
+  .image-gallery {
+    margin-bottom: $spacing-2xl;
+
+    .main-image {
+      position: relative;
+      height: 500px;
+      border-radius: $border-radius-lg;
+      overflow: hidden;
+      margin-bottom: $spacing-md;
+
+      @include mobile-only {
+        height: 300px;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .nav-btn {
+        @include absolute-center;
+        @include flex-center;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all $transition-fast;
+
+        &.prev { left: $spacing-lg; }
+        &.next { right: $spacing-lg; left: auto; }
+
+        &:hover {
+          background: $color-white;
+          transform: scale(1.1);
+        }
+
+        i {
+          color: $color-dark-gray;
+          font-size: $font-size-lg;
+        }
+      }
+    }
+
+    .thumbnails {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: $spacing-md;
+
+      .thumbnail {
+        height: 100px;
+        border-radius: $border-radius-sm;
+        overflow: hidden;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all $transition-fast;
+
+        &.active {
+          border-color: $color-primary;
+        }
+
+        &:hover {
+          transform: scale(1.05);
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: $spacing-2xl;
+
+    @include tablet-only {
+      grid-template-columns: 1fr;
+    }
+
+    @include mobile-only {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .detail-content {
+    .detail-header {
+      padding-bottom: $spacing-xl;
+      border-bottom: 1px solid $color-light-gray;
+      margin-bottom: $spacing-xl;
+
+      .badge-type {
+        display: inline-block;
+        background: $color-primary;
+        color: $color-white;
+        padding: $spacing-xs $spacing-md;
+        border-radius: $border-radius-full;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-semibold;
+        margin-bottom: $spacing-md;
+      }
+
+      h1 {
+        font-size: $font-size-3xl;
+        color: $color-dark-gray;
+        margin-bottom: $spacing-sm;
+      }
+
+      .location {
+        @include flex-start;
+        gap: $spacing-xs;
+        color: $color-gray;
+        margin-bottom: $spacing-sm;
+
+        i {
+          color: $color-primary;
+        }
+      }
+
+      .rating {
+        @include flex-start;
+        gap: $spacing-sm;
+
+        .stars {
+          @include flex-start;
+          gap: 2px;
+
+          i {
+            color: $color-warning;
+          }
+        }
+
+        span {
+          color: $color-gray;
+          font-size: $font-size-sm;
+        }
+      }
+    }
+
+    .features-section,
+    .description-section,
+    .owner-section {
+      padding-bottom: $spacing-xl;
+      border-bottom: 1px solid $color-light-gray;
+      margin-bottom: $spacing-xl;
+
+      h2 {
+        font-size: $font-size-xl;
+        color: $color-dark-gray;
+        margin-bottom: $spacing-lg;
+      }
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $spacing-lg;
+
+      @include mobile-only {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-item {
+        @include flex-start;
+        gap: $spacing-md;
+        padding: $spacing-lg;
+        background: $color-light-gray;
+        border-radius: $border-radius-md;
+
+        i {
+          font-size: $font-size-2xl;
+          color: $color-primary;
+        }
+
+        div {
+          @include flex-column;
+          gap: $spacing-xs;
+
+          strong {
+            font-size: $font-size-xl;
+            color: $color-dark-gray;
+          }
+
+          span {
+            font-size: $font-size-sm;
+            color: $color-gray;
+          }
+        }
+      }
+    }
+
+    .description-section {
+      p {
+        line-height: $line-height-relaxed;
+        color: $color-dark-gray;
+      }
+    }
+
+    .owner-card {
+      @include flex-start;
+      gap: $spacing-lg;
+      padding: $spacing-lg;
+      background: $color-light-gray;
+      border-radius: $border-radius-md;
+
+      .owner-avatar {
+        @include flex-center;
+        width: 80px;
+        height: 80px;
+        background: $color-primary;
+        border-radius: 50%;
+
+        i {
+          font-size: $font-size-3xl;
+          color: $color-white;
+        }
+      }
+
+      .owner-info {
+        h3 {
+          font-size: $font-size-lg;
+          color: $color-dark-gray;
+          margin-bottom: $spacing-xs;
+        }
+
+        p {
+          color: $color-gray;
+          font-size: $font-size-sm;
+        }
+      }
+    }
+  }
+
+  .booking-card {
+    @include card;
+    position: sticky;
+    top: 90px;
+    height: fit-content;
+
+    .price-section {
+      padding-bottom: $spacing-lg;
+      border-bottom: 1px solid $color-light-gray;
+      margin-bottom: $spacing-lg;
+
+      .price {
+        @include flex-start;
+        align-items: baseline;
+        gap: $spacing-xs;
+
+        .amount {
+          font-size: $font-size-3xl;
+          font-weight: $font-weight-bold;
+          color: $color-primary;
+        }
+
+        .period {
+          color: $color-gray;
+          font-size: $font-size-base;
+        }
+      }
+    }
+
+    .btn-block {
+      width: 100%;
+      @include btn-primary;
+      margin-bottom: $spacing-lg;
+    }
+
+    .booking-info {
+      p {
+        @include flex-start;
+        gap: $spacing-xs;
+        margin-bottom: $spacing-sm;
+        color: $color-dark-gray;
+        font-size: $font-size-sm;
+
+        i {
+          color: $color-success;
+        }
+      }
+    }
+  }
+}
+
+// Modal
+.modal-overlay {
+  @include absolute-cover;
+  @include flex-center;
+  position: fixed;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+
+  .modal-content {
+    background: $color-white;
+    border-radius: $border-radius-lg;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    .modal-header {
+      @include flex-between;
+      padding: $spacing-lg;
+      border-bottom: 1px solid $color-light-gray;
+
+      h2 {
+        font-size: $font-size-xl;
+        color: $color-dark-gray;
+      }
+
+      .btn-close {
+        background: none;
+        border: none;
+        font-size: $font-size-xl;
+        color: $color-gray;
+        cursor: pointer;
+
+        &:hover {
+          color: $color-dark-gray;
+        }
+      }
+    }
+
+    .modal-body {
+      padding: $spacing-lg;
+
+      .form-group {
+        margin-bottom: $spacing-lg;
+
+        label {
+          display: block;
+          font-weight: $font-weight-semibold;
+          margin-bottom: $spacing-xs;
+          color: $color-dark-gray;
+        }
+
+        .form-control {
+          @include input-base;
+        }
+      }
+
+      .price-summary {
+        background: $color-light-gray;
+        padding: $spacing-lg;
+        border-radius: $border-radius-md;
+
+        .summary-row {
+          @include flex-between;
+          font-size: $font-size-lg;
+
+          strong {
+            color: $color-primary;
+            font-size: $font-size-xl;
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+      @include flex-between;
+      gap: $spacing-md;
+      padding: $spacing-lg;
+      border-top: 1px solid $color-light-gray;
+
+      .btn {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.loading-container {
+  @include flex-column-center;
+  min-height: 50vh;
+  color: $color-gray;
+
+  i {
+    font-size: $font-size-3xl;
+    margin-bottom: $spacing-md;
+  }
+}

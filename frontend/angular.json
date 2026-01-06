@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "mboaspot": {
+    "request_app": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/mboaspot",
+            "outputPath": "dist/request_app",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -37,7 +37,10 @@
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+
+            ]
           },
           "configurations": {
             "production": {
@@ -67,10 +70,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "mboaspot:build:production"
+              "buildTarget": "request_app:build:production"
             },
             "development": {
-              "buildTarget": "mboaspot:build:development"
+              "buildTarget": "request_app:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -98,7 +101,10 @@
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+
+            ]
           }
         }
       }
