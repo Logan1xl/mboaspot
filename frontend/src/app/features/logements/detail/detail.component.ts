@@ -219,4 +219,5 @@ export class DetailComponent implements OnInit {
     
     return jours > 0 ? jours * this.annonce.prix : 0;
   }
+  // test git 
 }
