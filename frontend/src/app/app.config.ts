@@ -8,6 +8,8 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ToastrModule } from 'ngx-toastr';
+import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
+
 
 import { routes } from './app.routes';
 
@@ -18,6 +20,8 @@ export const appConfig: ApplicationConfig = {
 
     provideAnimations(),
     provideHttpClient(),
+     provideHttpClient(withInterceptors([jwtInterceptor])),
+     provideRouter(routes),
     importProvidersFrom([
       MatNativeDateModule,
       ToastrModule.forRoot({

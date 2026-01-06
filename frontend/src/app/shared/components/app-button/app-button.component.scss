@@ -1,5 +1,5 @@
-@use '../../../../styles/_variables' as *;
-@use '../../../../styles/_mixins' as *;
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
 
 button {
   font-family: $font-family-base;
@@ -20,3 +20,4 @@ button {
 .btn-ghost {
   @include btn-ghost;
 }
+
