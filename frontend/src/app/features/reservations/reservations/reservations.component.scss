@@ -1,0 +1,242 @@
+// src/app/features/reservations/mes-reservations/mes-reservations.component.scss
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.mes-reservations-page {
+  min-height: calc(100vh - 70px);
+  padding: $spacing-2xl 0;
+  background: $color-light-gray;
+
+  .page-header {
+    margin-bottom: $spacing-2xl;
+
+    h1 {
+      font-size: $font-size-3xl;
+      color: $color-dark-gray;
+      margin-bottom: $spacing-sm;
+    }
+
+    p {
+      color: $color-gray;
+      font-size: $font-size-lg;
+    }
+  }
+
+  .filters-bar {
+    @include flex-start;
+    gap: $spacing-md;
+    margin-bottom: $spacing-2xl;
+    flex-wrap: wrap;
+
+    .filter-btn {
+      @include flex-center;
+      gap: $spacing-xs;
+      background: $color-white;
+      border: 2px solid $color-light-gray;
+      padding: $spacing-sm $spacing-lg;
+      border-radius: $border-radius-full;
+      font-weight: $font-weight-semibold;
+      color: $color-dark-gray;
+      cursor: pointer;
+      transition: all $transition-fast;
+
+      &:hover {
+        border-color: $color-primary;
+        color: $color-primary;
+      }
+
+      &.active {
+        background: $color-primary;
+        border-color: $color-primary;
+        color: $color-white;
+
+        .count {
+          background: rgba(255, 255, 255, 0.3);
+        }
+      }
+
+      .count {
+        @include flex-center;
+        min-width: 24px;
+        height: 24px;
+        background: $color-light-gray;
+        border-radius: $border-radius-full;
+        font-size: $font-size-sm;
+        padding: 0 $spacing-xs;
+      }
+    }
+  }
+
+  .loading-state,
+  .empty-state {
+    @include flex-column-center;
+    padding: $spacing-2xl * 2;
+    background: $color-white;
+    border-radius: $border-radius-md;
+
+    i {
+      font-size: $font-size-3xl * 1.5;
+      color: $color-gray;
+      margin-bottom: $spacing-lg;
+    }
+
+    h3 {
+      color: $color-dark-gray;
+      margin-bottom: $spacing-sm;
+    }
+
+    p {
+      color: $color-gray;
+      margin-bottom: $spacing-lg;
+    }
+  }
+
+  .reservations-list {
+    display: grid;
+    gap: $spacing-xl;
+
+    .reservation-card {
+      background: $color-white;
+      border-radius: $border-radius-md;
+      box-shadow: $shadow-md;
+      overflow: hidden;
+      transition: all $transition-normal;
+
+      &:hover {
+        box-shadow: $shadow-lg;
+        transform: translateY(-2px);
+      }
+
+      .card-header {
+        @include flex-between;
+        padding: $spacing-lg;
+        border-bottom: 1px solid $color-light-gray;
+        background: linear-gradient(to right, rgba($color-primary, 0.05), transparent);
+
+        @include mobile-only {
+          flex-direction: column;
+          gap: $spacing-md;
+          align-items: flex-start;
+        }
+
+        .header-left {
+          h3 {
+            font-size: $font-size-xl;
+            color: $color-dark-gray;
+            margin-bottom: $spacing-xs;
+          }
+
+          .code {
+            font-size: $font-size-sm;
+            color: $color-gray;
+            font-family: monospace;
+          }
+        }
+
+        .status-badge {
+          @include flex-center;
+          gap: $spacing-xs;
+          padding: $spacing-sm $spacing-lg;
+          border-radius: $border-radius-full;
+          font-weight: $font-weight-semibold;
+          font-size: $font-size-sm;
+
+          &.status-pending {
+            background: rgba($color-warning, 0.1);
+            color: $color-warning;
+          }
+
+          &.status-confirmed {
+            background: rgba($color-success, 0.1);
+            color: $color-success;
+          }
+
+          &.status-completed {
+            background: rgba($color-info, 0.1);
+            color: $color-info;
+          }
+
+          &.status-cancelled {
+            background: rgba($color-error, 0.1);
+            color: $color-error;
+          }
+        }
+      }
+
+      .card-body {
+        padding: $spacing-lg;
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: $spacing-xl;
+
+          @include mobile-only {
+            grid-template-columns: 1fr;
+          }
+
+          .info-item {
+            @include flex-start;
+            gap: $spacing-md;
+
+            i {
+              font-size: $font-size-xl;
+              color: $color-primary;
+            }
+
+            div {
+              @include flex-column;
+              gap: $spacing-xs;
+
+              .label {
+                font-size: $font-size-sm;
+                color: $color-gray;
+              }
+
+              .value {
+                font-weight: $font-weight-semibold;
+                color: $color-dark-gray;
+              }
+            }
+          }
+        }
+      }
+
+      .card-footer {
+        @include flex-start;
+        gap: $spacing-md;
+        padding: $spacing-lg;
+        border-top: 1px solid $color-light-gray;
+        flex-wrap: wrap;
+
+        @include mobile-only {
+          flex-direction: column;
+
+          .btn {
+            width: 100%;
+          }
+        }
+
+        .btn {
+          @include flex-center;
+          gap: $spacing-xs;
+        }
+
+        .btn-danger {
+          background: $color-error;
+          color: $color-white;
+          border: none;
+          padding: $spacing-sm $spacing-lg;
+          border-radius: $border-radius-sm;
+          font-weight: $font-weight-semibold;
+          cursor: pointer;
+          transition: all $transition-fast;
+
+          &:hover {
+            background: darken($color-error, 10%);
+          }
+        }
+      }
+    }
+  }
+}

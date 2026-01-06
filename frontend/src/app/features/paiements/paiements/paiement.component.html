@@ -1,0 +1,174 @@
+<!-- src/app/features/paiement/paiement.component.html -->
+<app-navbar></app-navbar>
+
+<div class="paiement-page" *ngIf="!isLoading && reservation">
+  <div class="container">
+
+    <!-- Success State -->
+    <div class="payment-result success" *ngIf="paymentStatus === 'success'">
+      <div class="result-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h1>Paiement réussi !</h1>
+      <p>Votre réservation a été confirmée avec succès.</p>
+
+      <div class="confirmation-details">
+        <div class="detail-row">
+          <span>Code de confirmation</span>
+          <strong>{{ reservation.codeConfirmation }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>Montant payé</span>
+          <strong>{{ reservation.prixTotal | number:'1.0-0' }} FCFA</strong>
+        </div>
+        <div class="detail-row">
+          <span>Transaction ID</span>
+          <strong>{{ transactionId }}</strong>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-primary" (click)="downloadReceipt()">
+          <i class="fas fa-download"></i>
+          Télécharger le reçu
+        </button>
+        <button class="btn btn-ghost" (click)="goToReservations()">
+          <i class="fas fa-list"></i>
+          Voir mes réservations
+        </button>
+      </div>
+    </div>
+
+    <!-- Failed State -->
+    <div class="payment-result failed" *ngIf="paymentStatus === 'failed'">
+      <div class="result-icon">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <h1>Paiement échoué</h1>
+      <p>Une erreur est survenue lors du traitement de votre paiement.</p>
+
+      <div class="action-buttons">
+        <button class="btn btn-primary" (click)="retryPayment()">
+          <i class="fas fa-redo"></i>
+          Réessayer
+        </button>
+        <button class="btn btn-ghost" (click)="goToReservations()">
+          <i class="fas fa-arrow-left"></i>
+          Retour
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Form -->
+    <div class="payment-form-container" *ngIf="paymentStatus === 'idle' || paymentStatus === 'pending'">
+
+      <!-- Résumé réservation -->
+      <div class="reservation-summary">
+        <h2>Résumé de votre réservation</h2>
+        <div class="summary-card">
+          <div class="summary-row">
+            <span>Logement</span>
+            <strong>{{ reservation.annonceTitre || 'Logement' }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Code de réservation</span>
+            <strong>{{ reservation.codeConfirmation }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Nombre d'invités</span>
+            <strong>{{ reservation.nombreInvites }} personne(s)</strong>
+          </div>
+          <div class="summary-row total">
+            <span>Montant total</span>
+            <strong>{{ reservation.prixTotal | number:'1.0-0' }} FCFA</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulaire de paiement -->
+      <div class="payment-form">
+        <h2>Mode de paiement</h2>
+
+        <form [formGroup]="paiementForm" (ngSubmit)="onSubmitPaiement()">
+
+          <!-- Sélection méthode -->
+          <div class="payment-methods">
+            <label
+              *ngFor="let method of methodesDisponibles"
+              class="method-option"
+              [class.selected]="paiementForm.get('methode')?.value === method.value"
+            >
+              <input
+                type="radio"
+                formControlName="methode"
+                [value]="method.value"
+              />
+              <div class="method-card">
+                <i [class]="method.icon" [style.color]="method.color"></i>
+                <span>{{ method.label }}</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Numéro de téléphone -->
+          <div class="form-group">
+            <label>
+              <i class="fas fa-phone"></i>
+              Numéro de téléphone
+            </label>
+            <input
+              type="tel"
+              formControlName="phoneNumber"
+              class="form-control"
+              placeholder="690000000"
+              [class.is-invalid]="paiementForm.get('phoneNumber')?.invalid && paiementForm.get('phoneNumber')?.touched"
+            />
+            <div class="invalid-feedback" *ngIf="paiementForm.get('phoneNumber')?.invalid && paiementForm.get('phoneNumber')?.touched">
+              <span *ngIf="paiementForm.get('phoneNumber')?.errors?.['required']">Le numéro est requis</span>
+              <span *ngIf="paiementForm.get('phoneNumber')?.errors?.['pattern']">Format invalide (ex: 690000000)</span>
+            </div>
+          </div>
+
+          <!-- Instructions -->
+          <div class="payment-instructions">
+            <h4>Instructions de paiement</h4>
+            <ol>
+              <li>Sélectionnez votre opérateur mobile</li>
+              <li>Entrez votre numéro de téléphone</li>
+              <li>Cliquez sur "Payer maintenant"</li>
+              <li>Validez la transaction sur votre téléphone</li>
+            </ol>
+          </div>
+
+          <!-- Bouton de soumission -->
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            [disabled]="isProcessing || paiementForm.invalid"
+            [style.background-color]="getMethodeColor()"
+          >
+            <span *ngIf="paymentStatus === 'idle'">
+              <i class="fas fa-lock"></i>
+              Payer {{ reservation.prixTotal | number:'1.0-0' }} FCFA
+            </span>
+            <span *ngIf="paymentStatus === 'pending'">
+              <i class="fas fa-spinner fa-spin"></i>
+              Traitement en cours...
+            </span>
+          </button>
+
+          <p class="security-notice">
+            <i class="fas fa-shield-alt"></i>
+            Paiement 100% sécurisé
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-container" *ngIf="isLoading">
+  <i class="fas fa-spinner fa-spin"></i>
+  <p>Chargement...</p>
+</div>
