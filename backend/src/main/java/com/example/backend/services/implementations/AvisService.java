@@ -2,6 +2,7 @@ package com.example.backend.services.implementations;
 
 import com.example.backend.dto.AvisDTO;
 import com.example.backend.entities.Avis;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.mappers.AvisMapper;
 import com.example.backend.repositories.AvisRepos;
 import com.example.backend.repositories.VoyageurRepos;

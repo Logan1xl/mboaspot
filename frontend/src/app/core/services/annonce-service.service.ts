@@ -231,7 +231,7 @@ export class AnnonceService {
       }
     }
 
-    console.error('Erreur API:', errorMessage);
+    // L'interceptor HttpErrorInterceptor gère déjà les notifications d'erreur
     return throwError(() => new Error(errorMessage));
   }
 }

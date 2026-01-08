@@ -2,6 +2,7 @@ package com.example.backend.services.implementations;
 
 import com.example.backend.dto.UtilisateurDTO;
 import com.example.backend.entities.Utilisateur;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.mappers.UtilisateurMapper;
 import com.example.backend.repositories.UtilisateurRepository;
 import com.example.backend.services.interfaces.UtilisateurInterface;
@@ -44,16 +45,14 @@ public class UtilisateurService implements UtilisateurInterface {
     public UtilisateurDTO getUtilisateurById(Long id) {
         logger.info("Récupération de l'utilisateur (id={})", id);
 
-        try {
-            Utilisateur utilisateur = repository.findById(id).get();
-            logger.debug("Utilisateur récupéré : {}", utilisateur);
+        Utilisateur utilisateur = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Utilisateur non trouvé (id={})", id);
+                    return new ResourceNotFoundException("Utilisateur non trouvé avec l'id: " + id);
+                });
 
-            return utilisateurMapper.toDTO(utilisateur);
-
-        } catch (Exception e) {
-            logger.warn("Utilisateur non trouvé (id={})", id);
-            throw new RuntimeException("Utilisateur non trouvé avec l'id: " + id);
-        }
+        logger.debug("Utilisateur récupéré : {}", utilisateur);
+        return utilisateurMapper.toDTO(utilisateur);
     }
 
     @Override
@@ -86,28 +85,21 @@ public class UtilisateurService implements UtilisateurInterface {
     public UtilisateurDTO updateUtilisateur(Long id, UtilisateurDTO utilisateurDTO) {
         logger.info("Mise à jour de l'utilisateur (id={})", id);
 
-        try {
-            Utilisateur existingUtilisateur = repository.findById(id).get();
+        Utilisateur existingUtilisateur = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Utilisateur non trouvé pour mise à jour (id={})", id);
+                    return new ResourceNotFoundException("Utilisateur non trouvé avec l'id: " + id);
+                });
 
-            if (existingUtilisateur == null) {
-                logger.warn("Utilisateur non trouvé pour mise à jour (id={})", id);
-                throw new RuntimeException("Utilisateur non trouvé avec l'id: " + id);
-            }
+        existingUtilisateur.setNom(utilisateurDTO.getNom());
+        existingUtilisateur.setPrenom(utilisateurDTO.getPrenom());
+        existingUtilisateur.setEmail(utilisateurDTO.getEmail());
+        existingUtilisateur.setRole(utilisateurDTO.getRole());
 
-            existingUtilisateur.setNom(utilisateurDTO.getNom());
-            existingUtilisateur.setPrenom(utilisateurDTO.getPrenom());
-            existingUtilisateur.setEmail(utilisateurDTO.getEmail());
-            existingUtilisateur.setRole(utilisateurDTO.getRole());
+        Utilisateur updatedUtilisateur = repository.save(existingUtilisateur);
+        logger.info("Utilisateur mis à jour avec succès (id={})", id);
 
-            repository.save(existingUtilisateur);
-            logger.info("Utilisateur mis à jour avec succès (id={})", id);
-
-            return utilisateurMapper.toDTO(existingUtilisateur);
-
-        } catch (Exception e) {
-            logger.error("Erreur lors de la mise à jour de l'utilisateur (id={})", id, e);
-            throw new RuntimeException("Erreur lors de la mise à jour de l'utilisateur: " + e.getMessage());
-        }
+        return utilisateurMapper.toDTO(updatedUtilisateur);
     }
 
     @Override
@@ -116,7 +108,7 @@ public class UtilisateurService implements UtilisateurInterface {
 
         if (!repository.existsById(id)) {
             logger.warn("Suppression impossible : utilisateur non trouvé (id={})", id);
-            throw new RuntimeException("Utilisateur non trouvé avec l'id: " + id);
+            throw new ResourceNotFoundException("Utilisateur non trouvé avec l'id: " + id);
         }
 
         repository.deleteById(id);

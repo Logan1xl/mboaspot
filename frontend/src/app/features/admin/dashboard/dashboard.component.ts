@@ -104,8 +104,7 @@ export class AdminDashboardComponent implements OnInit {
 
   approuverAnnonce(annonce: any): void {
     if (confirm(`Approuver l'annonce "${annonce.titre}" ?`)) {
-      console.log('Approuver annonce:', annonce.id);
-      // Appel API
+      // TODO: Appel API pour approuver l'annonce
       this.loadAnnoncesEnAttente();
     }
   }
@@ -113,16 +112,14 @@ export class AdminDashboardComponent implements OnInit {
   rejeterAnnonce(annonce: any): void {
     const motif = prompt('Motif de rejet :');
     if (motif) {
-      console.log('Rejeter annonce:', annonce.id, motif);
-      // Appel API
+      // TODO: Appel API pour rejeter l'annonce avec le motif
       this.loadAnnoncesEnAttente();
     }
   }
 
   traiterSignalement(signalement: any): void {
     if (confirm(`Marquer ce signalement comme traité ?`)) {
-      console.log('Traiter signalement:', signalement.id);
-      // Appel API
+      // TODO: Appel API pour traiter le signalement
       this.loadSignalements();
     }
   }
@@ -130,8 +127,7 @@ export class AdminDashboardComponent implements OnInit {
   toggleUserStatus(user: any): void {
     const action = user.estActif ? 'désactiver' : 'activer';
     if (confirm(`Voulez-vous ${action} cet utilisateur ?`)) {
-      console.log('Toggle user:', user.id);
-      // Appel API
+      // TODO: Appel API pour changer le statut de l'utilisateur
       this.loadRecentUsers();
     }
   }

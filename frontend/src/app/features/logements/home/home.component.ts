@@ -84,7 +84,6 @@ export class HomeComponent implements OnInit {
   }
 
   onFavoriteToggle(annonceId: number): void {
-    console.log('Toggle favorite:', annonceId);
     // TODO : implémenter favoris
   }
 

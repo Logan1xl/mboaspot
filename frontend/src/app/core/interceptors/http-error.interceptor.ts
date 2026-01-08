@@ -9,7 +9,8 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
-import {NotifService} from '../services/notif-service.service';
+import { NotifService } from '../services/notif-service.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
@@ -31,7 +32,14 @@ export class HttpErrorInterceptor implements HttpInterceptor {
               errorMessage = 'Impossible de contacter le serveur. Vérifiez votre connexion.';
               break;
             case 400:
-              errorMessage = error.error?.message || 'Requête invalide';
+              // Gestion des erreurs de validation
+              if (error.error?.errors && typeof error.error.errors === 'object') {
+                // Erreurs de validation multiples
+                const validationErrors = Object.values(error.error.errors).join(', ');
+                errorMessage = validationErrors || error.error?.message || 'Requête invalide';
+              } else {
+                errorMessage = error.error?.message || 'Requête invalide';
+              }
               break;
             case 401:
               errorMessage = 'Non autorisé. Veuillez vous connecter.';
@@ -40,10 +48,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
               errorMessage = 'Accès refusé';
               break;
             case 404:
-              errorMessage = 'Ressource non trouvée';
+              errorMessage = error.error?.message || 'Ressource non trouvée';
               break;
             case 500:
-              errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+              errorMessage = error.error?.message || 'Erreur serveur. Veuillez réessayer plus tard.';
               break;
             case 503:
               errorMessage = 'Service temporairement indisponible';
@@ -53,7 +61,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           }
         }
 
-        console.error('HTTP Error:', error);
+        // Logger uniquement en développement
+        if (!environment.production) {
+          console.error('HTTP Error:', error);
+        }
 
         // N'affiche pas de notification pour certaines requêtes (comme le comptage)
         if (!request.url.includes('/statistiques') && error.status !== 404) {

@@ -1,5 +1,6 @@
 package com.example.backend.security.config;
 
+import com.example.backend.entities.Proprietaire;
 import com.example.backend.repositories.AdminRepository;
 import com.example.backend.entities.Utilisateur;
 import com.example.backend.entities.Admin;
@@ -50,6 +51,8 @@ public class DataInitializer implements CommandLineRunner {
             admin.setIdUser(adminUser);
             admin.setDepartement("Système");
             adminRepository.save(admin);
+
+
 
             System.out.println("Administrateur créé avec succès !");
             System.out.println("   Email : admin@mboaspot.cm");

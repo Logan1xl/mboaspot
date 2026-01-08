@@ -20,9 +20,10 @@ export class ApiService {
 
   /**
    * Crée les headers HTTP avec le token d'authentification
+   * Note: Le token est généralement ajouté automatiquement par le JWT interceptor
    */
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('accessToken');
+    const token = this.authService.getToken();
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
@@ -100,34 +101,13 @@ export class ApiService {
 
   /**
    * Gestion des erreurs HTTP
+   * Note: Les notifications sont gérées par l'interceptor HttpErrorInterceptor
+   * pour éviter les doublons. Cette méthode propage simplement l'erreur.
    */
   private handleError(error: any) {
-    let errorMessage = 'Une erreur est survenue';
-
-    if (error.error instanceof ErrorEvent) {
-      // Erreur côté client
-      errorMessage = `Erreur: ${error.error.message}`;
-    } else {
-      // Erreur côté serveur
-      if (error.status === 401) {
-        // Non autorisé - rafraîchir le token
-        this.authService.refreshToken().subscribe({
-          error: () => this.authService.logout()
-        });
-        errorMessage = 'Session expirée, veuillez vous reconnecter';
-      } else if (error.status === 403) {
-        errorMessage = 'Accès refusé';
-      } else if (error.status === 404) {
-        errorMessage = 'Ressource non trouvée';
-      } else if (error.status === 500) {
-        errorMessage = 'Erreur serveur';
-      } else {
-        errorMessage = error.error?.message || 'Une erreur est survenue';
-      }
-    }
-
-    this.notificationService.error(errorMessage);
-    return throwError(() => new Error(errorMessage));
+    // L'interceptor HttpErrorInterceptor gère déjà les notifications d'erreur
+    // On propage simplement l'erreur pour que les composants puissent la gérer si nécessaire
+    return throwError(() => error);
   }
 }
 

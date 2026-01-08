@@ -158,7 +158,7 @@ export class ListingComponent implements OnInit {
   }
 
   onFavoriteToggle(annonceId: number): void {
-    console.log('Toggle favorite:', annonceId);
+    // TODO: Implémenter la logique de favoris
   }
 
   getPages(): number[] {

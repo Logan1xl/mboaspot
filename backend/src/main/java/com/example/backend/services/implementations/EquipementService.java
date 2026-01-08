@@ -2,16 +2,18 @@ package com.example.backend.services.implementations;
 
 import com.example.backend.dto.EquipementDTO;
 import com.example.backend.entities.Equipement;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.mappers.EquipementMapper;
 import com.example.backend.repositories.EquipementRepository;
 import com.example.backend.services.interfaces.EquipementInterface;
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Service
 public class EquipementService implements EquipementInterface {
+
+    private static final Logger logger = LoggerFactory.getLogger(EquipementService.class);
 
     private final EquipementRepository equipementRepository;
     private final EquipementMapper equipementMapper;
@@ -55,18 +59,18 @@ public class EquipementService implements EquipementInterface {
     /**
      * Récupère un équipement par son ID.
      *
-     * @param id identifiant de l’équipement
-     * @return Optional contenant le DTO si l'équipement est trouvé
+     * @param id identifiant de l'équipement
+     * @return DTO de l'équipement trouvé
+     * @throws ResourceNotFoundException si l'équipement n'existe pas
      */
     @Override
     public EquipementDTO getById(Long id) {
-
-        Equipement equipement = equipementRepository.findById(id).get();
-        if (equipement==null){
-            throw new RuntimeException("Equipement non trouvé");
-        }else{
-            return equipementMapper.toDto(equipement);
-        }
+        logger.debug("Récupération de l'équipement (id={})", id);
+        
+        Equipement equipement = equipementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipement non trouvé avec l'id : " + id));
+        
+        return equipementMapper.toDto(equipement);
     }
 
     /**
@@ -111,39 +115,66 @@ public class EquipementService implements EquipementInterface {
         return equipementMapper.toDto(updatedEquipement);
     }
 
-   
-    
+    /**
+     * Récupère un équipement par son ID (méthode avec Optional).
+     *
+     * @param id identifiant de l'équipement
+     * @return Optional contenant le DTO si l'équipement est trouvé
+     */
     @Override
     public Optional<EquipementDTO> getEquipementById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEquipementById'");
+        logger.debug("Récupération de l'équipement (id={})", id);
+        
+        return equipementRepository.findById(id)
+                .map(equipementMapper::toDto);
     }
 
+    /**
+     * Récupère tous les équipements (alias de getAll).
+     *
+     * @return liste de tous les équipements en DTO
+     */
     @Override
     public List<EquipementDTO> getAllEquipements() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllEquipements'");
+        logger.debug("Récupération de tous les équipements");
+        return getAll();
     }
 
+    /**
+     * Met à jour un équipement existant (alias de update).
+     *
+     * @param id identifiant de l'équipement à mettre à jour
+     * @param equipementDTO nouvelles données
+     * @return DTO de l'équipement mis à jour
+     */
     @Override
     public EquipementDTO updateEquipement(Long id, EquipementDTO equipementDTO) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateEquipement'");
+        logger.debug("Mise à jour de l'équipement (id={})", id);
+        return update(id, equipementDTO);
     }
 
+    /**
+     * Supprime un équipement (alias de delete).
+     *
+     * @param id identifiant de l'équipement à supprimer
+     */
     @Override
     public void deleteEquipement(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteEquipement'");
+        logger.debug("Suppression de l'équipement (id={})", id);
+        delete(id);
     }
 
     @Override
     public void delete(Long id) {
-        // Vérifie si l'équipement existe avant de supprimer (optionnel mais recommandé)
+        logger.debug("Suppression de l'équipement (id={})", id);
+        
+        // Vérifie si l'équipement existe avant de supprimer
         if (!equipementRepository.existsById(id)) {
-            throw new RuntimeException("Équipement non trouvé avec l'id : " + id);
+            throw new ResourceNotFoundException("Équipement non trouvé avec l'id : " + id);
         }
+        
         equipementRepository.deleteById(id);
+        logger.info("Équipement supprimé avec succès (id={})", id);
     }
 
 }
