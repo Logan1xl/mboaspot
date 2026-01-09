@@ -4,6 +4,8 @@ import com.example.backend.dto.*;
 import com.example.backend.entities.*;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class AnnonceService {
+
+    // Initialisation du Logger
+    private static final Logger log = LoggerFactory.getLogger(AnnonceService.class);
 
     @Autowired
     private AnnoncesRepository annoncesRepository;
@@ -33,9 +38,14 @@ public class AnnonceService {
      * Créer une annonce avec disponibilité par défaut
      */
     public AnnonceResponseDTO creerAnnonce(AnnonceRequestDTO request) {
+        log.info("Début création annonce (RequestDTO) pour Propriétaire ID: {}", request.getProprietaireId());
+
         // Vérifier que le propriétaire existe
         Proprietaire proprietaire = proprietaireRepository.findById(request.getProprietaireId())
-                .orElseThrow(() -> new RuntimeException("Propriétaire non trouvé"));
+                .orElseThrow(() -> {
+                    log.error("Erreur création annonce : Propriétaire ID {} non trouvé", request.getProprietaireId());
+                    return new RuntimeException("Propriétaire non trouvé");
+                });
 
         // Créer l'annonce
         Annonces annonce = new Annonces();
@@ -61,9 +71,11 @@ public class AnnonceService {
         }
 
         annonce = annoncesRepository.save(annonce);
+        log.info("Annonce sauvegardée avec succès. ID généré: {}", annonce.getId());
 
         // Créer la localisation si ville et quartier sont fournis
         if (request.getVille() != null) {
+            log.debug("Ajout de la localisation pour l'annonce ID: {}", annonce.getId());
             Localisation localisation = new Localisation();
             localisation.setVille(request.getVille());
             localisation.setQuartier(request.getQuartier() != null ? request.getQuartier() : "Centre");
@@ -75,18 +87,23 @@ public class AnnonceService {
 
         creerDisponibiliteParDefaut(annonce);
 
+        log.info("Fin création annonce ID: {}", annonce.getId());
         return convertirEnResponseDTO(annonce);
     }
 
     public AnnonceDTO createAnnonce(AnnonceDTO dto) {
+        log.info("Début createAnnonce (DTO) - Titre: {}", dto.getTitre());
+
         Annonces annonce = convertToEntity(dto);
         annonce.setEstActive(true);
         annonce.setEvaluationMoyenne(0.0);
         annonce.setTotalAvis(0);
 
         Annonces saved = annoncesRepository.save(annonce);
+        log.info("Annonce DTO sauvegardée. ID: {}", saved.getId());
 
         if (dto.getLocalisation() != null) {
+            log.debug("Traitement localisation DTO pour annonce ID: {}", saved.getId());
             LocalisationDTO locDTO = dto.getLocalisation();
             Localisation localisation = new Localisation();
             localisation.setVille(locDTO.getVille());
@@ -103,31 +120,42 @@ public class AnnonceService {
     }
 
     public List<AnnonceDTO> getAllAnnonces() {
-        return annoncesRepository.findAll()
+        log.info("Récupération de toutes les annonces (getAllAnnonces)");
+        List<AnnonceDTO> result = annoncesRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+        log.info("Nombre total d'annonces trouvées: {}", result.size());
+        return result;
     }
 
     public AnnonceResponseDTO obtenirAnnonce(Long id) {
+        log.info("Recherche annonce (ResponseDTO) ID: {}", id);
         Annonces annonce = annoncesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
+                .orElseThrow(() -> {
+                    log.error("Annonce ID {} non trouvée lors de l'obtention", id);
+                    return new RuntimeException("Annonce non trouvée");
+                });
         return convertirEnResponseDTO(annonce);
     }
 
     public Optional<AnnonceDTO> getAnnonceById(Long id) {
+        log.info("Recherche annonce (Optional DTO) ID: {}", id);
         return annoncesRepository.findById(id)
                 .map(this::convertToDTO);
     }
 
     public List<AnnonceResponseDTO> obtenirAnnoncesActives() {
+        log.info("Récupération des annonces actives (ResponseDTO)");
         List<Annonces> annonces = annoncesRepository.findByEstActive(true);
+        log.info("Nombre d'annonces actives trouvées: {}", annonces.size());
         return annonces.stream()
                 .map(this::convertirEnResponseDTO)
                 .collect(Collectors.toList());
     }
 
     public List<AnnonceDTO> getAnnoncesActives() {
+        log.info("Récupération des annonces actives (DTO)");
         return annoncesRepository.findAll()
                 .stream()
                 .filter(a -> a.getEstActive() != null && a.getEstActive())
@@ -136,15 +164,21 @@ public class AnnonceService {
     }
 
     public List<AnnonceResponseDTO> obtenirAnnoncesProprietaire(Long proprietaireId) {
+        log.info("Récupération annonces pour Propriétaire ID: {}", proprietaireId);
         List<Annonces> annonces = annoncesRepository.findByIdProprietaire_Id(proprietaireId);
+        log.info("Nombre d'annonces trouvées pour ce propriétaire: {}", annonces.size());
         return annonces.stream()
                 .map(this::convertirEnResponseDTO)
                 .collect(Collectors.toList());
     }
 
     public AnnonceResponseDTO mettreAJourAnnonce(Long id, AnnonceRequestDTO request) {
+        log.info("Mise à jour annonce ID: {}", id);
         Annonces annonce = annoncesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
+                .orElseThrow(() -> {
+                    log.error("Impossible de mettre à jour : Annonce ID {} introuvable", id);
+                    return new RuntimeException("Annonce non trouvée");
+                });
 
         annonce.setTitre(request.getTitre());
         annonce.setPrix(request.getPrix());
@@ -157,13 +191,18 @@ public class AnnonceService {
         annonce.setTypeAnnonce(request.getTypeAnnonce());
 
         annonce = annoncesRepository.save(annonce);
+        log.info("Annonce ID {} mise à jour avec succès", id);
 
         return convertirEnResponseDTO(annonce);
     }
 
     public AnnonceDTO updateAnnonce(Long id, AnnonceDTO dto) {
+        log.info("Update annonce (DTO) ID: {}", id);
         Annonces annonce = annoncesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
+                .orElseThrow(() -> {
+                    log.error("Impossible d'update : Annonce ID {} introuvable", id);
+                    return new RuntimeException("Annonce non trouvée");
+                });
 
         annonce.setTitre(dto.getTitre());
         annonce.setPrix(dto.getPrix());
@@ -183,10 +222,12 @@ public class AnnonceService {
         }
 
         Annonces updated = annoncesRepository.save(annonce);
+        log.info("Fin update annonce (DTO) ID: {}", id);
         return convertToDTO(updated);
     }
 
     public AnnonceResponseDTO changerStatutAnnonce(Long id, Boolean estActive) {
+        log.info("Changement statut annonce ID: {} vers estActive={}", id, estActive);
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
@@ -197,6 +238,7 @@ public class AnnonceService {
     }
 
     public void activerAnnonce(Long id, Boolean activer) {
+        log.info("Activation/Désactivation (void) annonce ID: {} -> {}", id, activer);
         Annonces annonce = annoncesRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Annonce non trouvée"));
         annonce.setEstActive(activer);
@@ -204,23 +246,33 @@ public class AnnonceService {
     }
 
     public void supprimerAnnonce(Long id) {
+        log.info("Demande de suppression logique (désactivation) annonce ID: {}", id);
         Annonces annonce = annoncesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
+                .orElseThrow(() -> {
+                    log.error("Echec suppression : Annonce ID {} introuvable", id);
+                    return new RuntimeException("Annonce non trouvée");
+                });
 
         annonce.setEstActive(false);
         annoncesRepository.save(annonce);
+        log.info("Annonce ID {} désactivée avec succès", id);
     }
 
     public void deleteAnnonce(Long id) {
+        log.info("Demande de suppression physique (deleteById) annonce ID: {}", id);
         annoncesRepository.deleteById(id);
+        log.info("Annonce ID {} supprimée de la base", id);
     }
 
     // ===== Recherche avancée =====
 
     public List<AnnonceDTO> rechercherAnnonces(RechercheDTO recherche) {
+        log.info("Recherche avancée initiée. Ville: {}, Type: {}", recherche.getVille(), recherche.getTypeAnnonce());
         List<Annonces> resultats;
 
         if (recherche.getLatitude() != null && recherche.getLongitude() != null && recherche.getRayon() != null) {
+            log.debug("Recherche par géolocalisation: Lat={}, Long={}, Rayon={}",
+                    recherche.getLatitude(), recherche.getLongitude(), recherche.getRayon());
             // Recherche par géolocalisation
             resultats = annoncesRepository.findAnnoncesProches(
                     recherche.getLatitude(),
@@ -228,6 +280,7 @@ public class AnnonceService {
                     recherche.getRayon()
             );
         } else {
+            log.debug("Recherche classique par critères");
             // Recherche avancée complète avec tous les critères
             resultats = annoncesRepository.rechercheAvanceeComplete(
                     recherche.getVille(),
@@ -242,12 +295,14 @@ public class AnnonceService {
             );
         }
 
+        log.info("Résultats recherche: {} annonce(s) trouvée(s)", resultats.size());
         return resultats.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     public List<AnnonceDTO> getTopAnnonces() {
+        log.info("Récupération des Top Annonces");
         return annoncesRepository.findTop10ByEstActiveTrueOrderByEvaluationMoyenneDesc()
                 .stream()
                 .map(this::convertToDTO)
@@ -260,10 +315,12 @@ public class AnnonceService {
      * Récupère toutes les villes disponibles
      */
     public List<String> getVillesDisponibles() {
+        log.info("Récupération des villes disponibles");
         List<String> villes = annoncesRepository.findAllVillesDistinct();
 
         // Fallback sur la table localisation si aucune ville dans annonces
         if (villes == null || villes.isEmpty()) {
+            log.debug("Aucune ville trouvée dans Annonces, recherche dans Localisation");
             villes = localisationRepository.findAllVilles();
         }
 
@@ -274,6 +331,7 @@ public class AnnonceService {
      * Récupère les quartiers d'une ville
      */
     public List<String> getQuartiersByVille(String ville) {
+        log.debug("Récupération quartiers pour la ville: {}", ville);
         if (ville == null || ville.trim().isEmpty()) {
             return new ArrayList<>();
         }
@@ -292,10 +350,12 @@ public class AnnonceService {
      * Récupère tous les types d'annonces
      */
     public List<String> getTypesAnnonces() {
+        log.info("Récupération des types d'annonces");
         List<String> types = annoncesRepository.findAllTypesAnnonces();
 
         // Si aucun type trouvé, retourner des valeurs par défaut
         if (types == null || types.isEmpty()) {
+            log.debug("Aucun type trouvé en base, retour valeurs par défaut");
             types = Arrays.asList("Appartement", "Maison", "Studio", "Villa", "Hôtel");
         }
 
@@ -307,6 +367,7 @@ public class AnnonceService {
      */
     public Long countAnnoncesActives() {
         Long count = annoncesRepository.countAnnoncesActives();
+        log.info("Comptage annonces actives: {}", count);
         return count != null ? count : 0L;
     }
 
@@ -314,6 +375,7 @@ public class AnnonceService {
      * Récupère les annonces recommandées (top annonces)
      */
     public List<AnnonceDTO> getAnnoncesRecommandees(int limit) {
+        log.info("Récupération des {} annonces recommandées", limit);
         List<Annonces> annonces = annoncesRepository.findTopAnnonces();
 
         return annonces.stream()
@@ -326,6 +388,7 @@ public class AnnonceService {
      * Récupère les fourchettes de prix (min, max, moyenne)
      */
     public Map<String, Double> getFourchettePrix() {
+        log.info("Calcul des fourchettes de prix");
         Map<String, Double> fourchette = new HashMap<>();
 
         Double min = annoncesRepository.findMinPrix();
@@ -336,12 +399,14 @@ public class AnnonceService {
         fourchette.put("max", max != null ? max : 1000000.0);
         fourchette.put("moyenne", avg != null ? avg : 100000.0);
 
+        log.debug("Fourchette prix: {}", fourchette);
         return fourchette;
     }
 
     // ===== Gestion Disponibilité =====
 
     public List<DisponibiliteDTO> getDisponibilites(Long annonceId) {
+        log.info("Récupération disponibilités pour annonce ID: {}", annonceId);
         return disponibiliteRepository.findByIdAnnonceId(annonceId)
                 .stream()
                 .map(this::convertDisponibiliteToDTO)
@@ -349,6 +414,7 @@ public class AnnonceService {
     }
 
     public DisponibiliteDTO addDisponibilite(DisponibiliteDTO dto) {
+        log.info("Ajout disponibilité pour annonce ID: {}", dto.getIdAnnonce());
         Annonces annonce = annoncesRepository.findById(dto.getIdAnnonce())
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
@@ -364,20 +430,25 @@ public class AnnonceService {
     }
 
     public boolean verifierDisponibilite(Long annonceId, Date dateDebut, Date dateFin) {
+        log.debug("Vérification disponibilité annonce ID: {} du {} au {}", annonceId, dateDebut, dateFin);
         List<Disponibilite> dispos = disponibiliteRepository.findDisponibilitePourPeriode(
                 annonceId, dateDebut, dateFin
         );
-        return !dispos.isEmpty();
+        boolean indisponible = !dispos.isEmpty();
+        log.debug("Résultat vérification: {}", indisponible ? "Indisponible" : "Disponible");
+        return indisponible;
     }
 
     // ===== Gestion Localisation =====
 
     public Optional<LocalisationDTO> getLocalisation(Long annonceId) {
+        log.info("Récupération localisation pour annonce ID: {}", annonceId);
         return localisationRepository.findByIdAnnonceId(annonceId)
                 .map(this::convertLocalisationToDTO);
     }
 
     public LocalisationDTO updateLocalisation(Long annonceId, LocalisationDTO dto) {
+        log.info("Mise à jour localisation pour annonce ID: {}", annonceId);
         Annonces annonce = annoncesRepository.findById(annonceId)
                 .orElseThrow(() -> new RuntimeException("Annonce non trouvée"));
 
@@ -397,6 +468,7 @@ public class AnnonceService {
     // ===== Méthodes utilitaires privées =====
 
     private void creerDisponibiliteParDefaut(Annonces annonce) {
+        log.debug("Création disponibilité par défaut pour annonce ID: {}", annonce.getId());
         Disponibilite disponibilite = new Disponibilite();
         disponibilite.setIdAnnonce(annonce);
         disponibilite.setDateDebut(new Date());
@@ -412,6 +484,7 @@ public class AnnonceService {
     }
 
     private AnnonceResponseDTO convertirEnResponseDTO(Annonces annonce) {
+        // Pas de log ici pour éviter de spammer la console lors des listings
         AnnonceResponseDTO dto = new AnnonceResponseDTO();
 
         dto.setId(annonce.getId());
@@ -491,7 +564,10 @@ public class AnnonceService {
 
         if (dto.getIdProprietaire() != null) {
             Proprietaire proprio = proprietaireRepository.findById(dto.getIdProprietaire())
-                    .orElseThrow(() -> new RuntimeException("Propriétaire non trouvé"));
+                    .orElseThrow(() -> {
+                        log.error("Conversion DTO->Entity : Propriétaire ID {} non trouvé", dto.getIdProprietaire());
+                        return new RuntimeException("Propriétaire non trouvé");
+                    });
             annonce.setIdProprietaire(proprio);
         }
 

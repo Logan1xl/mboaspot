@@ -5,6 +5,8 @@ import com.example.backend.entities.Paiement;
 import com.example.backend.entities.Reservation;
 import com.example.backend.repositories.PaiementRepository;
 import com.example.backend.repositories.ReservationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class PaiementService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PaiementService.class);
+
     @Autowired
     private PaiementRepository paiementRepository;
 
@@ -31,99 +35,109 @@ public class PaiementService {
      * Crée un nouveau paiement
      */
     public PaiementDTO creerPaiement(PaiementDTO paiementDTO) {
-        // Validation
+        logger.info("Début création paiement pour la réservation ID={}", paiementDTO.getIdReservation());
+
         if (paiementDTO.getMontant() == null || paiementDTO.getMontant() <= 0) {
+            logger.warn("Montant invalide pour le paiement : {}", paiementDTO.getMontant());
             throw new IllegalArgumentException("Le montant doit être positif");
         }
 
         if (paiementDTO.getIdReservation() == null) {
+            logger.warn("Tentative de création paiement sans réservation");
             throw new IllegalArgumentException("La réservation est obligatoire");
         }
 
-        // Vérifier que la réservation existe
         Reservation reservation = reservationRepository.findById(paiementDTO.getIdReservation())
-                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable avec l'ID: " + paiementDTO.getIdReservation()));
+                .orElseThrow(() -> {
+                    logger.error("Réservation introuvable ID={}", paiementDTO.getIdReservation());
+                    return new IllegalArgumentException(
+                            "Réservation introuvable avec l'ID: " + paiementDTO.getIdReservation());
+                });
 
-        // Créer le paiement
         Paiement paiement = new Paiement();
         paiement.setMontant(paiementDTO.getMontant());
         paiement.setMethode(paiementDTO.getMethode());
         paiement.setStatut(paiementDTO.getStatut() != null ? paiementDTO.getStatut() : "EN_ATTENTE");
         paiement.setIdReservation(reservation);
 
-        // Générer un ID de transaction unique si non fourni
         if (paiementDTO.getIdTransaction() == null || paiementDTO.getIdTransaction().isEmpty()) {
-            paiement.setIdTransaction("TXN-" + UUID.randomUUID().toString());
+            paiement.setIdTransaction("TXN-" + UUID.randomUUID());
+            logger.debug("ID transaction généré automatiquement");
         } else {
             paiement.setIdTransaction(paiementDTO.getIdTransaction());
         }
 
         paiement.setUrlRecepisse(paiementDTO.getUrlRecepisse());
 
-        // Sauvegarder
         Paiement paiementSauvegarde = paiementRepository.save(paiement);
+        logger.info("Paiement créé avec succès ID={}, Transaction={}",
+                paiementSauvegarde.getId(), paiementSauvegarde.getIdTransaction());
 
         return convertirEnDTO(paiementSauvegarde);
     }
 
-    /**
-     * Récupère tous les paiements
-     */
     @Transactional(readOnly = true)
     public List<PaiementDTO> obtenirTousLesPaiements() {
+        logger.info("Récupération de tous les paiements");
         return paiementRepository.findAll().stream()
                 .map(this::convertirEnDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Récupère un paiement par son ID
-     */
     @Transactional(readOnly = true)
     public PaiementDTO obtenirPaiementParId(Long id) {
+        logger.info("Recherche paiement par ID={}", id);
+
         Paiement paiement = paiementRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Paiement introuvable avec l'ID: " + id));
+                .orElseThrow(() -> {
+                    logger.error("Paiement introuvable ID={}", id);
+                    return new IllegalArgumentException("Paiement introuvable avec l'ID: " + id);
+                });
+
         return convertirEnDTO(paiement);
     }
 
-    /**
-     * Récupère tous les paiements d'une réservation
-     */
     @Transactional(readOnly = true)
     public List<PaiementDTO> obtenirPaiementsParReservation(Long idReservation) {
+        logger.info("Récupération des paiements pour la réservation ID={}", idReservation);
+
         return paiementRepository.findByIdReservation_Id(idReservation).stream()
                 .map(this::convertirEnDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Récupère un paiement par son ID de transaction
-     */
     @Transactional(readOnly = true)
     public PaiementDTO obtenirPaiementParIdTransaction(String idTransaction) {
+        logger.info("Recherche paiement par ID transaction={}", idTransaction);
+
         Paiement paiement = paiementRepository.findByIdTransaction(idTransaction)
-                .orElseThrow(() -> new IllegalArgumentException("Paiement introuvable avec l'ID de transaction: " + idTransaction));
+                .orElseThrow(() -> {
+                    logger.error("Paiement introuvable pour la transaction={}", idTransaction);
+                    return new IllegalArgumentException(
+                            "Paiement introuvable avec l'ID de transaction: " + idTransaction);
+                });
+
         return convertirEnDTO(paiement);
     }
 
-    /**
-     * Récupère tous les paiements par statut
-     */
     @Transactional(readOnly = true)
     public List<PaiementDTO> obtenirPaiementsParStatut(String statut) {
+        logger.info("Récupération des paiements avec statut={}", statut);
+
         return paiementRepository.findByStatut(statut).stream()
                 .map(this::convertirEnDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Met à jour un paiement
-     */
     public PaiementDTO mettreAJourPaiement(Long id, PaiementDTO paiementDTO) {
-        Paiement paiement = paiementRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Paiement introuvable avec l'ID: " + id));
+        logger.info("Mise à jour paiement ID={}", id);
 
-        // Mise à jour des champs modifiables
+        Paiement paiement = paiementRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Paiement introuvable ID={}", id);
+                    return new IllegalArgumentException("Paiement introuvable avec l'ID: " + id);
+                });
+
         if (paiementDTO.getMontant() != null && paiementDTO.getMontant() > 0) {
             paiement.setMontant(paiementDTO.getMontant());
         }
@@ -140,18 +154,20 @@ public class PaiementService {
             paiement.setMethode(paiementDTO.getMethode());
         }
 
-        // Sauvegarder
         Paiement paiementMisAJour = paiementRepository.save(paiement);
+        logger.info("Paiement mis à jour avec succès ID={}", id);
 
         return convertirEnDTO(paiementMisAJour);
     }
 
-    /**
-     * Met à jour le statut d'un paiement
-     */
     public PaiementDTO mettreAJourStatutPaiement(Long id, String nouveauStatut) {
+        logger.info("Mise à jour du statut paiement ID={} vers {}", id, nouveauStatut);
+
         Paiement paiement = paiementRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Paiement introuvable avec l'ID: " + id));
+                .orElseThrow(() -> {
+                    logger.error("Paiement introuvable ID={}", id);
+                    return new IllegalArgumentException("Paiement introuvable avec l'ID: " + id);
+                });
 
         paiement.setStatut(nouveauStatut);
         Paiement paiementMisAJour = paiementRepository.save(paiement);
@@ -159,32 +175,38 @@ public class PaiementService {
         return convertirEnDTO(paiementMisAJour);
     }
 
-    /**
-     * Supprime un paiement
-     */
     public void supprimerPaiement(Long id) {
+        logger.info("Suppression paiement ID={}", id);
+
         if (!paiementRepository.existsById(id)) {
+            logger.error("Tentative de suppression paiement inexistant ID={}", id);
             throw new IllegalArgumentException("Paiement introuvable avec l'ID: " + id);
         }
+
         paiementRepository.deleteById(id);
+        logger.info("Paiement supprimé avec succès ID={}", id);
     }
 
-    /**
-     * Calcule le montant total payé pour une réservation
-     */
     @Transactional(readOnly = true)
     public Double calculerMontantTotalPaye(Long idReservation) {
-        Double montantTotal = paiementRepository.sumMontantByReservationAndStatut(idReservation, "VALIDE");
+        logger.debug("Calcul du montant total payé pour réservation ID={}", idReservation);
+
+        Double montantTotal =
+                paiementRepository.sumMontantByReservationAndStatut(idReservation, "VALIDE");
+
         return montantTotal != null ? montantTotal : 0.0;
     }
 
-    /**
-     * Vérifie si une réservation est entièrement payée
-     */
     @Transactional(readOnly = true)
     public boolean estEntierementPaye(Long idReservation) {
+        logger.info("Vérification paiement complet pour réservation ID={}", idReservation);
+
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable avec l'ID: " + idReservation));
+                .orElseThrow(() -> {
+                    logger.error("Réservation introuvable ID={}", idReservation);
+                    return new IllegalArgumentException(
+                            "Réservation introuvable avec l'ID: " + idReservation);
+                });
 
         Double montantPaye = calculerMontantTotalPaye(idReservation);
         Double prixTotal = reservation.getPrixTotal();
@@ -192,9 +214,6 @@ public class PaiementService {
         return prixTotal != null && montantPaye >= prixTotal;
     }
 
-    /**
-     * Convertit une entité Paiement en DTO
-     */
     private PaiementDTO convertirEnDTO(Paiement paiement) {
         PaiementDTO dto = new PaiementDTO();
         dto.setId(paiement.getId());
@@ -206,12 +225,16 @@ public class PaiementService {
 
         if (paiement.getIdReservation() != null) {
             dto.setIdReservation(paiement.getIdReservation().getId());
-            dto.setCodeConfirmationReservation(paiement.getIdReservation().getCodeConfirmation());
+            dto.setCodeConfirmationReservation(
+                    paiement.getIdReservation().getCodeConfirmation());
 
             if (paiement.getIdReservation().getIdVoyageur() != null
                     && paiement.getIdReservation().getIdVoyageur().getIdUser() != null) {
-                String nomComplet = paiement.getIdReservation().getIdVoyageur().getIdUser().getPrenom()
-                        + " " + paiement.getIdReservation().getIdVoyageur().getIdUser().getNom();
+
+                String nomComplet =
+                        paiement.getIdReservation().getIdVoyageur().getIdUser().getPrenom()
+                                + " "
+                                + paiement.getIdReservation().getIdVoyageur().getIdUser().getNom();
                 dto.setNomVoyageur(nomComplet);
             }
         }
