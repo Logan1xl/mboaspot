@@ -1,0 +1,11 @@
+2026-01-09 10:27:39 [main] INFO  c.example.backend.BackendApplication - Starting BackendApplication using Java 21.0.1 with PID 35664 (C:\Users\Johann Gouaffo\Desktop\coursiuc\EADL\Semestre_1\Developpement avance\projet\final\mboaspot\backend\target\classes started by Johann Gouaffo in C:\Users\Johann Gouaffo\Desktop\coursiuc\EADL\Semestre_1\Developpement avance\projet\final\mboaspot)
+2026-01-09 10:27:39 [main] INFO  c.example.backend.BackendApplication - The following 1 profile is active: "dev"
+2026-01-09 10:27:46 [main] INFO  c.example.backend.BackendApplication - Started BackendApplication in 7.996 seconds (process running for 8.378)
+2026-01-09 10:28:11 [http-nio-8003-exec-1] INFO  c.e.b.s.i.AnnonceService - Demande de suppression logique (désactivation) annonce ID: 546
+2026-01-09 12:20:48 [main] INFO  c.example.backend.BackendApplication - Starting BackendApplication using Java 21.0.1 with PID 47244 (C:\Users\Johann Gouaffo\Desktop\coursiuc\EADL\Semestre_1\Developpement avance\projet\final\mboaspot\backend\target\classes started by Johann Gouaffo in C:\Users\Johann Gouaffo\Desktop\coursiuc\EADL\Semestre_1\Developpement avance\projet\final\mboaspot)
+2026-01-09 12:20:48 [main] INFO  c.example.backend.BackendApplication - The following 1 profile is active: "dev"
+2026-01-09 12:20:56 [main] INFO  c.example.backend.BackendApplication - Started BackendApplication in 7.933 seconds (process running for 8.374)
+2026-01-09 12:29:58 [http-nio-8003-exec-6] INFO  c.e.b.s.implementations.AuthService - Tentative d'inscription avec email=albert@gmail.com et role=VOYAGEUR
+2026-01-09 12:29:58 [http-nio-8003-exec-6] INFO  c.e.b.s.implementations.AuthService - Utilisateur créé avec succès id=7 email=albert@gmail.com
+2026-01-09 12:29:58 [http-nio-8003-exec-6] INFO  c.e.b.s.implementations.AuthService - Profil VOYAGEUR créé pour userId=7
+2026-01-09 12:29:58 [http-nio-8003-exec-6] INFO  c.e.b.s.implementations.AuthService - Inscription réussie pour userId=7 role=VOYAGEUR

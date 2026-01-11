@@ -1,0 +1,4 @@
+2026-01-09 10:27:39 [main] DEBUG c.example.backend.BackendApplication - Running with Spring Boot v3.5.7, Spring v6.2.12
+2026-01-09 10:27:44 [main] DEBUG c.e.backend.security.jwt.JwtFilter - Filter 'jwtFilter' configured for use
+2026-01-09 12:20:48 [main] DEBUG c.example.backend.BackendApplication - Running with Spring Boot v3.5.7, Spring v6.2.12
+2026-01-09 12:20:53 [main] DEBUG c.e.backend.security.jwt.JwtFilter - Filter 'jwtFilter' configured for use
