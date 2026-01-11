@@ -1,8 +1,15 @@
 {
+  "version": 2,
   "builds": [
-    { "src": "dist/request_app/**", "use": "@vercel/static" }
+    {
+      "src": "dist/request_app/**",
+      "use": "@vercel/static"
+    }
   ],
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
