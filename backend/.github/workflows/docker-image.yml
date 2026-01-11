@@ -30,7 +30,7 @@ jobs:
       env:
         SPRING_PROFILES_ACTIVE: test
 
-  # ========== JOB 2 : BUILD & PUSH (si tests OK) ==========
+  # ========== JOB 2 : BUILD & PUSH (si tous les tests OK) ==========
   build-and-push:
     runs-on: ubuntu-latest
     needs: test
