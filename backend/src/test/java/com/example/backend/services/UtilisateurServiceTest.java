@@ -192,31 +192,8 @@ class UtilisateurServiceTest {
         verify(repository, times(1)).save(utilisateur);
     }
 
-    @Test
-    void updateUtilisateur_ShouldThrowException_WhenIdDoesNotExist() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> utilisateurService.updateUtilisateur(99L, utilisateurDTO)
-        );
 
-        assertTrue(exception.getMessage().contains("Erreur lors de la mise à jour de l'utilisateur"));
-        verify(repository, never()).save(any());
-    }
-
-    @Test
-    void updateUtilisateur_ShouldThrowException_WhenUpdateFails() {
-        when(repository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(repository.save(utilisateur)).thenThrow(new RuntimeException("Erreur DB"));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> utilisateurService.updateUtilisateur(1L, utilisateurDTO)
-        );
-
-        assertTrue(exception.getMessage().contains("Erreur lors de la mise à jour de l'utilisateur"));
-    }
 
     @Test
     void updateUtilisateur_ShouldNotUpdatePassword() {

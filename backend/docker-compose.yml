@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  # ========== BASE DE DONNÉES MYSQL ==========
+  mysqldb:
+    image: mysql:8.0
+    container_name: mb_mysql_db
+    restart: always
+    ports:
+      - "3308:3306"
+    networks:
+      - mb_net
+    environment:  
+      MYSQL_DATABASE: logement_cameroun
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: "%"
+    command: 
+      - --bind-address=0.0.0.0
+      - --skip-name-resolve
+    volumes:
+      - mysql_data:/var/lib/mysql 
+      - ./mysql/init-db:/docker-entrypoint-initdb.d/init.sql  
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ========== APPLICATION (UN SEUL SERVICE) ==========
+  mb_api_compose:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mboaspot_backend
+    restart: always
+    ports:
+      - "8086:8003"
+    networks:
+      - mb_net
+    environment:
+      # Profil défini par variable (défaut: dev)
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/logement_cameroun?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      SERVER_PORT: 8003
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    volumes:
+      - .m2:/root/.m2  # Cache Maven pour accélérer les builds
+      
+# ========== RÉSEAUX ==========
+networks:
+  mb_net:
+    driver: bridge
+
+# ========== VOLUMES ==========
+volumes:
+  mysql_data:
+    driver: local
