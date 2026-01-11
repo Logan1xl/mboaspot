@@ -1,0 +1,11 @@
+**/*.md
+**/.git
+**/.github
+**/target
+**/node_modules
+**/.mvn
+mvnw
+mvnw.cmd
+**/*.log
+**/test
+**/src/test
