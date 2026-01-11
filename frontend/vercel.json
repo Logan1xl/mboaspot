@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/request_app/**",
+      "src": "frontend/dist/request_app/**",
       "use": "@vercel/static"
     }
   ],
