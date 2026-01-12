@@ -133,6 +133,8 @@
             <label>Ville <span class="required">*</span></label>
             <select formControlName="ville" class="form-control">
               <option value="">Sélectionner...</option>
+              <option value="Douala">Douala</option>
+              <option value="Yaounde">Yaounde</option>
               <option *ngFor="let ville of villes" [value]="ville">{{ ville }}</option>
             </select>
           </div>

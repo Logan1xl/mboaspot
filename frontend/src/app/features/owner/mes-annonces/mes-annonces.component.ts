@@ -141,60 +141,103 @@ export class MesAnnoncesComponent implements OnInit {
     }
   }
 
-  async onSubmit(): Promise<void> {
-    if (this.annonceForm.invalid) {
-      Object.keys(this.annonceForm.controls).forEach(key => {
-        this.annonceForm.get(key)?.markAsTouched();
-      });
+ async onSubmit(): Promise<void> {
+  if (this.annonceForm.invalid) {
+    Object.keys(this.annonceForm.controls).forEach(key => {
+      this.annonceForm.get(key)?.markAsTouched();
+    });
+    this.toastr.error('Veuillez remplir tous les champs requis', 'Formulaire invalide');
+    return;
+  }
+
+  this.isSubmitting = true;
+
+  try {
+    // Upload des images
+    const imageUrls = await this.uploadImages();
+
+    if (imageUrls.length === 0 && !this.isEditMode) {
+      this.toastr.warning('Veuillez ajouter au moins une photo', 'Photos manquantes');
+      this.isSubmitting = false;
       return;
     }
 
-    this.isSubmitting = true;
-
-    try {
-      const imageUrls = await this.uploadImages();
-      const userId = this.authService.getCurrentUserId();
-
-      const annonceData = {
-        ...this.annonceForm.value,
-        urlImages: imageUrls,
-        urlImagePrincipale: imageUrls[0] || '',
-        idProprietaire: userId
-      };
-
-      if (this.isEditMode && this.currentAnnonceId) {
-        this.annoncesService.updateAnnonce(this.currentAnnonceId, annonceData).subscribe({
-          next: () => {
-            this.toastr.success('Annonce modifiée avec succès', 'Succès');
-            this.loadAnnonces();
-            this.closeModal();
-            this.isSubmitting = false;
-          },
-          error: () => {
-            this.isSubmitting = false;
-            this.toastr.error('Erreur lors de la modification', 'Erreur');
-          }
-        });
-      } else {
-        this.annoncesService.createAnnonce(annonceData).subscribe({
-          next: () => {
-            this.toastr.success('Annonce créée avec succès', 'Succès');
-            this.loadAnnonces();
-            this.closeModal();
-            this.isSubmitting = false;
-          },
-          error: () => {
-            this.isSubmitting = false;
-            this.toastr.error('Erreur lors de la création', 'Erreur');
-          }
-        });
-      }
-    } catch (error) {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      this.toastr.error('Session expirée, veuillez vous reconnecter', 'Erreur');
       this.isSubmitting = false;
-      this.toastr.error('Erreur lors du traitement', 'Erreur');
+      return;
     }
-  }
 
+    // Préparer les données de l'annonce
+    const formValue = this.annonceForm.value;
+
+    const annonceData = {
+      titre: formValue.titre,
+      description: formValue.description,
+      prix: formValue.prix,
+      adresse: formValue.adresse,
+      ville: formValue.ville,
+      quartier: formValue.ville, // Utiliser la ville comme quartier par défaut
+      typeAnnonce: formValue.typeAnnonce,
+      nbreChambres: formValue.nbreChambres,
+      nbreLits: formValue.nbreLits,
+      maxInvites: formValue.maxInvites,
+      latitude: formValue.latitude || 4.0511, // Coordonnées par défaut de Douala
+      longitude: formValue.longitude || 9.7679,
+      urlImages: imageUrls,
+      urlImagePrincipale: imageUrls[0] || '',
+      idProprietaire: userId, // ID de l'utilisateur connecté
+      estActive: true
+    };
+
+    console.log('Données envoyées au backend:', annonceData);
+
+    if (this.isEditMode && this.currentAnnonceId) {
+      // Mode modification
+      this.annoncesService.updateAnnonce(this.currentAnnonceId, annonceData).subscribe({
+        next: (response) => {
+          console.log('Réponse modification:', response);
+          this.toastr.success('Annonce modifiée avec succès', 'Succès');
+          this.loadAnnonces();
+          this.closeModal();
+          this.isSubmitting = false;
+        },
+        error: (error) => {
+          console.error('Erreur modification:', error);
+          this.isSubmitting = false;
+          this.toastr.error(
+            error.error?.message || 'Erreur lors de la modification',
+            'Erreur'
+          );
+        }
+      });
+    } else {
+      // Mode création
+      this.annoncesService.createAnnonce(annonceData).subscribe({
+        next: (response) => {
+          console.log('Réponse création:', response);
+          this.toastr.success('Annonce créée avec succès', 'Succès');
+          this.loadAnnonces();
+          this.closeModal();
+          this.isSubmitting = false;
+        },
+        error: (error) => {
+          console.error('Erreur création:', error);
+          this.isSubmitting = false;
+          this.toastr.error(
+            error.error?.message || 'Erreur lors de la création',
+            'Erreur'
+          );
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Erreur traitement:', error);
+    this.isSubmitting = false;
+    this.toastr.error('Erreur lors du traitement', 'Erreur');
+  }
+}
   toggleActivation(annonce: Annonce): void {
     this.annoncesService.activerAnnonce(annonce.id, !annonce.estActive).subscribe({
       next: () => {
@@ -227,11 +270,12 @@ export class MesAnnoncesComponent implements OnInit {
   getImageUrl(url: string): string {
     return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
   }
-  onMapLocationSelected(event: { lat: number; lng: number }): void {
+
+onMapLocationSelected(event: { lat: number; lng: number }): void {
+  console.log('Position sélectionnée:', event);
   this.annonceForm.patchValue({
     latitude: event.lat,
     longitude: event.lng
   });
 }
-
 }
